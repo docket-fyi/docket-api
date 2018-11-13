@@ -1,0 +1,30 @@
+{
+  "name": "docket-api",
+  "version": "0.1.0",
+  "description": "Docket API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "John Goldsmith <johngoldsm1@gmail.com>",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/john-goldsmith/docket-api.git"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "dotenv": "^6.1.0",
+    "express": "^4.16.4",
+    "http-status": "^1.2.0",
+    "mongodb": "^3.1.9",
+    "mongoose": "^5.3.11",
+    "node-fetch": "^2.2.1",
+    "qs": "^6.5.2"
+  },
+  "devDependencies": {
+    "husky": "^1.1.3"
+  }
+}
