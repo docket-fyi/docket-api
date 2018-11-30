@@ -2,15 +2,16 @@ const express = require('express')
 // const httpStatus = require('http-status')
 // const debug = require('debug')('app:api')
 
-const { devices } = require('../controllers')
+const controller = require('../controllers').devices
+const validations = require('./validations').devices
 // const { Device } = require('../../models')
 
 const router = express.Router()
 
-router.get('/devices/:deviceId', devices.show)
-router.post('/devices', devices.create)
-router.put('/devices/:deviceId', devices.update)
-router.delete('/devices/:deviceId', devices.destroy)
+router.get('/devices/:deviceId', validations['/devices/:deviceId'].get, controller.show)
+router.post('/devices', validations['/devices'].post, controller.create)
+router.put('/devices/:deviceId', validations['/devices/:deviceId'].put, controller.update)
+router.delete('/devices/:deviceId', validations['/devices/:deviceId'].delete, controller.destroy)
 
 // router.param('deviceId', async (req, res, next, id) => {
 //   try {
