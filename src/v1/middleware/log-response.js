@@ -1,7 +1,7 @@
 const debug = require('../config/debug').api
 
 /**
- * Logs the HTTP request.
+ * Logs the HTTP response.
  *
  * @param {Request} req The incoming request object
  * @param {Response} res The outgoing response object
@@ -9,9 +9,9 @@ const debug = require('../config/debug').api
  *
  * @return  {undefined}
  */
-function logRequest(req, res, next) {
-  debug(`-> ${req.method} ${req.originalUrl}`)
+function logResponse(req, res, next) {
+  debug(`<- ${req.method} ${req.originalUrl} (${res.statusCode} ${res.statusMessage})`)
   next()
 }
 
-module.exports = logRequest
+module.exports = logResponse

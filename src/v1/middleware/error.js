@@ -1,17 +1,37 @@
-const debug = require('debug')('app:api')
-const httpStatus = require('http-status')
+const status = require('http-status')
 
-function error(err, req, res, next) { // eslint-disable-line no-unused-vars
+/**
+ * Error handler.
+ *
+ * @param {Error} err The error instance
+ * @param {Request} req The incoming request object
+ * @param {Response} res The outgoing response object
+ * @param {Function} next Callback to continue on to next middleware
+ *
+ * @return  {undefined}
+ */
+function error(err, req, res, next) {
+  /**
+   * The default status code is 200 if not set, but if this error
+   * middleware has been invoked, obviously things are not OK. If a
+   * previous middleware has set the status code, it will bypass this
+   * check.
+   *
+   * @see https://github.com/expressjs/express/issues/3828
+   */
+  if (res.statusCode === status.OK) {
+    res.status(status.INTERNAL_SERVER_ERROR)
+  }
   const json = {
     errors: [
       {
-        name: err.name,
-        message: err.message,
+        name: err.name || 'UnknownError',
+        message: err.message || 'An unknown error occurred',
       }
     ]
   }
-  debug(`<- ${req.method} ${req.originalUrl} (${httpStatus.INTERNAL_SERVER_ERROR} ${httpStatus[500]})`)
-  res.status(httpStatus.INTERNAL_SERVER_ERROR).json(json)
+  res.json(json)
+  return next()
 }
 
 module.exports = error

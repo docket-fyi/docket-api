@@ -12,18 +12,12 @@ const schema = new mongoose.Schema({
   date: {
     type: Date,
     required: true
-  },
-  createdAt: {
-    type: Date,
-  },
-  updatedAt: {
-    type: Date
-  },
-  deletedAt: {
-    type: Date
   }
-})
+}, { timestamps: true })
 
-const Event = mongoose.model('Event', schema)
+const model = mongoose.model('Event', schema)
 
-module.exports = Event
+module.exports = {
+  schema,
+  model
+}

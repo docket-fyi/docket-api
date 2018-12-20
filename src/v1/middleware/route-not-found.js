@@ -1,17 +1,28 @@
-const httpStatus = require('http-status')
-const debug = require('debug')('app:api')
+const status = require('http-status')
 
-function routeNotFound(req, res) {
-  debug(`<- ${req.method} ${req.originalUrl} (${httpStatus.NOT_FOUND} ${httpStatus[404]})`)
+/**
+ * Handler for unknown routes.
+ *
+ * @param {Request} req The incoming request object
+ * @param {Response} res The outgoing response object
+ * @param {Function} next Callback to continue on to next middleware
+ *
+ * @return  {undefined}
+ */
+function routeNotFound(req, res, next) {
+  if (res.headersSent) {
+    return next()
+  }
   const json = {
     errors: [
       {
-        name: 'Not Found',
+        name: status[404],
         message: `The route ${req.method} ${req.originalUrl} does not exist`
       }
     ]
   }
-  res.status(httpStatus.NOT_FOUND).json(json)
+  res.status(status.NOT_FOUND).json(json)
+  next()
 }
 
 module.exports = routeNotFound

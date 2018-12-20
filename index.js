@@ -1,5 +1,5 @@
 const environment = require('./src/v1/environment')
-const debug = require('debug')('app:api')
+const debug = require('./src/v1/config/debug').api
 
 const server = require('./src/v1/config/server')
 

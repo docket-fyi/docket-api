@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 const repl = require('repl')
 
 console.log(`Loading ${process.env.NODE_ENV || 'development'} environment (Node ${process.version})`)

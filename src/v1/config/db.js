@@ -1,4 +1,4 @@
-const debug = require('debug')('db:mongo')
+const debug = require('./debug').mongo
 const mongoose = require('mongoose')
 
 const environment = require('../environment')

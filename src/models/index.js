@@ -1,5 +1,5 @@
-const Device = require('./device')
-const Event = require('./event')
+const Device = require('./device').model
+const Event = require('./event').model
 
 module.exports = {
   Device,

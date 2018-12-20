@@ -1,9 +1,9 @@
 const express = require('express')
-const httpStatus = require('http-status')
-const debug = require('debug')('app:api')
+const status = require('http-status')
 
 const { events } = require('../controllers')
 const { Device, Event } = require('../../models')
+const { DeviceNotFoundError, EventNotFoundError } = require('../errors')
 
 const router = express.Router()
 
@@ -15,24 +15,13 @@ router.delete('/:deviceId/events/:eventId', events.destroy)
 
 router.param('deviceId', async (req, res, next, id) => {
   try {
-    const device = await Device.findOne({ id }).exec()
-    if (device) {
-      req.device = device
-      next()
-      return
+    const device = await Device.findOne({ _i: id }).exec()
+    if (!device) {
+      res.status(status.NOT_FOUND)
+      throw new DeviceNotFoundError()
     }
-    // const err = new DeviceNotFoundError()
-    // next(err)
-    const json = {
-      errors: [
-        {
-          name: httpStatus[404],
-          message: 'Device not found'
-        }
-      ]
-    }
-    res.status(httpStatus.NOT_FOUND).json(json)
-    debug(`<- ${req.method} ${req.originalUrl} (${httpStatus.NOT_FOUND} ${httpStatus[404]})`)
+    req.device = device
+    return next()
   } catch (err) {
     return next(err)
   }
@@ -40,24 +29,13 @@ router.param('deviceId', async (req, res, next, id) => {
 
 router.param('eventId', async (req, res, next, id) => {
   try {
-    const event = await Event.findOne({ id }).exec()
-    if (event) {
-      req.event = event
-      next()
-      return
+    const event = await Event.findOne({ _id: id }).exec()
+    if (!event) {
+      res.status(status.NOT_FOUND)
+      throw new EventNotFoundError()
     }
-    // const err = new EventNotFoundError()
-    // next(err)
-    const json = {
-      errors: [
-        {
-          name: httpStatus[404],
-          message: 'Event not found'
-        }
-      ]
-    }
-    res.status(httpStatus.NOT_FOUND).json(json)
-    debug(`<- ${req.method} ${req.originalUrl} (${httpStatus.NOT_FOUND} ${httpStatus[404]})`)
+    req.event = event
+    return next()
   } catch (err) {
     return next(err)
   }
