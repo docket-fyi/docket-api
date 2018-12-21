@@ -1,7 +1,7 @@
 const status = require('http-status')
 const moment = require('moment')
 
-const { User, Event } = require('../../models')
+const { Event } = require('../../models')
 
 /**
  * Returns the current user.
@@ -58,7 +58,7 @@ async function update(req, res, next) {
 }
 
 /**
- * Deletes the current user from the database.
+ * Deletes the current user and all associated events from the database.
  *
  * @param {Request} req The incoming request object
  * @param {Response} res The outgoing response object
@@ -70,7 +70,9 @@ async function destroy(req, res, next) {
   try {
     const { currentUser } = req
     const { id } = currentUser
-    await User.deleteOne({ _id: id })
+    const deleteCurrentUser = currentUser.remove()
+    const deleteAllEvents = Event.deleteMany({ userId: id })
+    await Promise.all([deleteCurrentUser, deleteAllEvents])
     res.status(status.NO_CONTENT).send()
     return next()
   } catch (err) {
