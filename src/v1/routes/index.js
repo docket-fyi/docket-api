@@ -1,7 +1,11 @@
-const events = require('./events')
-const devices = require('./devices')
+const auth = require('./auth')
+// const events = require('./events')
+const users = require('./users')
+const me = require('./me')
 
 module.exports = [
-  events,
-  devices
+  auth,
+  // events,
+  users,
+  me
 ]

@@ -1,7 +1,7 @@
-const Device = require('./device').model
 const Event = require('./event').model
+const User = require('./user').model
 
 module.exports = {
-  Device,
-  Event
+  Event,
+  User
 }

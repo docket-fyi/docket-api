@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 
 const schema = new mongoose.Schema({
-  deviceId: {
-    type: String,
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
     required: true
   },
   name: {

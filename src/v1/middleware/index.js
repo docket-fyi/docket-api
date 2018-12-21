@@ -4,6 +4,8 @@ const logRequest = require('./log-request')
 const logResponse = require('./log-response')
 const error = require('./error')
 const routeNotFound = require('./route-not-found')
+const verifyJwt = require('./verify-jwt')
+const currentUser = require('./current-user')
 
 module.exports = {
   bodyParser,
@@ -11,5 +13,7 @@ module.exports = {
   logRequest,
   logResponse,
   routeNotFound,
-  error
+  error,
+  verifyJwt,
+  currentUser
 }

@@ -15,7 +15,7 @@ router.delete('/:deviceId/events/:eventId', events.destroy)
 
 router.param('deviceId', async (req, res, next, id) => {
   try {
-    const device = await Device.findOne({ _i: id }).exec()
+    const device = await Device.findOne({ _id: id }).exec()
     if (!device) {
       res.status(status.NOT_FOUND)
       throw new DeviceNotFoundError()

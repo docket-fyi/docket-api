@@ -2,6 +2,10 @@ module.exports = {
   api: {
     port: process.env.PORT || 3000
   },
+  jwt: {
+    secret: process.env.JWT_SECRET,
+    expiration: process.env.JWT_EXPIRATION
+  },
   db: {
     protocol: process.env.DB_PROTOCOL || 'mongodb://',
     url: process.env.DB_SERVERS || '127.0.0.1',
