@@ -1,5 +1,5 @@
 const status = require('http-status')
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 const jsonWebToken = require('jsonwebtoken')
 
 const environment = require('../environment')

@@ -1,21 +1,29 @@
 const debug = require('./debug').mongo
 const mongoose = require('mongoose')
 
-const environment = require('../environment')
+const { db } = require('../environment')
+const {
+  protocol,
+  username,
+  password,
+  host,
+  port,
+  name
+} = db
 
-const url = `${environment.db.protocol}${environment.db.username}:${environment.db.password}@${environment.db.url}:${environment.db.port}/${environment.db.name}`
+const url = `${protocol}${username}:${password}@${host}:${port}/${name}`
 const options = {
   useNewUrlParser: true
 }
 mongoose.connect(url, options, error => {
   if (error) throw error
 })
-const db = mongoose.connection
+const connection = mongoose.connection
 
-db.on('error', err => {
+connection.on('error', err => {
   debug('connection error', err)
   process.exit(1)
 })
-db.once('open', () => debug('connected'))
+connection.once('open', () => debug('connected'))
 
-module.exports = db
+module.exports = connection

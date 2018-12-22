@@ -8,7 +8,7 @@ module.exports = {
   },
   db: {
     protocol: process.env.DB_PROTOCOL || 'mongodb://',
-    url: process.env.DB_SERVERS || '127.0.0.1',
+    host: process.env.DB_HOST || 'docket-db',
     port: process.env.DB_PORT || '27017',
     name: process.env.DB_NAME || 'docket_development',
     username: process.env.DB_USERNAME,

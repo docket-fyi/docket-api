@@ -1,0 +1,38 @@
+# See https://docs.docker.com/compose/compose-file/
+
+version: '3'
+services:
+  docket-db:
+    container_name: docket-db
+    image: mongo:4.0.3
+    ports:
+      - '27017:27017'
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: ''
+    #   MONGO_INITDB_ROOT_PASSWORD: 'root'
+  docket-api:
+    # entrypoint: ["./docker-entrypoint.sh"]
+    container_name: docket-api
+    build: .
+    command: npm run start
+    volumes:
+      - ../docket-api:/docket/docket-api
+    ports:
+      - '3000:3000'
+    depends_on:
+      - docket-db
+    links:
+      - docket-db
+    # environment:
+    #   DEBUG: ''
+    #   DB_SERVERS: ''
+    #   API_VERSION: ''
+    #   JWT_SECRET: ''
+    #   JWT_EXPIRATION: ''
+    #   TWITCH_CLIENT_ID: ''
+    #   TWITCH_CLIENT_SECRET: ''
+    #   TWITCH_STREAM_KEY: ''
+    #   TWITCH_OAUTH_CALLBACK_URL: ''
+    #   TWITCH_WEBHOOK_SECRET: ''
+    #   TWITCH_WEBHOOK_STREAM_CHANGED_CALLBACK_URL: ''
+    #   TWITCH_WEBHOOK_USER_FOLLOWS_CALLBACK_URL: ''
