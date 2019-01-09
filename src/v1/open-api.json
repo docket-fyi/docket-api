@@ -1,0 +1,721 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Docket API",
+    "description": "",
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/v1",
+      "description": "Local environment"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "5c14089df7aa5a78833a633d"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Frank"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Sinatra"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "frank@ratpack.org"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2018-12-14 19:46:37.733"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2018-12-14 19:46:37.733"
+          }
+        }
+      },
+      "Event": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "5c14089df7aa5a78833a633d"
+          },
+          "name": {
+            "type": "string",
+            "example": "Christmas 2018"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2018-12-25 00:00:00.000"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2018-12-14 19:46:37.733"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2018-12-14 19:46:37.733"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Error"
+          },
+          "message": {
+            "type": "string",
+            "example": "An error occurred"
+          }
+        }
+      }
+    },
+    "parameters": {},
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "requestBodies": {
+      "UsersPost": {
+        "description": "",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "firstName": {
+                  "type": "string",
+                  "example": "John"
+                },
+                "lastName": {
+                  "type": "string",
+                  "example": "Doe"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "example": "you@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "s3cr3t"
+                }
+              }
+            }
+          }
+        }
+      },
+      "MePut": {
+        "description": "",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "firstName": {
+                  "type": "string",
+                  "example": "John"
+                },
+                "lastName": {
+                  "type": "string",
+                  "example": "Doe"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "example": "you@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "s3cr3t"
+                }
+              }
+            }
+          }
+        }
+      },
+      "MeEventsPost": {
+        "description": "",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Christmas 2018"
+                },
+                "date": {
+                  "type": "string",
+                  "format": "date-time",
+                  "example": "2018-12-25 00:00:00.000"
+                }
+              }
+            }
+          }
+        }
+      },
+      "AuthPost": {
+        "description": "",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "example": "you@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "s3cr3t"
+                }
+              }
+            }
+          }
+        }
+      },
+      "MeEventPut": {
+        "description": "",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Christmas 2018"
+                },
+                "date": {
+                  "type": "string",
+                  "format": "date-time",
+                  "example": "2018-12-25 00:00:00.000"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "UsersPostOk": {
+        "$ref": "#/components/schemas/User"
+      },
+      "UsersPostBadRequest": {
+        "$ref": "#/components/schemas/Error"
+      },
+      "MeGetOk": {
+        "$ref": "#/components/schemas/User"
+      },
+      "MeGetNotFound": {
+        "$ref": "#/components/schemas/Error"
+      },
+      "MePutOk": {
+        "$ref": "#/components/schemas/User"
+      },
+      "MePutNotFound": {
+        "$ref": "#/components/schemas/Error"
+      },
+      "MePutBadRequest": {
+        "$ref": "#/components/schemas/Error"
+      },
+      "MeDeleteNotFound": {
+        "$ref": "#/components/schemas/Error"
+      },
+      "MeEventsGetOk": {
+        "description": "",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Event"
+              }
+            }
+          }
+        }
+      },
+      "MeEventsGetNotFound": {
+        "$ref": "#/components/schemas/Error"
+      },
+      "MeEventsPostOk": {
+        "$ref": "#/components/schemas/Event"
+      },
+      "MeEventsPostNotFound": {
+        "$ref": "#/components/schemas/Error"
+      },
+      "MeEventPutOk": {
+        "$ref": "#/components/schemas/Event"
+      },
+      "MeEventPutNotFound": {
+        "$ref": "#/components/schemas/Error"
+      },
+      "MeEventDeleteNotFound": {
+        "$ref": "#/components/schemas/Error"
+      },
+      "DocsGetOk": {
+        "description": "",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "AuthPostOk": {
+        "description": "",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "jwt": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "AuthPostBadRequestMissingAuthParams": {
+        "$ref": "#/components/schemas/Error"
+      },
+      "AuthPostBadRequestInvalidLogin": {
+        "$ref": "#/components/schemas/Error"
+      }
+    },
+    "headers": {},
+    "examples": {},
+    "links": {},
+    "callbacks": {}
+  },
+  "tags": [
+    {
+      "name": "User",
+      "description": ""
+    },
+    {
+      "name": "Me",
+      "description": ""
+    },
+    {
+      "name": "Event",
+      "description": ""
+    },
+    {
+      "name": "Documentation",
+      "description": ""
+    },
+    {
+      "name": "Auth",
+      "description": ""
+    }
+  ],
+  "paths": {
+    "/users": {
+      "post": {
+        "summary": "Create a user",
+        "description": "",
+        "tags": [
+          "User"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/UsersPost"
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/responses/UsersPostOk"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/responses/UsersPostBadRequest"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "summary": "Fetches the current user",
+        "description": "",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Me"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/responses/MeGetOk"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/responses/MeGetNotFound"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Updates the current user",
+        "description": "",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Me"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/MePut"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/responses/MePutOk"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/responses/MePutNotFound"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/responses/MePutBadRequest"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deletes the current user",
+        "description": "",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Me"
+        ],
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/responses/MeDeleteNotFound"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me/events": {
+      "get": {
+        "summary": "Fetches all events for the current user",
+        "description": "",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Event",
+          "Me"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/responses/MeEventsGetOk"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/responses/MeEventsGetNotFound"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Creates a new event for the current user",
+        "description": "",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Event",
+          "Me"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/MeEventsPost"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/responses/MeEventsPostOk"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/responses/MeEventsPostNotFound"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me/events/{id}": {
+      "put": {
+        "summary": "Updates an event for the current user",
+        "description": "",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Event",
+          "Me"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/MeEventPut"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/responses/MeEventPutOk"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/responses/MeEventPutNotFound"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deletes an event for the current user",
+        "description": "",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Event",
+          "Me"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/responses/MeEventDeleteNotFound"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth": {
+      "post": {
+        "summary": "Issues a JWT",
+        "description": "",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/AuthPost"
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/responses/AuthPostOk"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/responses/AuthPostBadRequestMissingAuthParams"
+                    },
+                    {
+                      "$ref": "#/components/responses/AuthPostBadRequestInvalidLogin"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/docs": {
+      "get": {
+        "summary": "Returns an OpenAPI 3.0 spec.",
+        "description": "Returns an OpenAPI 3.0 spec describing HTTP methods, endpoints, parameters, etc.",
+        "tags": [
+          "Documentation"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. A JSON object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/responses/DocsGetOk"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

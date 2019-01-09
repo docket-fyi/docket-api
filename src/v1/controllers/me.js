@@ -1,5 +1,6 @@
 const status = require('http-status')
 const moment = require('moment')
+const slugify = require('slugify')
 
 const { Event } = require('../../models')
 
@@ -96,11 +97,32 @@ async function getAllEvents(req, res, next) {
     const fields = {
       _id: true,
       name: true,
+      slug: true,
       date: true
     }
     const events = await Event.find({ userId: currentUser.id }, fields).exec() // @todo limit, offset
     const eventsWithDiff = events.map(event => ({ ...event.toObject(), diff: { value: moment(event.date).diff(moment(), currentUser.preferredMeasurementUnit), unit: currentUser.preferredMeasurementUnit }}))
     res.status(status.OK).json(eventsWithDiff)
+    return next()
+  } catch (err) {
+    return next(err)
+  }
+}
+
+/**
+ * Fetches a specific events from the database for the current user and
+ * returns it.
+ *
+ * @param {Request} req The incoming request object
+ * @param {Response} res The outgoing response object
+ * @param {Function} next Callback to continue on to next middleware
+ *
+ * @return  {Promise<undefined>}
+ */
+async function getEvent(req, res, next) {
+  try {
+    const { event } = req
+    res.status(status.OK).json(event)
     return next()
   } catch (err) {
     return next(err)
@@ -124,7 +146,8 @@ async function createEvent(req, res, next) {
     const event = await Event.create({
       userId: currentUser.id,
       name,
-      date: moment(date)
+      date: moment(date),
+      slug: slugify(name, {remove: /[*+~.()'"!:@]/g})
     })
     res.status(status.OK).json(event)
     return next()
@@ -189,6 +212,7 @@ module.exports = {
   update,
   destroy,
   getAllEvents,
+  getEvent,
   createEvent,
   updateEvent,
   destroyEvent

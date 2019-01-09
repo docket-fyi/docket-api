@@ -36,7 +36,10 @@ async function create(req, res, next) {
       res.status(status.BAD_REQUEST)
       throw new InvalidLoginError()
     }
-    const jwt = jsonWebToken.sign({ id: user.id }, environment.jwt.secret)
+    const options = {
+      expiresIn: environment.jwt.expiration
+    }
+    const jwt = jsonWebToken.sign({ id: user.id }, environment.jwt.secret, options)
     res.status(status.OK).json({ jwt })
     return next()
   } catch (err) {

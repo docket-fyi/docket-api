@@ -1,13 +1,13 @@
 const auth = require('./auth')
-// const events = require('./events')
 const users = require('./users')
 const me = require('./me')
 const docs = require('./docs')
+const healthCheck = require('./health-check')
 
 module.exports = [
   auth,
-  // events,
   users,
   me,
-  docs
+  docs,
+  healthCheck
 ]

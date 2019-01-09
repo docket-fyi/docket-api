@@ -22,6 +22,9 @@ const schema = new mongoose.Schema({
     type: String,
     enum: ['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'],
     default: 'd'
+  },
+  confirmedAt: {
+    type: Date
   }
 }, { timestamps: true })
 
