@@ -1,13 +1,15 @@
-const users = require('./users')
-const me = require('./me')
 const auth = require('./auth')
 const docs = require('./docs')
+const google = require('./google')
 const healthCheck = require('./health-check')
+const me = require('./me')
+const users = require('./users')
 
 module.exports = {
-  users,
-  me,
   auth,
   docs,
-  healthCheck
+  google,
+  healthCheck,
+  me,
+  users
 }

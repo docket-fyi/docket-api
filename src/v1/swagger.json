@@ -670,6 +670,75 @@
         "description": "",
         "summary": "Health check"
       }
+    },
+    "/google/url": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "example": "https://accounts.google.com/o/oauth2/v2/auth?scope=&response_type=code&client_id=&redirect_uri="
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Google"
+        ],
+        "operationId": "getGoogleAuthUrl",
+        "description": "",
+        "summary": "Get Google OAuth URL"
+      }
+    },
+    "/google/tokens": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "code",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "access": {
+                  "type": "string",
+                  "example": ""
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Google"
+        ],
+        "operationId": "getGoogleAuthTokens",
+        "description": "",
+        "summary": "Get Google OAuth tokens"
+      }
     }
   },
   "definitions": {
@@ -780,6 +849,10 @@
     {
       "description": "",
       "name": "Status"
+    },
+    {
+      "description": "",
+      "name": "Google"
     }
   ],
   "x-components": {

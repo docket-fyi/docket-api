@@ -19,6 +19,7 @@ const RegistrationConfirmationMissingUserError = require('./registration-confirm
 const UserAlreadyConfirmedError = require('./user-already-confirmed')
 const UserNotConfirmedError = require('./user-not-confirmed')
 const UserNotFoundError = require('./user-not-found')
+const GoogleOAuthMissingAuthorizationCodeError = require('./google-oauth-missing-authorization-code.js')
 
 module.exports = {
   AuthorizationHeaderMissingError,
@@ -41,5 +42,6 @@ module.exports = {
   RegistrationConfirmationMissingUserError,
   UserAlreadyConfirmedError,
   UserNotConfirmedError,
-  UserNotFoundError
+  UserNotFoundError,
+  GoogleOAuthMissingAuthorizationCodeError
 }
