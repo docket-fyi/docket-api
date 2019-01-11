@@ -10,7 +10,7 @@ const debug = require('../config/debug').api
  * @return  {undefined}
  */
 function logRequest(req, res, next) {
-  debug(`-> ${req.method} ${req.originalUrl}`)
+  debug(`<- ${req.method} ${req.originalUrl}`)
   next()
 }
 
