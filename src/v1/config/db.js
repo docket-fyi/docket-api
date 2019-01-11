@@ -13,6 +13,7 @@ const {
 
 const url = `${protocol}${username}:${password}@${host}:${port}/${name}`
 const options = {
+  ssl: true,
   useNewUrlParser: true
 }
 mongoose.connect(url, options, error => {

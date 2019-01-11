@@ -13,9 +13,9 @@ module.exports = {
   },
   db: {
     protocol: process.env.DB_PROTOCOL || 'mongodb://',
-    host: process.env.DB_HOST || 'docket-db', // 'docket-db',
+    host: process.env.DB_HOST,
     port: process.env.DB_PORT || '27017',
-    name: process.env.DB_NAME || 'docket_development',
+    name: process.env.DB_NAME || 'docket_staging',
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD
   },
