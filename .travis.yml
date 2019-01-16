@@ -1,18 +1,18 @@
 env:
   global:
-    - CC_TEST_REPORTER_ID=b08226d9f786697f7c91303d73b40c9ac9f4ac77e70875fb94fe890fcc8e2037
+    - CC_TEST_REPORTER_ID=c42eb5f1c199660704b9191007993c9a80dc4691e50276638211b52712b8aaf4
 language: node_js
 node_js: '10'
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
-  - ./cc-test-reporter before-build
+  - "./cc-test-reporter before-build"
 script:
   - npm run lint
   - npm run test:unit
   - cat ./coverage/lcov.info | $(npm bin)/coveralls
 after_script:
-  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+  - "./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT"
 notifications:
   slack:
-    secure: lJEqF+Oc8tmvIaeJ6YIWCn0pdJqDU6q2SkQ+uvzgT9s5um2RJVcEe0GCZ/qRCdHi6uwP2UJwqNKSvwRebzs4pqsekaOszv+WUqkd7XfpMpNcnI30DR+MWmUhAxExGMIvloQwo7P4tWHSI0/akQHoadiefUonE3mBye5DkTXNxUxiO50if32kuLxVZfYNx1qNW2+mzjriWvE8UYdcgA7jRGQvpGSzxTEWAXhozaGq65FW+NJqKob8kWS9C0HsH1JR2EK9Ay73rQ7gFa9SJHmggmogvehluFnLOsNNVRAML6i/rrVkrQRMW+LxJnMP/Kjk3V8pL1H7mcxTdMr0usLih46FDz1sUcSw4P9tar4TUK7t8oaQbozaGOy7l18qtip6EaPU1MbjHYsnH0osIRMZ8kO5nq3i3dwP1eAipXfYBUhmt3DS5wXxo9ZezBWZ7z8OfwS6Hgj92hFqv8K/wpXZbMUG1k7Ksavzl7OhirkTyolHbblbj1bdjGykVxaPn7nnZY0cC1ebS/YB9kN4J1mr9T9iK5J+i87SNW9z9l+UohlWOSwHZfS9Ay6QvkF1nHsRQZdFSd1WeZXJp0gTa5BTChJE8hRRpR+1je4mOUubWxbNqDbjjlrLU66T+NHoqhOoeP5XYtTY3mEl4gTdUtRFf/20SaXhMV8UIeGXVg1gZQE=
+    secure: fxmJpG/Qx4O/Jml1nhIKrVKj5KslvfODrW74C0g77OXBdhjqaEEnIvMqsz4XE3VyMg0yNwnZ8dTriyTl5NhtYbLwQixylzfdDF6LJoQOozqZjjkIkpEQCIDXgHJwInFC1eKfcGNpEaxOscJAq3waoTX5NKCI+RH/YiUmo6E9ttfUQCHfoVWXYwRqHZUYM/bK9baTGwzjl/lwaBgBHNhbVKFmRmaEI5g9xpgZ+CEqo7uBLKdOOmvi6zM1tu7oRyUv037LcOvqBhle11bn8YDYy/foKDLbV2UPY25PUTw9wXpxDlQvtRk7tyD9Xtm/xNLEbfPm0mozd+jrF4bCEmRH8C5oiUQFFJHbYVnmcUABnZ7KzItt2RXGjiU7WI+KZfd5GhTir619pNA3BqeS0izo39/n7qD8klsF8MWurUch38HBHKkMTwIAI7bmnmDSmihLAY901x+oApzpSlGthu2tK5Qj4E5STdKoXAkshuOVhRKDQYGwoqhk4xqHxH2tW3JsARmThI+5JzVV8/krBLJff2xUq7TvzN2b3+2CsO7uBCUjQ6IhBIL1gQuFjVGUWzcQtyLQwUNdsnMYzX8e9UAPitfSB/6dmuhGH56caIflT2CJ+yZI9rMiuRS5Zq7ps1UjfYNSiq2JRVDWvNC74z8CuQAFb3jQ5KSVZdPYbkX21Xo=
