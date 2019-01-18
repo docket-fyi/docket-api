@@ -22,7 +22,7 @@ deploy:
   region: us-west-2
   app: docket-api
   env: staging
-  # bucket_name: "the-target-S3-bucket"
+  bucket_name: "api.staging.docket.fyi"
 notifications:
   slack:
     secure: d1k4YlBry+Tpve12D6+p1LClOJALypqnUG/c9ijOhl6Wh6IChVx94NqAkdMH/L8u84/kHFfxqG+gS1ndNYdnrQcxFWax1PYy14xHCyE3GTYWbPk1vN+2ygHCt+zSczNYQJHw5tanoV1Yb9S9PG8qimD7ESmqLEbBIntnPid9s9R8A8uWP6gUHUZdrNJrpruGlO64au48ca1UXevPBvGkjiGoE9BzwhwZLpHJAYxXikErO0W4SoEkhL+H8/e6mPTwJ+eQMDsLgFhDZjteodyv2z6BHpolqGzdPXOP98pYfB6J1M//At41wPwYcqGBCGwtpnlV8vix3A2px8xMOe1irPEAqp1nkUmS60o5hWsIl5ull0ALkHWBLQRSzRXp1AG5hFLMUnWl3Vtrk1W7J/p+/2Yo7AiCYJ9dvL4Glfg9D62BbQ9mpNhFgSwZIv/nwYKs/qILz0zKTBg7gS+5aZBZazVMSg1JnGWsn1WxZgIN6uyqfZGUjYbgD31fdCQqcr0wqt1MeSu4y2QmMU2RKm8O653x+6BdZkQ77bi6M9HAm+loWPSpHdwf2rITlKv2Y6QzszldwUbE+rmSyI5QkpA3o8jePBlutAg7f8v7eBZkVBpzvRAasix999PhrQ7s61RQl020JaeCdrV+hz8rEolOXHJf74lr60ERff2x6riigUM=
