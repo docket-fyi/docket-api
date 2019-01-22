@@ -8,8 +8,8 @@ const {
   password,
   host,
   port,
-  name,
-  useSSL
+  useSSL,
+  name
 } = db
 
 const url = `${protocol}${username}:${password}@${host}:${port}/${name}`
