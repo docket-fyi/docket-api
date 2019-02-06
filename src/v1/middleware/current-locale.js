@@ -1,5 +1,6 @@
 const acceptLanguage = require('accept-language')
 
+const debug = require('../config/debug').api
 const { Locale } = require('../../models')
 
 /**
@@ -31,7 +32,12 @@ async function currentLocale(req, res, next) {
     req.currentLocale = locale // NOTE: It's possible for this to be `null`
     return next()
   } catch (err) {
-    return next(err)
+    debug(`${err.name}: ${err.message}`)
+    /**
+     * Don't pass `err` to next() because users should be able to carry
+     * on even if a locale can't be found.
+     */
+    return next()
   }
 }
 
