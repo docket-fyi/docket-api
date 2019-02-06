@@ -6,6 +6,7 @@ const routes = require('../routes')
 const {
   bodyParser,
   cors,
+  currentLocale,
   logRequest,
   routeNotFound,
   error,
@@ -14,6 +15,7 @@ const {
 
 app.use(cors())
 app.use(bodyParser.json())
+app.use(currentLocale)
 app.use(logRequest)
 app.use('/v1', routes)
 app.use(routeNotFound)

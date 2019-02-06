@@ -671,6 +671,49 @@
         "summary": "Health check"
       }
     },
+    "/i18n/{localeCode}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "localeCode",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "translations": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "tags": [
+          "I18n"
+        ],
+        "operationId": "getLocale",
+        "description": "",
+        "summary": ""
+      }
+    },
     "/google/url": {
       "get": {
         "consumes": [
@@ -743,6 +786,7 @@
   },
   "definitions": {
     "Error": {
+      "type": "object",
       "properties": {
         "message": {
           "example": "An error occurred",
@@ -751,11 +795,15 @@
         "name": {
           "example": "Error",
           "type": "string"
+        },
+        "translationKey": {
+          "example": "clickHereToLogin",
+          "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "Event": {
+      "type": "object",
       "properties": {
         "_id": {
           "example": "5c14089df7aa5a78833a633d",
@@ -785,10 +833,10 @@
           "format": "date-time",
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "User": {
+      "type": "object",
       "properties": {
         "_id": {
           "example": "5c14089df7aa5a78833a633d",
@@ -818,8 +866,35 @@
           "format": "date-time",
           "type": "string"
         }
-      },
-      "type": "object"
+      }
+    },
+    "Locale": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "example": "5c14089df7aa5a78833a633d",
+          "format": "uuid",
+          "type": "string"
+        },
+        "code": {
+          "example": "frank@ratpack.org",
+          "format": "email",
+          "type": "string"
+        },
+        "translations": {
+          "type": "object"
+        },
+        "createdAt": {
+          "example": "2018-12-14 19:46:37.733",
+          "format": "date-time",
+          "type": "string"
+        },
+        "updatedAt": {
+          "example": "2018-12-14 19:46:37.733",
+          "format": "date-time",
+          "type": "string"
+        }
+      }
     }
   },
   "securityDefinitions": {
@@ -853,6 +928,10 @@
     {
       "description": "",
       "name": "Google"
+    },
+    {
+      "description": "Internationalization / localization",
+      "name": "I18n"
     }
   ],
   "x-components": {

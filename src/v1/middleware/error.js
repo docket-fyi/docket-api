@@ -27,6 +27,9 @@ function error(err, req, res, next) {
       {
         name: err.name || 'UnknownError',
         message: err.message || 'An unknown error occurred',
+        translationKey: err.translationKey || err.message || 'An unknown error occurred'
+        // code: err.code
+        // date: err.date
       }
     ]
   }

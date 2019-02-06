@@ -1,4 +1,5 @@
 module.exports = {
+  name: process.NODE_ENV || 'staging',
   api: {
     port: process.env.PORT || '3000'
   },
@@ -11,14 +12,21 @@ module.exports = {
     expiration: process.env.PASSWORD_RESET_EXPIRATION || '1d',
     from: process.env.PASSWORD_RESET_FROM || 'no-reply@docket.fyi',
   },
-  db: {
+  db: { // @todo Rename this to 'mongo'
     protocol: process.env.DB_PROTOCOL || 'mongodb://',
     host: process.env.DB_HOST,
     port: process.env.DB_PORT || '27017',
-    name: process.env.DB_NAME || 'admin',
+    name: process.env.DB_NAME || 'docket_staging',
     useSSL: process.env.DB_USE_SSL || 'true',
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD
+  },
+  redis: {
+    protocol: process.env.REDIS_PROTOCOL || 'redis://',
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT || '6379',
+    username: process.env.REDIS_USERNAME,
+    password: process.env.REDIS_PASSWORD
   },
   mail: {
     host: process.env.MAIL_HOST,

@@ -17,6 +17,7 @@ const options = {
   ssl: useSSL === 'true',
   useNewUrlParser: true
 }
+mongoose.set('useCreateIndex', true)
 mongoose.connect(url, options, error => {
   if (error) throw error
 })

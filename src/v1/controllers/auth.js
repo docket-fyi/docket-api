@@ -6,7 +6,8 @@ const environment = require('../environment')
 const { User } = require('../../models')
 const {
   InvalidLoginError,
-  MissingAuthParamError
+  MissingAuthParamError,
+  UserNotConfirmedError
 } = require('../errors')
 
 /**
@@ -30,6 +31,10 @@ async function create(req, res, next) {
     if (!user) {
       res.status(status.BAD_REQUEST)
       throw new InvalidLoginError()
+    }
+    if (!user.confirmedAt) {
+      res.status(status.BAD_REQUEST)
+      throw new UserNotConfirmedError()
     }
     const isValidLogin = bcrypt.compareSync(password, user.password) // eslint-disable-line no-sync
     if (!isValidLogin) {
