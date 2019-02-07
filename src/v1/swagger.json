@@ -775,12 +775,49 @@
             }
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "tags": [
           "Google"
         ],
         "operationId": "getGoogleAuthTokens",
         "description": "",
         "summary": "Get Google OAuth tokens"
+      }
+    },
+    "/google/calendar-list": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GoogleCalendarList"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Google"
+        ],
+        "operationId": "getAllGoogleCalendarLists",
+        "description": "Get Google calendar lists",
+        "summary": "Get Google calendar lists"
       }
     }
   },
@@ -895,6 +932,39 @@
           "type": "string"
         }
       }
+    },
+    "GoogleCalendarList": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "example": "you@gmail.com",
+          "type": "string"
+        },
+        "summary": {
+          "example": "johngoldsm1@gmail.com",
+          "type": "string"
+        },
+        "timeZone": {
+          "example": "America/Los_Angeles",
+          "type": "string"
+        },
+        "backgroundColor": {
+          "example": "#0e61b9",
+          "type": "string"
+        },
+        "foregroundColor": {
+          "example": "#ffffff",
+          "type": "string"
+        }
+      }
+    },
+    "GoogleCalendar": {
+      "type": "object",
+      "properties": {}
+    },
+    "GoogleCalendarEvent": {
+      "type": "object",
+      "properties": {}
     }
   },
   "securityDefinitions": {

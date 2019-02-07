@@ -1,6 +1,8 @@
 const bodyParser = require('./body-parser')
 const cors = require('./cors')
 const currentLocale = require('./current-locale')
+const setGoogleOAuthCredentials = require('./set-google-oauth-credentials')
+const clearGoogleOAuthCredentials = require('./clear-google-oauth-credentials')
 const logRequest = require('./log-request')
 const logResponse = require('./log-response')
 const error = require('./error')
@@ -12,6 +14,8 @@ module.exports = {
   bodyParser,
   cors,
   currentLocale,
+  setGoogleOAuthCredentials,
+  clearGoogleOAuthCredentials,
   logRequest,
   logResponse,
   routeNotFound,

@@ -13,7 +13,8 @@ const users = [
     lastName: 'Istrator',
     email: 'j7w5veinmrorl7op@ethereal.email',
     password: hashedPassword,
-    preferredMeasurementUnit: 'd'
+    preferredMeasurementUnit: 'd',
+    confirmedAt: new Date()
   }
 ]
 

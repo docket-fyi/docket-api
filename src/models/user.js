@@ -25,6 +25,27 @@ const schema = new mongoose.Schema({
   },
   confirmedAt: {
     type: Date
+  },
+  tokens: {
+    access_token: {
+      type: String,
+      required: true
+    },
+    refresh_token: {
+      type: String
+    },
+    expiry_date: {
+      type: Number,
+      required: true
+    },
+    scope: {
+     type: String,
+     required: true
+    },
+    token_type: {
+      type: String,
+      required: true
+    }
   }
 }, { timestamps: true })
 

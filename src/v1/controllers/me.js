@@ -143,11 +143,21 @@ async function createEvent(req, res, next) {
   try {
     const { body, currentUser } = req
     const { name, date } = body
+    /*
+    Repeat every <X> day/week/month/year
+      week -> Su/M/Tu/W/Th/F/S
+      month -> day <X>/first <day>
+    Ends never/on/after
+      on -> date
+      after -> <X> occurrences
+    From now <X> day/week/month/year
+    From date <X> day/week/month/year
+    */
     const event = await Event.create({
       userId: currentUser.id,
       name,
       date: moment(date),
-      slug: slugify(name, {remove: /[*+~.()'"!:@]/g})
+      slug: slugify(name, {lower: true, remove: /[*+~.()'"!:@]/g})
     })
     res.status(status.OK).json(event)
     return next()
