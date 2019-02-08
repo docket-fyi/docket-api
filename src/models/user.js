@@ -29,22 +29,22 @@ const schema = new mongoose.Schema({
   tokens: {
     access_token: {
       type: String,
-      required: true
+      // required: true
     },
     refresh_token: {
       type: String
     },
     expiry_date: {
       type: Number,
-      required: true
+      // required: true
     },
     scope: {
      type: String,
-     required: true
+    //  required: true
     },
     token_type: {
       type: String,
-      required: true
+      // required: true
     }
   }
 }, { timestamps: true })

@@ -714,7 +714,7 @@
         "summary": ""
       }
     },
-    "/google/url": {
+    "/google/oauth-url": {
       "get": {
         "consumes": [
           "application/json"
@@ -737,10 +737,15 @@
             }
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "tags": [
           "Google"
         ],
-        "operationId": "getGoogleAuthUrl",
+        "operationId": "getGoogleOAuthUrl",
         "description": "",
         "summary": "Get Google OAuth URL"
       }
