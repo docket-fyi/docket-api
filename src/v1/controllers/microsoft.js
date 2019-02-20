@@ -1,12 +1,15 @@
+/* eslint-disable max-lines */
+
 const status = require('http-status')
-const { google } = require('googleapis')
+const qs = require('qs')
+const fetch = require('node-fetch')
+const { URLSearchParams } = require('url');
 
 const environment = require('../environment')
-const { GoogleOAuthMissingAuthorizationCodeError } = require('../errors')
-const oauth2Client = require('../config/google')
+// const { MicrosoftOAuthMissingAuthorizationCodeError } = require('../errors')
 
 /**
- * Returns the OAuth2 URL for Google services.
+ * Returns the OAuth2 URL for Microsoft services.
  *
  * @param {Request} req The incoming request object
  * @param {Response} res The outgoing response object
@@ -16,10 +19,14 @@ const oauth2Client = require('../config/google')
  */
 async function getOAuthUrl(req, res, next) {
   try {
-    const url = oauth2Client.generateAuthUrl({
-      // access_type: 'online|offline',
-      scope: environment.google.scopes()
-    })
+    const { applicationId, tokenHost, authorizePath, redirectUrl, scopes } = environment.microsoft
+    const queryParams = {
+      redirect_uri: redirectUrl,
+      response_type: 'code',
+      scope: scopes().join(' '),
+      client_id: applicationId
+    }
+    const url = `${tokenHost}/${authorizePath}?${qs.stringify(queryParams)}`
     res.status(status.OK).json({ url })
     return next()
   } catch (err) {
@@ -28,7 +35,7 @@ async function getOAuthUrl(req, res, next) {
 }
 
 /**
- * Returns the OAuth2 URL for Google services.
+ * Returns the OAuth2 URL for Microsoft services.
  *
  * @param {Request} req The incoming request object
  * @param {Response} res The outgoing response object
@@ -42,10 +49,29 @@ async function getAccessTokens(req, res, next) {
     const { code } = query
     if (!code) {
       res.status(status.BAD_REQUEST)
-      throw new GoogleOAuthMissingAuthorizationCodeError()
+      // @todo throw new MicrosoftOAuthMissingAuthorizationCodeError()
+      throw new Error('MicrosoftOAuthMissingAuthorizationCodeError')
     }
-    const { tokens } = await oauth2Client.getToken(code)
-    await currentUser.update({google: tokens})
+    const { applicationId, applicationPassword, tokenHost, tokenPath, redirectUrl, scopes } = environment.microsoft
+    const url = `${tokenHost}/${tokenPath}`
+    const body = new URLSearchParams({
+      client_id: applicationId,
+      scope: scopes().join(' '),
+      redirect_uri: redirectUrl,
+      grant_type: 'authorization_code',
+      client_secret: applicationPassword,
+      code
+    })
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body
+    }
+    const response = await fetch(url, options)
+    const microsoft = await response.json()
+    await currentUser.update({microsoft})
     res.status(status.NO_CONTENT).send()
     return next()
   } catch (err) {
@@ -88,20 +114,7 @@ async function getCalendarList(req, res, next) {
  */
 async function getAllCalendarLists(req, res, next) {
   try {
-    const calendar = google.calendar({version: 'v3', auth: oauth2Client})
-    const response = await calendar.calendarList.list()
-    // @todo GoogleCalendarList.create(response.data.items)
-    const items = response.data.items.map(item => {
-      const { id, summary, timeZone, backgroundColor, foregroundColor } = item
-      return {
-        id,
-        summary,
-        timeZone,
-        backgroundColor,
-        foregroundColor
-      }
-    })
-    res.status(status.OK).json(items)
+    res.status(status.OK).json([])
     return next()
   } catch (err) {
     return next(err)

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const moment = require('moment')
 
 const schema = new mongoose.Schema({
   firstName: {
@@ -16,7 +17,8 @@ const schema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true
+    required: true,
+    select: false
   },
   preferredMeasurementUnit: {
     type: String,
@@ -26,28 +28,72 @@ const schema = new mongoose.Schema({
   confirmedAt: {
     type: Date
   },
-  tokens: {
+  google: {
     access_token: {
       type: String,
       // required: true
+      select: false
     },
     refresh_token: {
-      type: String
+      type: String,
+      select: false
     },
     expiry_date: {
       type: Number,
       // required: true
+      select: false
     },
     scope: {
-     type: String,
-    //  required: true
+      type: String,
+      //  required: true
+      select: false
     },
     token_type: {
       type: String,
       // required: true
+      select: false
+    }
+  },
+  microsoft: {
+    access_token: {
+      type: String,
+      // required: true
+      select: false
+    },
+    refresh_token: {
+      type: String,
+      select: false
+    },
+    expires_in: {
+      type: Number,
+      // required: true
+      select: false
+    },
+    scope: {
+      type: String,
+      //  required: true
+      select: false
+    },
+    token_type: {
+      type: String,
+      // required: true
+      select: false
+    },
+    id_token: {
+      type: String,
+      // required: true
+      select: false
     }
   }
 }, { timestamps: true })
+
+schema.methods.eventDiff = function(event) {
+  const diff = {
+    value: moment(event.date).diff(moment(), this.preferredMeasurementUnit),
+    unit: this.preferredMeasurementUnit
+  }
+  return diff
+}
 
 const model = mongoose.model('User', schema)
 

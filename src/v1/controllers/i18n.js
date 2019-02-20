@@ -13,7 +13,7 @@ const status = require('http-status')
  *
 async function index(req, res, next) {
   try {
-    const locales = await Locale.find().exec()
+    const locales = await Locale.find()
     res.status(status.OK).json(locales)
     return next()
   } catch (err) {

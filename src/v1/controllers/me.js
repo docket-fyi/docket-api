@@ -101,7 +101,10 @@ async function getAllEvents(req, res, next) {
       date: true
     }
     const events = await Event.find({ userId: currentUser.id }, fields).exec() // @todo limit, offset
-    const eventsWithDiff = events.map(event => ({ ...event.toObject(), diff: { value: moment(event.date).diff(moment(), currentUser.preferredMeasurementUnit), unit: currentUser.preferredMeasurementUnit }}))
+    const eventsWithDiff = events.map(event => ({
+      ...event.toObject(),
+      diff: currentUser.eventDiff(event)
+    }))
     res.status(status.OK).json(eventsWithDiff)
     return next()
   } catch (err) {
@@ -157,9 +160,13 @@ async function createEvent(req, res, next) {
       userId: currentUser.id,
       name,
       date: moment(date),
-      slug: slugify(name, {lower: true, remove: /[*+~.()'"!:@]/g})
+      slug: slugify(name, {lower: true, remove: /[/*+~.()'"!:@]/g})
     })
-    res.status(status.OK).json(event)
+    const eventWithDiff = {
+      ...event.toObject(),
+      diff: currentUser.eventDiff(event)
+    }
+    res.status(status.OK).json(eventWithDiff)
     return next()
   } catch (err) {
     return next(err)

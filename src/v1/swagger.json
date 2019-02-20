@@ -824,6 +824,85 @@
         "description": "Get Google calendar lists",
         "summary": "Get Google calendar lists"
       }
+    },
+    "/microsoft/oauth-url": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "example": "https://microsoft.com/oauth2/"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Microsoft"
+        ],
+        "operationId": "getMicrosoftOAuthUrl",
+        "description": "",
+        "summary": "Get Microsoft OAuth URL"
+      }
+    },
+    "/microsoft/tokens": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "code",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "access": {
+                  "type": "string",
+                  "example": ""
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Microsoft"
+        ],
+        "operationId": "getMicrosoftAuthTokens",
+        "description": "",
+        "summary": "Get Microsoft OAuth tokens"
+      }
     }
   },
   "definitions": {
@@ -869,6 +948,19 @@
         "slug": {
           "example": "christmas-2018",
           "type": "string"
+        },
+        "diff": {
+          "type": "object",
+          "properties": {
+            "unit": {
+              "type": "string",
+              "example": "d"
+            },
+            "value": {
+              "type": "integer",
+              "example": 4
+            }
+          }
         },
         "updatedAt": {
           "example": "2018-12-14 19:46:37.733",
@@ -1003,6 +1095,10 @@
     {
       "description": "",
       "name": "Google"
+    },
+    {
+      "description": "",
+      "name": "Microsoft"
     },
     {
       "description": "Internationalization / localization",

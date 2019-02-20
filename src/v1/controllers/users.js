@@ -32,16 +32,7 @@ const {
  *
 async function index(req, res, next) {
   try {
-    const fields = {
-      _id: true,
-      firstName: true,
-      lastName: true,
-      email: true,
-      createdAt: true,
-      updatedAt: true,
-      password: false
-    }
-    const users = await User.find({}, fields).exec()
+    const users = await User.find({})
     res.status(status.OK).json(users)
     return next()
   } catch (err) {

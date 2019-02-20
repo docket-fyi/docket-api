@@ -46,5 +46,15 @@ module.exports = {
     apiKey: process.env.GOOGLE_CALENDAR_API_KEY,
     scopes: () => process.env.GOOGLE_CALENDAR_SCOPES.split(',').map(scope => scope.trim()),
     rawScopes: process.env.GOOGLE_CALENDAR_SCOPES
+  },
+  microsoft: {
+    applicationId: process.env.MICROSOFT_APPLICATION_ID,
+    applicationPassword: process.env.MICROSOFT_APPLICATION_PASSWORD,
+    tokenHost: process.env.MICROSOFT_TOKEN_HOST || 'https://login.microsoftonline.com',
+    authorizePath: process.env.MICROSOFT_AUTHORIZE_PATH || 'common/oauth2/v2.0/authorize',
+    tokenPath: process.env.MICROSOFT_TOKEN_PATH || 'common/oauth2/v2.0/token',
+    redirectUrl: process.env.MICROSOFT_REDIRECT_URL,
+    scopes: () => process.env.MICROSOFT_SCOPES.split(',').map(scope => scope.trim()),
+    rawScopes: process.env.MICROSOFT_SCOPES
   }
 }

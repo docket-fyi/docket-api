@@ -24,11 +24,7 @@ async function currentUser(req, res, next) {
       res.status(status.BAD_REQUEST)
       throw new MalformedJwtError()
     }
-    const fields = {
-      __v: false,
-      password: false
-    }
-    const currentUser = await User.findOne({ _id: id }, fields)
+    const currentUser = await User.findOne({ _id: id })
     if (!currentUser) {
       res.status(status.NOT_FOUND)
       throw new UserNotFoundError()

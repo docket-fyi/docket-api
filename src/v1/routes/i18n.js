@@ -63,7 +63,7 @@ router.param('localeCode', async (req, res, next, code) => {
 
 // router.param('id', async (req, res, next, id) => {
 //   try {
-//     const translation = await Translation.findOne({ _id: id }).exec() // @todo {userId: currentUser.id}
+//     const translation = await Translation.findOne({ _id: id }) // @todo {userId: currentUser.id}
 //     if (!translation) {
 //       res.status(status.NOT_FOUND)
 //       throw new TranslationNotFoundError()

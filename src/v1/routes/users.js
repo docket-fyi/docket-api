@@ -18,7 +18,7 @@ router.post('/users/reset-password', users.resetPassword)
 
 // router.param('id', async (req, res, next, id) => {
 //   try {
-//     const user = await User.findOne({ _id: id }).exec()
+//     const user = await User.findOne({ _id: id })
 //     if (!user) {
 //       res.status(status.NOT_FOUND)
 //       throw new UserNotFoundError()

@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Node API (Docker)",
+      "port": 9299,
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "/docket/docket-api/",
+      "address": "localhost",
+      "smartStep": false
+    }
+  ]
+}

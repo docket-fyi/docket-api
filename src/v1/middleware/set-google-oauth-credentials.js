@@ -21,7 +21,7 @@ async function setGoogleOAuthCredentials(req, res, next) {
       res.status(status.BAD_REQUEST)
       throw new UserNotFoundError()
     }
-    oauth2Client.setCredentials(currentUser.tokens)
+    oauth2Client.setCredentials(currentUser.google)
     return next()
   } catch (err) {
     return next(err)

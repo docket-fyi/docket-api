@@ -27,7 +27,12 @@ async function create(req, res, next) {
       res.status(status.BAD_REQUEST)
       throw new MissingAuthParamError()
     }
-    const user = await User.findOne({ email })
+    const fields = {
+      id: true,
+      confirmedAt: true,
+      password: true
+    }
+    const user = await User.findOne({ email }, fields)
     if (!user) {
       res.status(status.BAD_REQUEST)
       throw new InvalidLoginError()

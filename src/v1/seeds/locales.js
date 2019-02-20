@@ -26,7 +26,16 @@ const locales = [
       search: 'Search',
       submit: 'Submit',
       userNotConfirmed: 'User not confirmed',
-      thanksForRegistering: 'Thanks for registering, {{firstName}}! Please check your email ({{email}}) to confirm your account.'
+      thanksForRegistering: 'Thanks for registering, {{firstName}}! Please check your email ({{email}}) to confirm your account.',
+      preferredMeasurementUnit: 'Preferred measurement unit',
+      daysPlural: 'Days',
+      weeksPlural: 'Weeks',
+      monthsPlural: 'Months',
+      yearsPlural: 'Years',
+      daySingular: 'Day',
+      weekSingular: 'Week',
+      monthSingular: 'Month',
+      yearSingular: 'Year'
     }
   }
 ]
