@@ -2,5 +2,7 @@ const debug = require('debug')
 
 module.exports = {
   api: debug('app:api'),
-  mongo: debug('db:mongo')
+  worker: debug('app:worker'),
+  mongo: debug('db:mongo'),
+  redis: debug('db:redis')
 }

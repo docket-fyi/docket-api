@@ -1052,6 +1052,12 @@
         "foregroundColor": {
           "example": "#ffffff",
           "type": "string"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GoogleCalendarEvent"
+          }
         }
       }
     },
@@ -1061,7 +1067,46 @@
     },
     "GoogleCalendarEvent": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "summary": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "start": {
+          "type": "object",
+          "properties": {
+            "date": {
+              "type": "string",
+              "format": "date"
+            },
+            "dateTime": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "timeZone": {
+              "type": "string"
+            }
+          }
+        },
+        "end": {
+          "type": "object",
+          "properties": {
+            "date": {
+              "type": "string",
+              "format": "date"
+            },
+            "dateTime": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "timeZone": {
+              "type": "string"
+            }
+          }
+        }
+      }
     }
   },
   "securityDefinitions": {

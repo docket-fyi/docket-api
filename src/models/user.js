@@ -32,57 +32,57 @@ const schema = new mongoose.Schema({
     access_token: {
       type: String,
       // required: true
-      select: false
+      // select: false
     },
     refresh_token: {
       type: String,
-      select: false
+      // select: false
     },
     expiry_date: {
       type: Number,
       // required: true
-      select: false
+      // select: false
     },
     scope: {
       type: String,
       //  required: true
-      select: false
+      // select: false
     },
     token_type: {
       type: String,
       // required: true
-      select: false
+      // select: false
     }
   },
   microsoft: {
     access_token: {
       type: String,
       // required: true
-      select: false
+      // select: false
     },
     refresh_token: {
       type: String,
-      select: false
+      // select: false
     },
     expires_in: {
       type: Number,
       // required: true
-      select: false
+      // select: false
     },
     scope: {
       type: String,
       //  required: true
-      select: false
+      // select: false
     },
     token_type: {
       type: String,
       // required: true
-      select: false
+      // select: false
     },
     id_token: {
       type: String,
       // required: true
-      select: false
+      // select: false
     }
   }
 }, { timestamps: true })

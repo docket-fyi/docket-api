@@ -1,7 +1,4 @@
-const status = require('http-status')
-
 const oauth2Client = require('../config/google')
-const { UserNotFoundError } = require('../errors')
 
 /**
  * Sets the Google OAuth credentials on the OAuth client object. It's
@@ -17,10 +14,6 @@ const { UserNotFoundError } = require('../errors')
 async function setGoogleOAuthCredentials(req, res, next) {
   try {
     const { currentUser } = req
-    if (!currentUser) {
-      res.status(status.BAD_REQUEST)
-      throw new UserNotFoundError()
-    }
     oauth2Client.setCredentials(currentUser.google)
     return next()
   } catch (err) {

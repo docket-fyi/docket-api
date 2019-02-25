@@ -1,5 +1,8 @@
+/* eslint-disable max-lines */
+
 const status = require('http-status')
 const { google } = require('googleapis')
+const moment = require('moment')
 
 const environment = require('../environment')
 const { GoogleOAuthMissingAuthorizationCodeError } = require('../errors')
@@ -45,7 +48,7 @@ async function getAccessTokens(req, res, next) {
       throw new GoogleOAuthMissingAuthorizationCodeError()
     }
     const { tokens } = await oauth2Client.getToken(code)
-    await currentUser.update({google: tokens})
+    await currentUser.updateOne({google: tokens})
     res.status(status.NO_CONTENT).send()
     return next()
   } catch (err) {
@@ -90,7 +93,6 @@ async function getAllCalendarLists(req, res, next) {
   try {
     const calendar = google.calendar({version: 'v3', auth: oauth2Client})
     const response = await calendar.calendarList.list()
-    // @todo GoogleCalendarList.create(response.data.items)
     const items = response.data.items.map(item => {
       const { id, summary, timeZone, backgroundColor, foregroundColor } = item
       return {
@@ -102,6 +104,47 @@ async function getAllCalendarLists(req, res, next) {
       }
     })
     res.status(status.OK).json(items)
+    return next()
+  } catch (err) {
+    return next(err)
+  }
+}
+
+/**
+ * Returns...
+ *
+ * @param {Request} req The incoming request object
+ * @param {Response} res The outgoing response object
+ * @param {Function} next Callback to continue on to next middleware
+ *
+ * @return {Promise<undefined>}
+ */
+async function getAllCalendarListsWithEvents(req, res, next) {
+  try {
+    const calendar = google.calendar({version: 'v3', auth: oauth2Client})
+    const calendarListResponse = await calendar.calendarList.list()
+    const calendarListItems = calendarListResponse.data.items.map(item => {
+      const { id, summary, timeZone, backgroundColor, foregroundColor } = item
+      return {
+        id,
+        summary,
+        timeZone,
+        backgroundColor,
+        foregroundColor,
+        events: []
+      }
+    })
+    const now = moment()
+    for (const calendarListItem of calendarListItems) {
+      const options = {
+        calendarId: calendarListItem.id,
+        timeMin: now.format(), // @todo Consider historical events
+        timeMax: now.add(1, 'year').format() // @todo Make this configurable (1d, 1w, 1m, 1y, max, etc.)
+      }
+      const eventListResponse = await calendar.events.list(options) // eslint-disable-line no-await-in-loop
+      calendarListItem.events = eventListResponse.data.items
+    }
+    res.status(status.OK).json(calendarListItems)
     return next()
   } catch (err) {
     return next(err)
@@ -276,6 +319,7 @@ module.exports = {
   getCalendarList,
   // insertCalendarList,
   getAllCalendarLists,
+  getAllCalendarListsWithEvents,
   // patchCalendarList,
   // updateCalendarList,
   watchCalendarList,

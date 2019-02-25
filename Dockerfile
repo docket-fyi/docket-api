@@ -3,7 +3,7 @@
 # See https://github.com/nodejs/node/issues/23693
 FROM node:10.11-alpine
 # WORKDIR /var/app/current
-WORKDIR /docket/docket-api
+# WORKDIR /docket/docket-api
 # The following will capture both package.json and package-lock.json, if present.
 COPY package*.json ./
 RUN npm install

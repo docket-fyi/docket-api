@@ -20,7 +20,7 @@ const UserAlreadyConfirmedError = require('./user-already-confirmed')
 const UserNotConfirmedError = require('./user-not-confirmed')
 const UserNotFoundError = require('./user-not-found')
 const LocaleNotFoundError = require('./locale-not-found')
-const GoogleOAuthMissingAuthorizationCodeError = require('./google-oauth-missing-authorization-code.js')
+const GoogleOAuthMissingAuthorizationCodeError = require('./google-oauth-missing-authorization-code')
 
 module.exports = {
   AuthorizationHeaderMissingError,

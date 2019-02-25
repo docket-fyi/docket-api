@@ -4,8 +4,8 @@ const jsonWebToken = require('jsonwebtoken')
 const nodemailer = require('../config/nodemailer')
 const environment = require('../environment')
 const {
-  RegistrationConfirmationEmailUserMissingError,
-  RegistrationConfirmationEmailInvalidUserError
+  RegistrationConfirmationMissingUserError,
+  RegistrationConfirmationInvalidUserError
 } = require('../errors')
 
 const { from, secret, expiration } = environment.registrationConfirmation
@@ -13,37 +13,38 @@ const { from, secret, expiration } = environment.registrationConfirmation
 /**
  * [sendRegistrationConfirmation description]
  *
- * @param {Request} req The incoming request object
- * @param {User} user An instance of the User model
+ * @param {Object} data
+ * @param {String} data.referrer
+ * @param {User} data.user An instance of the User model
  *
  * @return  {undefined}
  */
-async function sendRegistrationConfirmationEmail(req, user) {
+async function sendRegistrationConfirmationEmail(job) {
   try {
+    const { referrer, user } = job.data
     if (!user) {
-      throw new RegistrationConfirmationEmailUserMissingError()
+      throw new RegistrationConfirmationMissingUserError()
     }
     if (!user.email || !user.firstName || !user.lastName) {
-      throw new RegistrationConfirmationEmailInvalidUserError()
+      throw new RegistrationConfirmationInvalidUserError()
     }
     const options = {
       expiresIn: expiration
     }
     const payload = {
-      id: user.id
+      id: user._id
     }
     const jwt = jsonWebToken.sign(payload, secret, options)
-    const referrer = req.get('Referrer')
     const { protocol, host } = url.parse(referrer)
     const uiUrl = `${protocol}//${host}`
-    const data = {
+    const emailData = {
       from,
       to: user.email,
       subject: `Docket registration confirmation`,
       text: `Hi ${user.firstName},\n\n${url}/users/confirm/${jwt}`,
       html: `<html><head></head><body>Hi ${user.firstName},\n\n<a href="${uiUrl}/users/confirm/${jwt}">Confirm</a></body></html>`
     }
-    const info = await nodemailer.sendMail(data)
+    const info = await nodemailer.sendMail(emailData)
     return info
   } catch (err) {
     throw err // Something else (probably a controller) should catch this

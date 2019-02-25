@@ -13,13 +13,15 @@ const { from, secret, expiration } = environment.passwordReset
 /**
  * [sendRegistrationConfirmation description]
  *
- * @param {Request} req The incoming request object
- * @param {User} user An instance of the User model
+ * @param {Object} data
+ * @param {String} data.referrer The incoming request object
+ * @param {User} data.newUser An instance of the User model
  *
  * @return  {Promise<undefined>}
  */
-async function sendPasswordResetEmail(req, user) {
+async function sendPasswordResetEmail(job) {
   try {
+    const { referrer, user } = job.data
     if (!user) {
       throw new PasswordResetEmailUserMissingError()
     }
@@ -30,20 +32,19 @@ async function sendPasswordResetEmail(req, user) {
       expiresIn: expiration
     }
     const payload = {
-      id: user.id
+      id: user._id
     }
     const jwt = jsonWebToken.sign(payload, secret, options)
-    const referrer = req.get('Referrer')
     const { protocol, host } = url.parse(referrer)
     const uiUrl = `${protocol}//${host}`
-    const data = {
+    const emailData = {
       from,
       to: user.email,
       subject: `Docket password reset`,
       text: `Hi ${user.firstName},\n\n${url}/reset-password/${jwt}`,
       html: `<html><head></head><body>Hi ${user.firstName},\n\n<a href="${uiUrl}/reset-password/${jwt}">Reset password</a></body></html>`
     }
-    const info = await nodemailer.sendMail(data)
+    const info = await nodemailer.sendMail(emailData)
     return info
   } catch (err) {
     throw err // Something else (probably a controller) should catch this

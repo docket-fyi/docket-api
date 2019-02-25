@@ -12,7 +12,7 @@ router.get('/google/tokens', verifyJwt, currentUser, google.getAccessTokens)
 // router.delete('/google/calendar-list/:calendarListId', verifyJwt, currentUser, google.destroyCalendarList) // Removes a calendar from the user's calendar list.
 router.get('/google/calendar-list/:calendarListId', verifyJwt, currentUser, setGoogleOAuthCredentials, google.getCalendarList) // Returns a calendar from the user's calendar list.
 // router.post('/google/calendar-list', verifyJwt, currentUser, google.insertCalendarList) // Inserts an existing calendar into the user's calendar list.
-router.get('/google/calendar-list', verifyJwt, currentUser, setGoogleOAuthCredentials, google.getAllCalendarLists) // Returns the calendars on the user's calendar list.
+router.get('/google/calendar-list', verifyJwt, currentUser, setGoogleOAuthCredentials, google.getAllCalendarListsWithEvents) // Returns the calendars on the user's calendar list.
 // router.patch('/google/calendar-list/:calendarListId', verifyJwt, currentUser, google.patchCalendarList) // Updates an existing calendar on the user's calendar list; supports patch semantics.
 // router.put('/google/calendar-list/:calendarListId', verifyJwt, currentUser, google.updateCalendarList) // Updates an existing calendar on the user's calendar list.
 router.post('/google/calendar-list/watch', verifyJwt, currentUser, google.watchCalendarList) // Watch for changes to CalendarList resources.

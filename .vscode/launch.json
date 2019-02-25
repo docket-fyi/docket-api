@@ -4,6 +4,12 @@
     {
       "type": "node",
       "request": "attach",
+      "name": "Node API (Local)",
+      "processId": "${command:PickProcess}"
+    },
+    {
+      "type": "node",
+      "request": "attach",
       "name": "Node API (Docker)",
       "port": 9299,
       "localRoot": "${workspaceFolder}",

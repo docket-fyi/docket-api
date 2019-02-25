@@ -17,9 +17,9 @@ const {
   PasswordResetSamePasswordError
 } = require('../errors')
 const {
-  sendRegistrationConfirmationEmail,
-  sendPasswordResetEmail
-} = require('../util')
+  sendRegistrationConfirmationEmailQueue,
+  sendPasswordResetEmailQueue
+} = require('../config/queues')
 
 /**
  * Fetches all users from the database and returns them.
@@ -88,7 +88,10 @@ async function create(req, res, next) {
       lastName,
       email
     }
-    await sendRegistrationConfirmationEmail(req, newUser)
+    await sendRegistrationConfirmationEmailQueue.add({
+      referrer: req.get('Referrer'),
+      user: newUser
+    })
     res.status(status.OK).json(json)
     return next()
   } catch (err) {
@@ -215,7 +218,10 @@ async function forgotPassword(req, res, next) {
       res.status(status.BAD_REQUEST)
       throw new UserNotConfirmedError()
     }
-    await sendPasswordResetEmail(req, user)
+    await sendPasswordResetEmailQueue.add({
+      referrer: req.get('Referrer'),
+      user
+    })
     res.status(status.NO_CONTENT).send()
     return next()
   } catch (err) {
