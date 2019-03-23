@@ -448,6 +448,60 @@
         "summary": "Fetches a specific event for the current user"
       }
     },
+    "/me/events/import": {
+      "post": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "description": "",
+            "in": "body",
+            "name": "ImportEventsMePostRequestBody",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "events": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Event"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Event"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Me"
+        ],
+        "operationId": "importMyEvents",
+        "description": "",
+        "summary": "Imports events for the current user"
+      }
+    },
     "/users": {
       "post": {
         "consumes": [
@@ -903,6 +957,38 @@
         "description": "",
         "summary": "Get Microsoft OAuth tokens"
       }
+    },
+    "/microsoft/calendar-list": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MicrosoftCalendarList"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Microsoft"
+        ],
+        "operationId": "getAllMicrosoftCalendarLists",
+        "description": "Get Microsoft calendar lists",
+        "summary": "Get Microsoft calendar lists"
+      }
     }
   },
   "definitions": {
@@ -1097,6 +1183,64 @@
               "type": "string",
               "format": "date"
             },
+            "dateTime": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "timeZone": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "MicrosoftCalendarList": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "example": "abc123",
+          "type": "string"
+        },
+        "name": {
+          "example": "Calendar",
+          "type": "string"
+        },
+        "color": {
+          "example": "auto",
+          "type": "string"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MicrosoftCalendarEvent"
+          }
+        }
+      }
+    },
+    "MicrosoftCalendarEvent": {
+      "type": "object",
+      "properties": {
+        "subject": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "start": {
+          "type": "object",
+          "properties": {
+            "dateTime": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "timeZone": {
+              "type": "string"
+            }
+          }
+        },
+        "end": {
+          "type": "object",
+          "properties": {
             "dateTime": {
               "type": "string",
               "format": "date-time"

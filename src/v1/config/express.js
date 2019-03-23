@@ -1,5 +1,4 @@
 const express = require('express')
-const app = express()
 
 require('./db')
 const routes = require('../routes')
@@ -10,13 +9,17 @@ const {
   logRequest,
   routeNotFound,
   error,
-  logResponse
+  logResponse,
+  socketIO
 } = require('../middleware')
+
+const app = express()
 
 app.use(cors())
 app.use(bodyParser.json())
 app.use(currentLocale)
 app.use(logRequest)
+app.use(socketIO)
 app.use('/v1', routes)
 app.use(routeNotFound)
 app.use(error)
