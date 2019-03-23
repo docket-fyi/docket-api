@@ -6,6 +6,7 @@ const fetch = require('node-fetch')
 const { URLSearchParams } = require('url');
 
 const environment = require('../environment')
+const microsoft = require('../microsoft')
 // const { MicrosoftOAuthMissingAuthorizationCodeError } = require('../errors')
 
 /**
@@ -79,32 +80,8 @@ async function getAccessTokens(req, res, next) {
   }
 }
 
-// async function destroyCalendarList(req, res, next) {
-//   try {
-//     return next()
-//   } catch (err) {
-//     return next(err)
-//   }
-// }
-
-async function getCalendarList(req, res, next) {
-  try {
-    return next()
-  } catch (err) {
-    return next(err)
-  }
-}
-
-// async function insertCalendarList(req, res, next) {
-//   try {
-//     return next()
-//   } catch (err) {
-//     return next(err)
-//   }
-// }
-
 /**
- * Returns...
+ * [getAllCalendarListsWithEvents description]
  *
  * @param {Request} req The incoming request object
  * @param {Response} res The outgoing response object
@@ -112,168 +89,36 @@ async function getCalendarList(req, res, next) {
  *
  * @return {Promise<undefined>}
  */
-async function getAllCalendarLists(req, res, next) {
+async function getAllCalendarListsWithEvents(req, res, next) {
   try {
-    res.status(status.OK).json([])
+    const { currentUser } = req
+    const accessToken = currentUser.microsoft.access_token
+    if (!accessToken) throw new Error()
+    const listCalendarsResponse = await microsoft.users.calendar.listCalendars(accessToken)
+    const calendarsJson = await listCalendarsResponse.json()
+    const calendars = calendarsJson.value
+    for (const calendar of calendars) {
+      const listEventsResponse = await microsoft.users.calendarView.list(calendar.id, accessToken) // eslint-disable-line no-await-in-loop
+      const listEventsJson = await listEventsResponse.json() // eslint-disable-line no-await-in-loop
+      calendar.events = listEventsJson.value
+    }
+    res.status(status.OK).json(calendars)
     return next()
   } catch (err) {
     return next(err)
   }
 }
 
-// async function patchCalendarList(req, res, next) {
-//   try {
-//     return next()
-//   } catch (err) {
-//     return next(err)
-//   }
-// }
-
-// async function updateCalendarList(req, res, next) {
-//   try {
-//     return next()
-//   } catch (err) {
-//     return next(err)
-//   }
-// }
-
-async function watchCalendarList(req, res, next) {
-  try {
-    return next()
-  } catch (err) {
-    return next(err)
-  }
-}
-
-// async function clearCalendar(req, res, next) {
-//   try {
-//     return next()
-//   } catch (err) {
-//     return next(err)
-//   }
-// }
-
-// async function destroyCalendar(req, res, next) {
-//   try {
-//     return next()
-//   } catch (err) {
-//     return next(err)
-//   }
-// }
-
-async function getCalendar(req, res, next) {
-  try {
-    return next()
-  } catch (err) {
-    return next(err)
-  }
-}
-
-// async function createCalendar(req, res, next) {
-//   try {
-//     return next()
-//   } catch (err) {
-//     return next(err)
-//   }
-// }
-
-// async function patchCalendar(req, res, next) {
-//   try {
-//     return next()
-//   } catch (err) {
-//     return next(err)
-//   }
-// }
-
-// async function updateCalendar(req, res, next) {
-//   try {
-//     return next()
-//   } catch (err) {
-//     return next(err)
-//   }
-// }
-
-// async function destroyEvent(req, res, next) {
-//   try {
-//     return next()
-//   } catch (err) {
-//     return next(err)
-//   }
-// }
-
-async function getEvent(req, res, next) {
-  try {
-    return next()
-  } catch (err) {
-    return next(err)
-  }
-}
-
-// async function importEvent(req, res, next) {
-//   try {
-//     return next()
-//   } catch (err) {
-//     return next(err)
-//   }
-// }
-
-// async function createEvent(req, res, next) {
-//   try {
-//     return next()
-//   } catch (err) {
-//     return next(err)
-//   }
-// }
-
-async function getEventInstances(req, res, next) {
-  try {
-    return next()
-  } catch (err) {
-    return next(err)
-  }
-}
-
+/**
+ * [getAllEvents description]
+ *
+ * @param {Request} req The incoming request object
+ * @param {Response} res The outgoing response object
+ * @param {Function} next Callback to continue on to next middleware
+ *
+ * @return {Promise<undefined>}
+ */
 async function getAllEvents(req, res, next) {
-  try {
-    return next()
-  } catch (err) {
-    return next(err)
-  }
-}
-
-// async function moveEvent(req, res, next) {
-//   try {
-//     return next()
-//   } catch (err) {
-//     return next(err)
-//   }
-// }
-
-// async function patchEvent(req, res, next) {
-//   try {
-//     return next()
-//   } catch (err) {
-//     return next(err)
-//   }
-// }
-
-// async function quickAddEvent(req, res, next) {
-//   try {
-//     return next()
-//   } catch (err) {
-//     return next(err)
-//   }
-// }
-
-// async function updateEvent(req, res, next) {
-//   try {
-//     return next()
-//   } catch (err) {
-//     return next(err)
-//   }
-// }
-
-async function watchEvent(req, res, next) {
   try {
     return next()
   } catch (err) {
@@ -285,28 +130,6 @@ async function watchEvent(req, res, next) {
 module.exports = {
   getOAuthUrl,
   getAccessTokens,
-  // destroyCalendarList,
-  getCalendarList,
-  // insertCalendarList,
-  getAllCalendarLists,
-  // patchCalendarList,
-  // updateCalendarList,
-  watchCalendarList,
-  // clearCalendar,
-  // destroyCalendar,
-  getCalendar,
-  // createCalendar,
-  // patchCalendar,
-  // updateCalendar,
-  // destroyEvent,
-  getEvent,
-  // importEvent,
-  // createEvent,
-  getEventInstances,
+  getAllCalendarListsWithEvents,
   getAllEvents,
-  // moveEvent,
-  // patchEvent,
-  // quickAddEvent,
-  // updateEvent,
-  watchEvent
 }
