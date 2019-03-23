@@ -21,6 +21,9 @@ const UserNotConfirmedError = require('./user-not-confirmed')
 const UserNotFoundError = require('./user-not-found')
 const LocaleNotFoundError = require('./locale-not-found')
 const GoogleOAuthMissingAuthorizationCodeError = require('./google-oauth-missing-authorization-code')
+const ImportedEventsNotArrayError = require('./imported-events-not-array')
+const MicrosoftMissingCalendarIdError = require('./microsoft-missing-calendar-id')
+const MicrosoftMissingAccessTokenError = require('./microsoft-missing-access-token')
 
 module.exports = {
   AuthorizationHeaderMissingError,
@@ -45,5 +48,8 @@ module.exports = {
   UserNotConfirmedError,
   UserNotFoundError,
   LocaleNotFoundError,
-  GoogleOAuthMissingAuthorizationCodeError
+  GoogleOAuthMissingAuthorizationCodeError,
+  ImportedEventsNotArrayError,
+  MicrosoftMissingCalendarIdError,
+  MicrosoftMissingAccessTokenError
 }

@@ -3,6 +3,8 @@ const moment = require('moment')
 const slugify = require('slugify')
 
 const { Event } = require('../../models')
+const { createEventReminder } = require('../config/redis')
+const { ImportedEventsNotArrayError } = require('../errors')
 
 /**
  * Returns the current user.
@@ -145,7 +147,7 @@ async function getEvent(req, res, next) {
 async function createEvent(req, res, next) {
   try {
     const { body, currentUser } = req
-    const { name, date } = body
+    const { name, date /*, reminders*/ } = body
     /*
     Repeat every <X> day/week/month/year
       week -> Su/M/Tu/W/Th/F/S
@@ -155,6 +157,12 @@ async function createEvent(req, res, next) {
       after -> <X> occurrences
     From now <X> day/week/month/year
     From date <X> day/week/month/year
+
+    Canned reminders:
+      1 day before
+      1 week before
+      1 month before
+      1 year before
     */
     const event = await Event.create({
       userId: currentUser.id,
@@ -162,11 +170,60 @@ async function createEvent(req, res, next) {
       date: moment(date),
       slug: slugify(name, {lower: true, remove: /[/*+~.()'"!:@]/g})
     })
+    /*
+    if (!currentUser.isPremium) {
+      reminders.slice(0..2)
+    }
+    reminders.forEach(reminder => {
+      createEventReminder(key, expiration)
+    })
+    */
+    createEventReminder(`users:${currentUser._id}:events:${event._id}`, 10 /*moment(date).add(10, 'seconds')*/)
+    // createEventReminderForUser(currentUser, event, moment(date).add(10, 'seconds'))
     const eventWithDiff = {
       ...event.toObject(),
       diff: currentUser.eventDiff(event)
     }
     res.status(status.OK).json(eventWithDiff)
+    return next()
+  } catch (err) {
+    return next(err)
+  }
+}
+
+/**
+ * Attempts to create a new event and, if valid, saves it to the database,
+ * and returns it.
+ *
+ * @param {Request} req The incoming request object
+ * @param {Response} res The outgoing response object
+ * @param {Function} next Callback to continue on to next middleware
+ *
+ * @return  {Promise<undefined>}
+ */
+async function importEvents(req, res, next) {
+  try {
+    const { body, currentUser } = req
+    const { events } = body
+    if (!Array.isArray(events)) {
+      res.status(status.BAD_REQUEST)
+      throw new ImportedEventsNotArrayError()
+    }
+    const decoratedEvents = events.map(event => {
+      const { name, date } = event
+      return {
+        userId: currentUser.id,
+        name,
+        date: moment(date),
+        slug: slugify(name, {lower: true, remove: /[/*+~.()'"!:@]/g})
+      }
+    })
+    const newEvents = await Event.create(decoratedEvents)
+    // const eventsWithDiff = {
+    //   ...event.toObject(),
+    //   diff: currentUser.eventDiff(event)
+    // }
+    res.status(status.OK).json(newEvents)
     return next()
   } catch (err) {
     return next(err)
@@ -231,6 +288,7 @@ module.exports = {
   getAllEvents,
   getEvent,
   createEvent,
+  importEvents,
   updateEvent,
   destroyEvent
 }

@@ -15,6 +15,7 @@ const router = express.Router()
 router.get('/me', verifyJwt, currentUser, me.show)
 router.get('/me/events', verifyJwt, currentUser, me.getAllEvents)
 router.post('/me/events', verifyJwt, currentUser, me.createEvent)
+router.post('/me/events/import', verifyJwt, currentUser, me.importEvents)
 router.get('/me/events/:id', verifyJwt, currentUser, me.getEvent)
 router.put('/me/events/:id', verifyJwt, currentUser, me.updateEvent)
 router.delete('/me/events/:id', verifyJwt, currentUser, me.destroyEvent)
@@ -23,7 +24,7 @@ router.delete('/me', verifyJwt, currentUser, me.destroy)
 
 router.param('id', async (req, res, next, id) => {
   try {
-    const event = await Event.findOne({ _id: id }).exec() // @todo {userId: currentUser.id}
+    const event = await Event.findOne({ _id: id }).exec() // @todo IMPORTANT {userId: currentUser.id}
     if (!event) {
       res.status(status.NOT_FOUND)
       throw new EventNotFoundError()
