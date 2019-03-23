@@ -9,6 +9,7 @@ const error = require('./error')
 const routeNotFound = require('./route-not-found')
 const verifyJwt = require('./verify-jwt')
 const currentUser = require('./current-user')
+const socketIO = require('./socket-io')
 
 module.exports = {
   bodyParser,
@@ -21,5 +22,6 @@ module.exports = {
   routeNotFound,
   error,
   verifyJwt,
-  currentUser
+  currentUser,
+  socketIO
 }

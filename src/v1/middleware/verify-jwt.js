@@ -34,6 +34,7 @@ function verifyJwt(req, res, next) {
     req.jwt = jwt
     return next()
   } catch (err) {
+    res.status(status.FORBIDDEN)
     return next(err)
   }
 }

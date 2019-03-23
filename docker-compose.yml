@@ -21,10 +21,10 @@ services:
     # entrypoint: ["./docker-entrypoint.sh"]
     container_name: docket-api
     build: .
-    # command: node --inspect=0.0.0.0 ./index.js
-    command: npm run start:debug
-    # volumes:
-      # - ../docket-api:/docket/docket-api
+    command: npm run start
+    working_dir: /docket/docket-api
+    volumes:
+      - .:/docket/docket-api
     ports:
       - '3000:3000'
       # - '9222:9222'
@@ -42,8 +42,9 @@ services:
     build: .
     # command: node --inspect=0.0.0.0 ./index.js
     command: npm run start:worker
-    # volumes:
-      # - ../docket-worker:/docket/docket-worker
+    working_dir: /docket/docket-worker
+    volumes:
+      - .:/docket/docket-worker
     # ports:
       # - '3000:3000'
       # - '9222:9222'

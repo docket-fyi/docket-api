@@ -26,7 +26,8 @@ module.exports = {
     host: process.env.REDIS_HOST || 'docket-redis',
     port: process.env.REDIS_PORT || '6379',
     username: process.env.REDIS_USERNAME,
-    password: process.env.REDIS_PASSWORD
+    password: process.env.REDIS_PASSWORD,
+    databaseId: process.env.REDIS_DATABASE_ID || '0'
   },
   mail: {
     host: process.env.MAIL_HOST,

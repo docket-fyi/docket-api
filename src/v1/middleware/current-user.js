@@ -26,7 +26,7 @@ async function currentUser(req, res, next) {
     }
     const currentUser = await User.findOne({ _id: id })
     if (!currentUser) {
-      res.status(status.NOT_FOUND)
+      res.status(status.FORBIDDEN)
       throw new UserNotFoundError()
     }
     req.currentUser = currentUser

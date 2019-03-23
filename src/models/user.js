@@ -28,6 +28,10 @@ const schema = new mongoose.Schema({
   confirmedAt: {
     type: Date
   },
+  isPremium: {
+    type: Boolean,
+    default: false
+  },
   google: {
     access_token: {
       type: String,
