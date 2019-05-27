@@ -50,7 +50,7 @@
     "socket.io": "2.2.0"
   },
   "devDependencies": {
-    "autocannon": "3.2.1",
+    "autocannon": "4.0.0",
     "clinic": "4.0.0",
     "coveralls": "3.0.3",
     "eslint": "5.15.3",
