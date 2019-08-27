@@ -25,7 +25,7 @@
     "url": "https://github.com/docket-fyi/docket-api.git"
   },
   "dependencies": {
-    "@microsoft/microsoft-graph-client": "^1.5.2",
+    "@microsoft/microsoft-graph-client": "^2.0.0",
     "accept-language": "3.0.18",
     "bcryptjs": "2.4.3",
     "body-parser": "1.18.3",
