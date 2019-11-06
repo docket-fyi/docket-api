@@ -3,10 +3,7 @@ const jsonWebToken = require('jsonwebtoken')
 
 const nodemailer = require('../config/nodemailer')
 const environment = require('../environment')
-const {
-  RegistrationConfirmationMissingUserError,
-  RegistrationConfirmationInvalidUserError
-} = require('../errors')
+const errors = require('../errors')
 
 const { from, secret, expiration } = environment.registrationConfirmation
 
@@ -23,16 +20,16 @@ async function sendRegistrationConfirmationEmail(job) {
   try {
     const { referrer, user } = job.data
     if (!user) {
-      throw new RegistrationConfirmationMissingUserError()
+      throw new errors.users.RegistrationConfirmationEmailMissingUserError()
     }
-    if (!user.email || !user.firstName || !user.lastName) {
-      throw new RegistrationConfirmationInvalidUserError()
+    if (!user.email || !user.firstName) {
+      throw new errors.users.RegistrationConfirmationEmailInvalidUserError()
     }
     const options = {
       expiresIn: expiration
     }
     const payload = {
-      id: user._id
+      id: user.id
     }
     const jwt = jsonWebToken.sign(payload, secret, options)
     const { protocol, host } = url.parse(referrer)
@@ -41,8 +38,8 @@ async function sendRegistrationConfirmationEmail(job) {
       from,
       to: user.email,
       subject: `Docket registration confirmation`,
-      text: `Hi ${user.firstName},\n\n${url}/users/confirm/${jwt}`,
-      html: `<html><head></head><body>Hi ${user.firstName},\n\n<a href="${uiUrl}/users/confirm/${jwt}">Confirm</a></body></html>`
+      text: `Hi ${user.firstName},\n\nConfirm registration:\n\n${uiUrl}/confirm-registration?code=${jwt}`,
+      html: `<html><head></head><body>Hi ${user.firstName},<br><br><a href="${uiUrl}/confirm-registration?code=${jwt}">Confirm Registration</a></body></html>`
     }
     const info = await nodemailer.sendMail(emailData)
     return info

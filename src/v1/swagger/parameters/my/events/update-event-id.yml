@@ -1,0 +1,7 @@
+parameters:
+  UpdateMyEventEventIdPathParameter:
+    name: eventId
+    in: path
+    description: ID of event to update
+    required: true
+    type: integer

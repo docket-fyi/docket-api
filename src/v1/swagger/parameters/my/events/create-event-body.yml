@@ -1,0 +1,23 @@
+parameters:
+  CreateEventBodyParameter:
+    name: body
+    in: body
+    description: Event creation parameters
+    required: true
+    schema:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - attributes
+          properties:
+            attributes:
+              type: object
+              properties:
+                name:
+                  type: string
+                date:
+                  type: string

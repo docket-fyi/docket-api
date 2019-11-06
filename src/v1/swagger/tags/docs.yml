@@ -1,0 +1,5 @@
+tags:
+  name: Docs
+  description: Swagger API operations
+  externalDocs:
+    url: https://developers.docket.fyi/api/v1/docs

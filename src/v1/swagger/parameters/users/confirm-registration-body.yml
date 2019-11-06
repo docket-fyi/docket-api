@@ -1,0 +1,26 @@
+parameters:
+  UserConfirmRegistrationBodyParameter:
+    name: body
+    in: body
+    description: Confirm registration body parameter
+    required: true
+    schema:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - attributes
+          properties:
+            attributes:
+              type: object
+              required:
+                - password
+                - passwordConfirmation
+              properties:
+                password:
+                  type: string
+                passwordConfirmation:
+                  type: string

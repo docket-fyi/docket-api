@@ -1,0 +1,25 @@
+# See https://docs.docker.com/compose/compose-file/
+
+version: '2.4'
+services:
+  docket-swagger-ui:
+    environment:
+      API_URL: 'http://localhost:3001/v1/docs'
+  docket-postgres:
+    environment:
+      POSTGRES_DB: 'docket_development'
+  # arena:
+  #   container_name: arena
+  #   image: mixmaxhq/arena # This image is 2+ years old
+  docket-api:
+    command: npm run start:dev
+    # command: npm run start:debug
+    # command: npx nodemon --inspect=0.0.0.0 ./index.js
+    volumes:
+      - ./src:/docket/docket-api/src
+    # ports:
+    #   - 9229:9229
+  docket-worker:
+    command: npm run start:worker:dev
+    volumes:
+      - ./src:/docket/docket-worker/src

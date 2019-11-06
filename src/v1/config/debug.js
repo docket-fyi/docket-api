@@ -7,5 +7,6 @@ module.exports = {
   worker: debug('app:worker'),
   socketio: debug('app:socketio'),
   mongo: debug('db:mongo'),
-  redis: debug('db:redis')
+  redis: debug('db:redis'),
+  postgres: debug('db:postgres')
 }

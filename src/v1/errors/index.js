@@ -1,55 +1,23 @@
-const AuthorizationHeaderMissingError = require('./authorization-header-missing')
 const BaseError = require('./base')
-const EventNotFoundError = require('./event-not-found')
-const ForgotPasswordEmailMissingError = require('./forgot-password-email-missing')
-const InvalidLoginError = require('./invalid-login')
-const MalformedAuthorizationHeaderError = require('./malformed-authorization-header')
-const MalformedJwtError = require('./malformed-jwt')
-const MissingAuthParamError = require('./missing-auth-param')
-const MissingJwtError = require('./missing-jwt')
-const PasswordResetEmailInvalidUserError = require('./password-reset-email-invalid-user')
-const PasswordResetEmailMissingUserError = require('./password-reset-email-missing-user')
-const PasswordResetMismatchError = require('./password-reset-mismatch')
-const PasswordResetMissingCodeError = require('./password-reset-missing-code')
-const PasswordResetMissingPasswordError = require('./password-reset-missing-password')
-const PasswordResetSamePasswordError = require('./password-reset-same-password')
-const RegistrationConfirmationCodeMissingError = require('./registration-confirmation-code-missing')
-const RegistrationConfirmationInvalidUserError = require('./registration-confirmation-email-invalid-user')
-const RegistrationConfirmationMissingUserError = require('./registration-confirmation-email-missing-user')
-const UserAlreadyConfirmedError = require('./user-already-confirmed')
-const UserNotConfirmedError = require('./user-not-confirmed')
-const UserNotFoundError = require('./user-not-found')
-const LocaleNotFoundError = require('./locale-not-found')
-const GoogleOAuthMissingAuthorizationCodeError = require('./google-oauth-missing-authorization-code')
-const ImportedEventsNotArrayError = require('./imported-events-not-array')
-const MicrosoftMissingCalendarIdError = require('./microsoft-missing-calendar-id')
-const MicrosoftMissingAccessTokenError = require('./microsoft-missing-access-token')
+const RouteNotFoundError = require('./route-not-found')
+const authentication = require('./authentication')
+const events = require('./events')
+const google = require('./google')
+const locales = require('./locales')
+const microsoft = require('./microsoft')
+const search = require('./search')
+const sessions = require('./sessions')
+const users = require('./users')
 
 module.exports = {
-  AuthorizationHeaderMissingError,
   BaseError,
-  EventNotFoundError,
-  ForgotPasswordEmailMissingError,
-  InvalidLoginError,
-  MalformedAuthorizationHeaderError,
-  MalformedJwtError,
-  MissingAuthParamError,
-  MissingJwtError,
-  PasswordResetEmailInvalidUserError,
-  PasswordResetEmailMissingUserError,
-  PasswordResetMismatchError,
-  PasswordResetMissingCodeError,
-  PasswordResetMissingPasswordError,
-  PasswordResetSamePasswordError,
-  RegistrationConfirmationCodeMissingError,
-  RegistrationConfirmationInvalidUserError,
-  RegistrationConfirmationMissingUserError,
-  UserAlreadyConfirmedError,
-  UserNotConfirmedError,
-  UserNotFoundError,
-  LocaleNotFoundError,
-  GoogleOAuthMissingAuthorizationCodeError,
-  ImportedEventsNotArrayError,
-  MicrosoftMissingCalendarIdError,
-  MicrosoftMissingAccessTokenError
+  RouteNotFoundError,
+  authentication,
+  events,
+  google,
+  locales,
+  microsoft,
+  search,
+  sessions,
+  users
 }

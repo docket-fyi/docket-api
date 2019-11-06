@@ -1,7 +1,7 @@
 const acceptLanguage = require('accept-language')
 
 const debug = require('../config/debug').api
-const { Locale } = require('../../models')
+const { Locale } = require('../models')
 
 /**
  * Inspects the 'Accept-Language' request header to determine a closest
@@ -16,7 +16,7 @@ const { Locale } = require('../../models')
 async function currentLocale(req, res, next) {
   try {
     const acceptLanguageHeader = req.get('Accept-Language')
-    const supportedLocales = await Locale.distinct('code')
+    const supportedLocales = [] // await Locale.distinct('code')
     acceptLanguage.languages(supportedLocales)
     const code = acceptLanguage.get(acceptLanguageHeader)
     const locale = await Locale.findOne({ code })

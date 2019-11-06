@@ -1,0 +1,7 @@
+parameters:
+  ListTranslationsByLocaleCodePathParameter:
+    name: localeCode
+    in: path
+    description: Locale code of translations
+    required: true
+    type: string

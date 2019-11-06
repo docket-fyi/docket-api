@@ -1,0 +1,11 @@
+require('dotenv').config()
+const path = require('path')
+
+const apiVersion = process.env.API_VERSION || 'v1'
+
+module.exports = {
+  'config': path.resolve('src', apiVersion, 'config', 'sequelize-cli.js'),
+  'models-path': path.resolve('src', apiVersion, 'models'),
+  'seeders-path': path.resolve('src', apiVersion, 'seeders'),
+  'migrations-path': path.resolve('src', apiVersion, 'migrations')
+}

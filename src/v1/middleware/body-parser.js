@@ -1,3 +1,9 @@
 const bodyParser = require('body-parser')
 
-module.exports = bodyParser
+const jsonApi = require('../config/json-api')
+
+const options = {
+  type: jsonApi.contentType
+}
+
+module.exports = bodyParser.json(options)

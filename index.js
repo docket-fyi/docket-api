@@ -1,3 +1,5 @@
+require('./src/v1/config/sentry')
+
 const environment = require('./src/v1/environment')
 const debug = require('./src/v1/config/debug')
 // const subscribeToRedisExpiredKeyEvents = require('./src/v1/config/redis')

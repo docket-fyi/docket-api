@@ -7,7 +7,8 @@ const { URLSearchParams } = require('url');
 
 const environment = require('../environment')
 const microsoft = require('../microsoft')
-// const { MicrosoftOAuthMissingAuthorizationCodeError } = require('../errors')
+const errors = require('../errors')
+const serializers = require('../serializers')
 
 /**
  * Returns the OAuth2 URL for Microsoft services.
@@ -15,8 +16,24 @@ const microsoft = require('../microsoft')
  * @param {Request} req The incoming request object
  * @param {Response} res The outgoing response object
  * @param {Function} next Callback to continue on to next middleware
- *
  * @return {Promise<undefined>}
+ * @swagger
+ * /microsoft/oauth-url:
+ *   get:
+ *     summary:
+ *     description:
+ *     operationId: microsoftGetOAuthUrl
+ *     security:
+ *       - jwt: []
+ *     produces:
+ *       - application/vnd.api+json
+ *     tags:
+ *       - Microsoft
+ *     responses:
+ *       200:
+ *         $ref: '#/responses/MicrosoftGetOAuthUrlOkResponse'
+ *       400:
+ *         $ref: '#/responses/BadRequestResponse'
  */
 async function getOAuthUrl(req, res, next) {
   try {
@@ -28,7 +45,8 @@ async function getOAuthUrl(req, res, next) {
       client_id: applicationId
     }
     const url = `${tokenHost}/${authorizePath}?${qs.stringify(queryParams)}`
-    res.status(status.OK).json({ url })
+    res.status(status.OK)
+    res.body = serializers.microsoft.getOAuthUrl.serialize({ url })
     return next()
   } catch (err) {
     return next(err)
@@ -36,13 +54,31 @@ async function getOAuthUrl(req, res, next) {
 }
 
 /**
- * Returns the OAuth2 URL for Microsoft services.
+ * Get access tokens.
  *
  * @param {Request} req The incoming request object
  * @param {Response} res The outgoing response object
  * @param {Function} next Callback to continue on to next middleware
- *
  * @return {Promise<undefined>}
+ * @swagger
+ * /microsoft/tokens:
+ *   get:
+ *     summary:
+ *     description:
+ *     operationId: microsoftGetAccessTokens
+ *     security:
+ *       - jwt: []
+ *     produces:
+ *       - application/vnd.api+json
+ *     tags:
+ *       - Microsoft
+ *     parameters:
+ *       - $ref: '#/parameters/MicrosoftGetAccessTokensCodeQueryParameter'
+ *     responses:
+ *       204:
+ *         $ref: '#/responses/NoContentResponse'
+ *       400:
+ *         $ref: '#/responses/BadRequestResponse'
  */
 async function getAccessTokens(req, res, next) {
   try {
@@ -50,8 +86,7 @@ async function getAccessTokens(req, res, next) {
     const { code } = query
     if (!code) {
       res.status(status.BAD_REQUEST)
-      // @todo throw new MicrosoftOAuthMissingAuthorizationCodeError()
-      throw new Error('MicrosoftOAuthMissingAuthorizationCodeError')
+      throw new errors.microsoft.OAuthMissingAuthorizationCodeError()
     }
     const { applicationId, applicationPassword, tokenHost, tokenPath, redirectUrl, scopes } = environment.microsoft
     const url = `${tokenHost}/${tokenPath}`
@@ -73,7 +108,7 @@ async function getAccessTokens(req, res, next) {
     const response = await fetch(url, options)
     const microsoft = await response.json()
     await currentUser.update({microsoft})
-    res.status(status.NO_CONTENT).send()
+    res.status(status.NO_CONTENT)
     return next()
   } catch (err) {
     return next(err)
@@ -81,15 +116,31 @@ async function getAccessTokens(req, res, next) {
 }
 
 /**
- * [getAllCalendarListsWithEvents description]
+ * List calendars
  *
  * @param {Request} req The incoming request object
  * @param {Response} res The outgoing response object
  * @param {Function} next Callback to continue on to next middleware
- *
  * @return {Promise<undefined>}
+ * @swagger
+ * /microsoft/calendars:
+ *   get:
+ *     summary:
+ *     description:
+ *     operationId: microsoftListCalendars
+ *     security:
+ *       - jwt: []
+ *     produces:
+ *       - application/vnd.api+json
+ *     tags:
+ *       - Microsoft
+ *     responses:
+ *       200:
+ *         $ref: '#/responses/MicrosoftListCalendarsOkResponse'
+ *       400:
+ *         $ref: '#/responses/BadRequestResponse'
  */
-async function getAllCalendarListsWithEvents(req, res, next) {
+async function listCalendars(req, res, next) {
   try {
     const { currentUser } = req
     const accessToken = currentUser.microsoft.access_token
@@ -102,7 +153,8 @@ async function getAllCalendarListsWithEvents(req, res, next) {
       const listEventsJson = await listEventsResponse.json() // eslint-disable-line no-await-in-loop
       calendar.events = listEventsJson.value
     }
-    res.status(status.OK).json(calendars)
+    res.status(status.OK)
+    res.body = serializers.microsoft.listCalendars.serialize(calendars)
     return next()
   } catch (err) {
     return next(err)
@@ -110,15 +162,33 @@ async function getAllCalendarListsWithEvents(req, res, next) {
 }
 
 /**
- * [getAllEvents description]
+ * List events by calendar ID
  *
  * @param {Request} req The incoming request object
  * @param {Response} res The outgoing response object
  * @param {Function} next Callback to continue on to next middleware
- *
  * @return {Promise<undefined>}
+ * @swagger
+ * /microsoft/calendars/{calendarId}/events:
+ *   get:
+ *     summary:
+ *     description:
+ *     operationId: microsoftListEventsByCalendarId
+ *     security:
+ *       - jwt: []
+ *     produces:
+ *       - application/vnd.api+json
+ *     tags:
+ *       - Microsoft
+ *     parameters:
+ *       - $ref: '#/parameters/MicrosoftListEventsByCalendarIdCalendarIdPathParameter'
+ *     responses:
+ *       200:
+ *         $ref: '#/responses/MicrosoftListCalendarEventsByCalendarIdOkResponse'
+ *       400:
+ *         $ref: '#/responses/BadRequestResponse'
  */
-async function getAllEvents(req, res, next) {
+async function listEventsByCalendarId(req, res, next) {
   try {
     return next()
   } catch (err) {
@@ -130,6 +200,6 @@ async function getAllEvents(req, res, next) {
 module.exports = {
   getOAuthUrl,
   getAccessTokens,
-  getAllCalendarListsWithEvents,
-  getAllEvents,
+  listCalendars,
+  listEventsByCalendarId,
 }

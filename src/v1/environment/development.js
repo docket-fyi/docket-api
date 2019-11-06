@@ -1,7 +1,8 @@
 module.exports = {
-  name: process.NODE_ENV || 'development',
   api: {
-    port: process.env.PORT || '3000'
+    name: process.env.NODE_ENV || 'development',
+    port: process.env.PORT || '3001',
+    version: process.env.VERSION || 'v1'
   },
   jwt: {
     secret: process.env.JWT_SECRET,
@@ -12,14 +13,15 @@ module.exports = {
     expiration: process.env.PASSWORD_RESET_EXPIRATION || '1d',
     from: process.env.PASSWORD_RESET_FROM || 'no-reply@docket.fyi',
   },
-  db: { // @todo Rename this to 'mongo'
-    protocol: process.env.DB_PROTOCOL || 'mongodb://',
-    host: process.env.DB_HOST || 'docket-mongo',
-    port: process.env.DB_PORT || '27017',
-    name: process.env.DB_NAME || 'docket_development',
+  postgres: {
+    protocol: process.env.DB_PROTOCOL || 'postgresql://',
+    host: process.env.DB_HOST || 'docket-postgres',
+    port: process.env.DB_PORT || '5432',
+    database: process.env.DB_NAME || 'docket_development',
     useSSL: process.env.DB_USE_SSL || 'false',
     username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD
+    password: process.env.DB_PASSWORD,
+    dialect: process.env.DB_DIALECT || 'postgres'
   },
   redis: {
     protocol: process.env.REDIS_PROTOCOL || 'redis://',
@@ -57,5 +59,8 @@ module.exports = {
     redirectUrl: process.env.MICROSOFT_REDIRECT_URL,
     scopes: () => process.env.MICROSOFT_SCOPES.split(',').map(scope => scope.trim()),
     rawScopes: process.env.MICROSOFT_SCOPES
+  },
+  sentry: {
+    dsn: process.env.SENTRY_DSN
   }
 }

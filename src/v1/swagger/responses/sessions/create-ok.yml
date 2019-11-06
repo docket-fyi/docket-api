@@ -1,0 +1,19 @@
+responses:
+  SessionCreateOkResponse:
+    description: OK
+    schema:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            attributes:
+              type: object
+              $ref: '#/definitions/Session'
+            type:
+              type: string
+            links:
+              type: object
+              properties:
+                self:
+                  type: string

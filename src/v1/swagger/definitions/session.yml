@@ -1,0 +1,6 @@
+definitions:
+  Session:
+    type: object
+    properties:
+      jwt:
+        type: string

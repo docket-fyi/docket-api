@@ -1,19 +1,21 @@
-const auth = require('./auth')
+const sessions = require('./sessions')
 const docs = require('./docs')
 const google = require('./google')
 const healthCheck = require('./health-check')
-const i18n = require('./i18n')
-const me = require('./me')
+const locales = require('./locales')
+const my = require('./my')
 const microsoft = require('./microsoft')
 const users = require('./users')
+const search = require('./search')
 
 module.exports = {
-  auth,
+  sessions,
   docs,
   google,
   healthCheck,
-  i18n,
-  me,
+  locales,
+  my,
   microsoft,
-  users
+  users,
+  search
 }

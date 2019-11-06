@@ -4,7 +4,7 @@ const socketIO = require('socket.io')
 // const server = require('./server')
 
 const options = {
-  serveClient: false // @todo This doesn't seem to be respected...?
+  serveClient: false // TODO: This doesn't seem to be respected...?
 }
 const io = new socketIO(/*server, */options)
 

@@ -1,13 +1,16 @@
-# Intentionally not using 10.12+ because of an issue with remote debugger
-# breakpoints not working.
-# See https://github.com/nodejs/node/issues/23693
-FROM node:10.11-alpine
-# WORKDIR /var/app/current
-# WORKDIR /docket/docket-api
-# The following will capture both package.json and package-lock.json, if present.
-# COPY package*.json ./
-# RUN npm install
-# COPY . .
-# EXPOSE 3000 9229
-# CMD ["npm" , "run", "start:debug"]
-# CMD ["node" , "--inspect=0.0.0.0", "./index.js"]
+FROM node:12.10.0-slim
+
+WORKDIR /docket/docket-api
+
+# Note that .dockerignore influences what gets copied
+COPY . .
+
+# A free-to-use tool that scans container images for package vulnerabilities.
+# See https://github.com/aquasecurity/microscanner
+ADD https://get.aquasec.com/microscanner /
+RUN chmod +x /microscanner
+RUN /microscanner N2JlNzQzY2VmNmM1
+
+RUN npm ci
+COPY docker-healthcheck /usr/local/bin/
+HEALTHCHECK --interval=60s --timeout=10s --retries=3 CMD docker-healthcheck

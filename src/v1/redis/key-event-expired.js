@@ -1,6 +1,6 @@
 const debug = require('../config/debug')
 const io = require('../config/socket-io')
-const { Event } = require('../../models')
+const { Event } = require('../models')
 const redis = require('../config/redis').primary
 
 async function keyEventExpired(redisEvent, key) {

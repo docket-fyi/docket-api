@@ -22,18 +22,19 @@ function error(err, req, res, next) {
   if (res.statusCode === status.OK) {
     res.status(status.INTERNAL_SERVER_ERROR)
   }
-  const json = {
+  res.body = {
     errors: [
       {
         name: err.name || 'UnknownError',
         message: err.message || 'An unknown error occurred',
-        translationKey: err.translationKey || err.message || 'An unknown error occurred'
+        translationKey: err.translationKey || err.message || 'An unknown error occurred',
+        method: req.method,
+        originalUrl: req.originalUrl
+        // date: err.date || new Date(),
         // code: err.code
-        // date: err.date
       }
     ]
   }
-  res.json(json)
   return next()
 }
 

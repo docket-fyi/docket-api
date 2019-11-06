@@ -1,0 +1,17 @@
+definitions:
+  ClientError:
+    type: object
+    properties:
+      errors:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            message:
+              type: string
+            translationKey:
+              type: string
+            code:
+              type: string

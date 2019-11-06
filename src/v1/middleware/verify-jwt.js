@@ -2,7 +2,7 @@ const status = require('http-status')
 const jsonWebToken = require('jsonwebtoken')
 
 const environment = require('../environment')
-const { AuthorizationHeaderMissingError, MalformedAuthorizationHeaderError } = require('../errors')
+const errors = require('../errors')
 
 const PREFIX = 'Bearer ' // The trailing space is intentional
 
@@ -21,12 +21,12 @@ function verifyJwt(req, res, next) {
     const authorizationHeader = req.get('Authorization')
     if (!authorizationHeader) {
       res.status(status.BAD_REQUEST)
-      throw new AuthorizationHeaderMissingError()
+      throw new errors.authentication.AuthorizationHeaderMissingError()
     }
     const hasBearer = authorizationHeader.startsWith(PREFIX)
     if (!hasBearer) {
       res.status(status.BAD_REQUEST)
-      throw new MalformedAuthorizationHeaderError()
+      throw new errors.authentication.MalformedAuthorizationHeaderError()
     }
     const rawJwt = authorizationHeader.split(PREFIX)[1]
     const jwt = jsonWebToken.verify(rawJwt, environment.jwt.secret)

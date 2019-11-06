@@ -1,0 +1,7 @@
+parameters:
+  SearchListQueryParameter:
+    name: query
+    in: query
+    description: Search query
+    required: true
+    type: string

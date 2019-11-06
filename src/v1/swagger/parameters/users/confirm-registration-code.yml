@@ -1,0 +1,7 @@
+parameters:
+  UserConfirmRegistrationCodeParameter:
+    name: code
+    in: query
+    description: Confirm registration code parameter
+    required: true
+    type: string

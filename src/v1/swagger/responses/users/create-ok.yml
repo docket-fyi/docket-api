@@ -1,0 +1,19 @@
+responses:
+  UserCreateOkResponse:
+    description: OK
+    schema:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            attributes:
+              type: object
+              $ref: '#/definitions/User'
+            type:
+              type: string
+            links:
+              type: object
+              properties:
+                self:
+                  type: string

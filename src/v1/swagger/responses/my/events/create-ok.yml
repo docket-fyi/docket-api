@@ -1,0 +1,19 @@
+responses:
+  CreateEventOkResponse:
+    description: OK
+    schema:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            attributes:
+              type: object
+              $ref: '#/definitions/Event'
+            type:
+              type: string
+            links:
+              type: object
+              properties:
+                self:
+                  type: string

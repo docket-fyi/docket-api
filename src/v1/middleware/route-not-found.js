@@ -1,5 +1,7 @@
 const status = require('http-status')
 
+const errors = require('../errors')
+
 /**
  * Handler for unknown routes.
  *
@@ -10,19 +12,15 @@ const status = require('http-status')
  * @return  {undefined}
  */
 function routeNotFound(req, res, next) {
-  if (res.headersSent) {
-    return next()
+  try {
+    if (res.headersSent || res.body || res.statusCode === status.NO_CONTENT) {
+      return next()
+    }
+    res.status(status.NOT_FOUND)
+    throw new errors.RouteNotFoundError()
+  } catch (err) {
+    return next(err)
   }
-  const json = {
-    errors: [
-      {
-        name: status[404],
-        message: `The route ${req.method} ${req.originalUrl} does not exist`
-      }
-    ]
-  }
-  res.status(status.NOT_FOUND).json(json)
-  next()
 }
 
 module.exports = routeNotFound

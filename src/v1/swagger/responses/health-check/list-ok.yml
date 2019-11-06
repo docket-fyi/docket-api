@@ -1,0 +1,21 @@
+responses:
+  HealthCheckListOkResponse:
+    description: OK
+    schema:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            attributes:
+              type: object
+              properties:
+                success:
+                  type: boolean
+            type:
+              type: string
+        links:
+          type: object
+          properties:
+            self:
+              type: string

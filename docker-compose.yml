@@ -1,58 +1,114 @@
 # See https://docs.docker.com/compose/compose-file/
 
-version: '3'
+version: '2.4'
 services:
+  docket-swagger-ui:
+    container_name: docket-swagger-ui
+    image: swaggerapi/swagger-ui
+    ports:
+      - 3200:8080
   docket-redis:
     container_name: docket-redis
-    image: redis:5.0.3
+    build: ./docker/redis
     ports:
-      - '6379:6379'
-  docket-mongo:
-    container_name: docket-mongo
-    image: mongo:4.0.3
+      - 6379:6379
+  docket-postgres:
+    container_name: docket-postgres
+    build: ./docker/postgres
     ports:
-      - '27017:27017'
-    # volumes:
-    #   - ./data/db:/data/db
+      - 5432:5432
     # environment:
-    #   MONGO_INITDB_ROOT_USERNAME: ''
-    #   MONGO_INITDB_ROOT_PASSWORD: 'root'
+    #   POSTGRES_USER: 'user'
+    #   POSTGRES_PASSWORD: 'user'
+  docket-elasticsearch:
+    container_name: docket-elasticsearch
+    # image: elasticsearch:7.2.0
+    build: ./docker/elasticsearch
+    ports:
+      - 9200:9200
+      - 9300:9300
+    # networks:
+    #   - docket
+    environment:
+      - discovery.type=single-node
+    # healthcheck:
+    #   test: docker-healthcheck-elasticsearch
+    #   interval: 60s
+    #   timeout: 10s
+    #   retries: 3
+  docket-kibana:
+    container_name: docket-kibana
+    image: kibana:7.2.0
+    ports:
+      - 5601:5601
+    environment:
+      ELASTICSEARCH_HOSTS: 'http://docket-elasticsearch:9200'
+    depends_on:
+      docket-elasticsearch:
+        condition: service_healthy
+    links:
+      - docket-elasticsearch
+    # networks:
+    #   - docket
+  # docket-mongo:
+  #   container_name: docket-mongo
+  #   image: mongo:4.0.3
+  #   ports:
+  #     - '27017:27017'
+  #   # volumes:
+  #   #   - ./data/db:/data/db
+  #   # environment:
+  #   #   MONGO_INITDB_ROOT_USERNAME: ''
+  #   #   MONGO_INITDB_ROOT_PASSWORD: 'root'
   docket-api:
-    # entrypoint: ["./docker-entrypoint.sh"]
+    entrypoint: ["./docker-entrypoint.sh"]
     container_name: docket-api
     build: .
-    command: npm run start
-    working_dir: /docket/docket-api
-    volumes:
-      - .:/docket/docket-api
+    # command: npm run start
+    # working_dir: /docket/docket-api
+    # volumes:
+    #   - .:/docket/docket-api
     ports:
-      - '3000:3000'
-      # - '9222:9222'
-      # - '9229:9229'
-      - '9299:9299'
+      - 3001:3001
+      # - 9222:9222
+      # - 9229:9229
+      - 9299:9299
     depends_on:
-      - docket-mongo
-      - docket-redis
+      docket-postgres:
+        condition: service_healthy
+      docket-redis:
+        condition: service_healthy
+      docket-elasticsearch:
+        condition: service_healthy
     links:
-      - docket-mongo
+      - docket-postgres
       - docket-redis
+      - docket-elasticsearch
   docket-worker:
     # entrypoint: ["./docker-entrypoint.sh"]
     container_name: docket-worker
     build: .
     # command: node --inspect=0.0.0.0 ./index.js
-    command: npm run start:worker
-    working_dir: /docket/docket-worker
-    volumes:
-      - .:/docket/docket-worker
+    # command: npm run start:worker
+    # working_dir: /docket/docket-worker
+    # volumes:
+    #   - .:/docket/docket-worker
     # ports:
       # - '3000:3000'
       # - '9222:9222'
       # - '9229:9229'
       # - '9299:9299'
     depends_on:
-      # - docket-mongo
-      - docket-redis
+      # - docket-postgres
+      docket-redis:
+        condition: service_healthy
+      docket-elasticsearch:
+        condition: service_healthy
+      # docket-api:
+      #   condition: service_healthy
+      # docket-postgres:
+      #   condition: service_healthy
     links:
-      # - docket-mongo
+      # - docket-postgres
       - docket-redis
+      - docket-elasticsearch

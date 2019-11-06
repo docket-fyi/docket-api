@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -eo pipefail
+
+host="$(hostname --ip-address || echo '127.0.0.1')"
+status_code=$(curl --header 'Content-Type: application/vnd.api+json' --fail --write-out %{http_code} --silent --output /dev/null $host:3001/v1/health-check)
+
+if [[ "$status_code" -ne 200 ]] ; then
+  exit 1
+fi
+
+exit 0

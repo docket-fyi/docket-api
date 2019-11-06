@@ -1,0 +1,5 @@
+responses:
+  ForbiddenResponse:
+    description: Forbidden (missing auth header, malformed auth header, invalid auth header)
+    schema:
+      $ref: '#/definitions/ClientError'

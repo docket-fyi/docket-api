@@ -1,0 +1,21 @@
+responses:
+  ListLocalesOkResponse:
+    description: OK
+    schema:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              attributes:
+                type: object
+                $ref: '#/definitions/Locale'
+              type:
+                type: string
+              links:
+                type: object
+                properties:
+                  self:
+                    type: string

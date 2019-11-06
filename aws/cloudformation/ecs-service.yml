@@ -1,0 +1,419 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy a service into an ECS cluster behind a public load balancer.
+Mappings:
+  StackMap:
+    Stack:
+      Stage: docket-staging-ecs
+      Production: docket-production-ecs
+  ServiceNameMap:
+    Name:
+      Stage: docket-staging
+      Production: docket-production
+  ContainerCountMap:
+    Count:
+      Stage: 2
+      Production: 2
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: 'Staging'
+    AllowedValues: [Staging, Production]
+  # StackName:
+  #   Type: String
+  #   Default: docket-stage-ecs
+  #   AllowedValues: [ docket-stage-ecs, docket-prod-ecs ]
+  #   Description: The name of the parent cluster stack that you created. Necessary
+  #                to locate and reference resources created by that stack.
+  DockerImageUrl:
+    Type: String
+    # Update with the Docker image. "You can use images in the Docker Hub registry or specify other repositories (repository-url/image:tag)."
+    Default: '045405168982.dkr.ecr.us-west-2.amazonaws.com/docket-api:latest'
+  # ServiceName:
+  #   Type: String
+  #   # update with the name of the service
+  #   Default: docket-staging
+  ContainerPort:
+    Type: Number
+    Default: 3001
+  HealthCheckPath:
+    Type: String
+    Default: /v1/health-check
+  # target CPU utilization (%)
+  AutoScalingTargetValue:
+    Type: Number
+    Default: 50
+  ContainerCpu:
+    Type: Number
+    Default: 256
+    Description: How much CPU to give the container. 1024 is 1 CPU
+  ContainerMemory:
+    Type: Number
+    Default: 512
+    Description: How much memory in megabytes to give the container
+  Path:
+    Type: String
+    Default: "*"
+    Description: A path on the public load balancer that this service
+                 should be connected to. Use * to send all load balancer
+                 traffic to this service.
+  Priority:
+    Type: Number
+    Default: 1
+    Description: The priority for the routing rule added to the load balancer.
+                 This only applies if your have multiple services which have been
+                 assigned to different paths on the load balancer.
+  DesiredCount:
+    Type: Number
+    Default: 1
+    Description: How many copies of the service task to run
+  Role:
+    Type: String
+    Default: ""
+    Description: (Optional) An IAM role to give the service's containers if the code within needs to
+                 access other AWS resources like S3 buckets, DynamoDB tables, etc
+  ApiVersion:
+    Type: String
+  DatabaseHost:
+    Type: String
+  DatabasePassword:
+    Type: String
+  DatabaseUsername:
+    Type: String
+  DatabasePort:
+    Type: String
+  DatabaseDialect:
+    Type: String
+  DatabaseName:
+    Type: String
+  Debug:
+    Type: String
+  ElasticsearchHost:
+    Type: String
+  ElasticsearchPort:
+    Type: String
+  ElasticsearchProtocol:
+    Type: String
+  JsonWebTokenExpiration:
+    Type: String
+  JsonWebTokenSecret:
+    Type: String
+  NodeEnv:
+    Type: String
+  NpmUseProduction:
+    Type: String
+  RedisHost:
+    Type: String
+  RegistrationConfirmationSecret:
+    Type: String
+  RegistrationConfirmationFrom:
+    Type: String
+  RegistrationConfirmationExpiration:
+    Type: String
+  RedisPort:
+    Type: String
+  RedisProtocol:
+    Type: String
+  PasswordResetFrom:
+    Type: String
+  PasswordResetExpiration:
+    Type: String
+  PasswordResetSecret:
+    Type: String
+  UiUrl:
+    Type: String
+  Port:
+    Type: String
+  MailUsername:
+    Type: String
+  MailPassword:
+    Type: String
+  MailHost:
+    Type: String
+  MailPort:
+    Type: String
+  MailSecure:
+    Type: String
+  DebugDepth:
+    Type: String
+Resources:
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join ['', [!FindInMap [ServiceNameMap, Name, !Ref Environment], TaskRole]]
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: 'sts:AssumeRole'
+  # The task definition. This is a simple metadata description of what
+  # container to run, and what resource requirements it has.
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !FindInMap [ServiceNameMap, Name, !Ref Environment]
+      Cpu: 512
+      Memory: 1GB
+      TaskRoleArn: !Ref TaskRole
+      ExecutionRoleArn: arn:aws:iam::045405168982:role/ecsTaskExecutionRole
+      ContainerDefinitions:
+        - Name: !Join ['-', [!FindInMap [ServiceNameMap, Name, !Ref Environment], api]]
+          Cpu: !Ref 'ContainerCpu'
+          Memory: !Ref 'ContainerMemory'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Fn::ImportValue:
+                  !Join [':', [!FindInMap [StackMap, Stack, !Ref Environment], 'CloudwatchLogsGroup']]
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: !Join ['-', [!FindInMap [ServiceNameMap, Name, !Ref Environment], api]]
+          Image: !Ref 'ImageUrl'
+          Environment:
+              - Name: API_VERSION
+                Value: !Ref ApiVersion
+              - Name: DB_HOST
+                Value: !Ref DatabaseHost
+              - Name: DB_PASSWORD
+                Value: !Ref DatabasePassword
+              - Name: DB_USERNAME
+                Value: !Ref DatabaseUsername
+              - Name: DEBUG
+                Value: !Ref Debug
+              - Name: ELASTICSEARCH_HOST
+                Value: !Ref ElasticsearchHost
+              - Name: ELASTICSEARCH_PORT
+                Value: !Ref ElasticsearchPort
+              - Name: ELASTICSEARCH_PROTOCOL
+                Value: !Ref ElasticsearchProtocol
+              - Name: JWT_EXPIRATION
+                Value: !Ref JsonWebTokenExpiration
+              - Name: JWT_SECRET
+                Value: !Ref JsonWebTokenSecret
+              - Name: NODE_ENV
+                Value: !Ref NodeEnv
+              - Name: NPM_USE_PRODUCTION
+                Value: !Ref NpmUseProduction
+              - Name: REDIS_HOST
+                Value: !Ref RedisHost
+              - Name: REGISTRATION_CONFIRMATION_SECRET
+                Value: !Ref RegistrationConfirmationSecret
+              - Name: REGISTRATION_CONFIRMATION_FROM
+                Value: !Ref RegistrationConfirmationFrom
+              - Name: REGISTRATION_CONFIRMATION_EXPIRATION
+                Value: !Ref RegistrationConfirmationExpiration
+              - Name: REDIS_PORT
+                Value: !Ref RedisPort
+              - Name: REDIS_PROTOCOL
+                Value: !Ref RedisProtocol
+              - Name: DB_PORT
+                Value: !Ref DatabasePort
+              - Name: DB_DIALECT
+                Value: !Ref DatabaseDialect
+              - Name: PASSWORD_RESET_FROM
+                Value: !Ref PasswordResetFrom
+              - Name: PASSWORD_RESET_EXPIRATION
+                Value: !Ref PasswordResetExpiration
+              - Name: PASSWORD_RESET_SECRET
+                Value: !Ref PasswordResetSecret
+              - Name: UI_URL
+                Value: !Ref UiUrl
+              - Name: PORT
+                Value: !Ref Port
+              - Name: DB_NAME
+                Value: !Ref DatabaseName
+              - Name: MAIL_USERNAME
+                Value: !Ref MailUsername
+              - Name: MAIL_PASSWORD
+                Value: !Ref MailPassword
+              - Name: MAIL_HOST
+                Value: !Ref MailHost
+              - Name: MAIL_PORT
+                Value: !Ref MailPort
+              - Name: MAIL_SECURE
+                Value: !Ref MailSecure
+              - Name: DEBUG_DEPTH
+                Value: !Ref DebugDepth
+          EntryPoint: ['npm', 'start']
+          PortMappings:
+            - ContainerPort: !Ref 'ContainerPort'
+        - Name: !Join ['-', [!FindInMap [ServiceNameMap, Name, !Ref Environment], worker]]
+          Cpu: !Ref 'ContainerCpu'
+          Memory: !Ref 'ContainerMemory'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Fn::ImportValue:
+                  !Join [':', [!FindInMap [StackMap, Stack, !Ref Environment], 'CloudwatchLogsGroup']]
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: !Join ['-', [!FindInMap [ServiceNameMap, Name, !Ref Environment], worker]]
+          Image: !Ref 'DockerImageUrl'
+          Environment:
+              - Name: API_VERSION
+                Value: !Ref ApiVersion
+              - Name: DB_HOST
+                Value: !Ref DBHost
+              - Name: DB_PASSWORD
+                Value: !Ref DBPassword
+              - Name: DB_USERNAME
+                Value: !Ref DBUsername
+              - Name: DEBUG
+                Value: !Ref Debug
+              - Name: ELASTICSEARCH_HOST
+                Value: !Ref ElasticsearchHost
+              - Name: ELASTICSEARCH_PORT
+                Value: !Ref ElasticsearchPort
+              - Name: ELASTICSEARCH_PROTOCOL
+                Value: !Ref ElasticsearchProtocol
+              - Name: JWT_EXPIRATION
+                Value: !Ref JsonWebTokenExpiration
+              - Name: JWT_SECRET
+                Value: !Ref JsonWebTokenSecret
+              - Name: NODE_ENV
+                Value: !Ref NodeEnv
+              - Name: NPM_USE_PRODUCTION
+                Value: !Ref NpmUseProduction
+              - Name: REDIS_HOST
+                Value: !Ref RedisHost
+              - Name: REGISTRATION_CONFIRMATION_SECRET
+                Value: !Ref RegistrationConfirmationSecret
+              - Name: REGISTRATION_CONFIRMATION_FROM
+                Value: !Ref RegistrationConfirmationFrom
+              - Name: REGISTRATION_CONFIRMATION_EXPIRATION
+                Value: !Ref RegistrationConfirmationExpiration
+              - Name: REDIS_PORT
+                Value: !Ref RedisPort
+              - Name: REDIS_PROTOCOL
+                Value: !Ref RedisProtocol
+              - Name: DB_PORT
+                Value: !Ref DatabasePort
+              - Name: DB_DIALECT
+                Value: !Ref DatabaseDialect
+              - Name: PASSWORD_RESET_FROM
+                Value: !Ref PasswordResetFrom
+              - Name: PASSWORD_RESET_EXPIRATION
+                Value: !Ref PasswordResetExpiration
+              - Name: PASSWORD_RESET_SECRET
+                Value: !Ref PasswordResetSecret
+              - Name: UI_URL
+                Value: !Ref UiUrl
+              - Name: PORT
+                Value: !Ref Port
+              - Name: DB_NAME
+                Value: !Ref DatabaseName
+              - Name: MAIL_USERNAME
+                Value: !Ref MailUsername
+              - Name: MAIL_PASSWORD
+                Value: !Ref MailPassword
+              - Name: MAIL_HOST
+                Value: !Ref MailHost
+              - Name: MAIL_PORT
+                Value: !Ref MailPort
+              - Name: MAIL_SECURE
+                Value: !Ref MailSecure
+              - Name: DEBUG_DEPTH
+                Value: !Ref DebugDepth
+          EntryPoint: ['npm', 'run', 'start:worker']
+
+  # The service. The service is a resource which allows you to run multiple
+  # copies of a type of task, and gather up their logs and metrics, as well
+  # as monitor the number of running tasks and replace any that have crashed
+  Service:
+    Type: AWS::ECS::Service
+    DependsOn: LoadBalancerRule
+    Properties:
+      ServiceName: !FindInMap [ServiceNameMap, Name, !Ref Environment]
+      Cluster:
+        Fn::ImportValue:
+          !Join [':', [!FindInMap [StackMap, Stack, !Ref Environment], 'ClusterName']]
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 75
+      DesiredCount: !Ref 'DesiredCount'
+      TaskDefinition: !Ref 'TaskDefinition'
+      LoadBalancers:
+        - ContainerName: !Join ['-', [!FindInMap [ServiceNameMap, Name, !Ref Environment], api]]
+          ContainerPort: !Ref 'ContainerPort'
+          TargetGroupArn: !Ref 'TargetGroup'
+
+  # A target group. This is used for keeping track of all the tasks, and
+  # what IP addresses / port numbers they have. You can query it yourself,
+  # to use the addresses yourself, but most often this target group is just
+  # connected to an application load balancer, or network load balancer, so
+  # it can automatically distribute traffic across all the targets.
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: !Ref HealthCheckPath
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 60
+      HealthyThresholdCount: 2
+      Name: !Join ['-', [!FindInMap [ServiceNameMap, Name, !Ref Environment], TargetGroup]]
+      Port: !Ref ContainerPort
+      Protocol: HTTP
+      UnhealthyThresholdCount: 2
+      VpcId:
+        Fn::ImportValue:
+          !Join [':', [!FindInMap [StackMap, Stack, !Ref Environment], 'VPCId']]
+
+  # Create a rule on the load balancer for routing traffic to the target group
+  LoadBalancerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+        - TargetGroupArn: !Ref 'TargetGroup'
+          Type: 'forward'
+      Conditions:
+        - Field: path-pattern
+          Values: [!Ref 'Path']
+      ListenerArn:
+        Fn::ImportValue:
+          !Join [':', [!FindInMap [StackMap, Stack, !Ref Environment], 'PublicListener']]
+      Priority: !Ref 'Priority'
+
+  AutoScalingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join ['', [!FindInMap [ServiceNameMap, Name, !Ref Environment], AutoScalingRole]]
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceAutoscaleRole'
+
+  AutoScalingTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MinCapacity: 1
+      MaxCapacity: !FindInMap [ContainerCountMap, Count, !Ref Environment]
+      ResourceId:
+        Fn::Join:
+          - '/'
+          - - service
+            - Fn::ImportValue: !Join [':', [!FindInMap [StackMap, Stack, !Ref Environment], 'ClusterName']]
+            - !GetAtt Service.Name
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+      # "The Amazon Resource Name (ARN) of an AWS Identity and Access Management (IAM) role that allows Application Auto Scaling to modify your scalable target."
+      RoleARN: !GetAtt AutoScalingRole.Arn
+  AutoScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: !Join ['', [!FindInMap [ServiceNameMap, Name, !Ref Environment], AutoScalingPolicy]]
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref AutoScalingTarget
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ECSServiceAverageCPUUtilization
+        ScaleInCooldown: 10
+        ScaleOutCooldown: 10
+        # Keep things at or lower than 50% CPU utilization, for example
+        TargetValue: !Ref AutoScalingTargetValue

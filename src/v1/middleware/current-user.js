@@ -1,7 +1,7 @@
 const status = require('http-status')
 
-const { User } = require('../../models')
-const { UserNotFoundError, MissingJwtError, MalformedJwtError } = require('../errors')
+const { User } = require('../models')
+const errors = require('../errors')
 
 /**
  * Handler for unknown routes.
@@ -17,17 +17,21 @@ async function currentUser(req, res, next) {
     const { jwt } = req
     if (!jwt) {
       res.status(status.BAD_REQUEST)
-      throw new MissingJwtError()
+      throw new errors.authentication.MissingJwtError()
     }
     const { id } = jwt
     if (!id) {
       res.status(status.BAD_REQUEST)
-      throw new MalformedJwtError()
+      throw new errors.authentication.MalformedJwtError()
     }
-    const currentUser = await User.findOne({ _id: id })
+    const currentUser = await User.findOne({
+      where: {
+        id
+      }
+    })
     if (!currentUser) {
       res.status(status.FORBIDDEN)
-      throw new UserNotFoundError()
+      throw new errors.users.NotFoundError()
     }
     req.currentUser = currentUser
     return next()

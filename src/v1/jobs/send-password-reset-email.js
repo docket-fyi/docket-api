@@ -3,10 +3,7 @@ const jsonWebToken = require('jsonwebtoken')
 
 const nodemailer = require('../config/nodemailer')
 const environment = require('../environment')
-const {
-  PasswordResetEmailUserMissingError,
-  PasswordResetEmailInvalidUserError
-} = require('../errors')
+const errors = require('../errors')
 
 const { from, secret, expiration } = environment.passwordReset
 
@@ -23,16 +20,16 @@ async function sendPasswordResetEmail(job) {
   try {
     const { referrer, user } = job.data
     if (!user) {
-      throw new PasswordResetEmailUserMissingError()
+      throw new errors.users.PasswordResetEmailUserMissingError()
     }
-    if (!user.email || !user.firstName || !user.lastName) {
-      throw new PasswordResetEmailInvalidUserError()
+    if (!user.email || !user.firstName) {
+      throw new errors.users.PasswordResetEmailInvalidUserError()
     }
     const options = {
       expiresIn: expiration
     }
     const payload = {
-      id: user._id
+      id: user.id
     }
     const jwt = jsonWebToken.sign(payload, secret, options)
     const { protocol, host } = url.parse(referrer)
@@ -41,8 +38,8 @@ async function sendPasswordResetEmail(job) {
       from,
       to: user.email,
       subject: `Docket password reset`,
-      text: `Hi ${user.firstName},\n\n${url}/reset-password/${jwt}`,
-      html: `<html><head></head><body>Hi ${user.firstName},\n\n<a href="${uiUrl}/reset-password/${jwt}">Reset password</a></body></html>`
+      text: `Hi ${user.firstName},\n\nReset password:\n\n${uiUrl}/reset-password?code=${jwt}`,
+      html: `<html><head></head><body>Hi ${user.firstName},<br><br><a href="${uiUrl}/reset-password?code=${jwt}">Reset password</a></body></html>`
     }
     const info = await nodemailer.sendMail(emailData)
     return info

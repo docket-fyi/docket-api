@@ -1,0 +1,5 @@
+tags:
+  name: Sessions
+  description: Session API operations
+  externalDocs:
+    url: https://developers.docket.fyi/api/v1/sessions

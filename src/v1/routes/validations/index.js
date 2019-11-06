@@ -1,9 +1,15 @@
-const auth = require('./auth')
+const sessions = require('./sessions')
 const devices = require('./devices')
 const events = require('./events')
+const search = require('./search')
+const users = require('./users')
+const my = require('./my')
 
 module.exports = {
-  auth,
+  sessions,
   devices,
-  events
+  events,
+  search,
+  users,
+  my
 }

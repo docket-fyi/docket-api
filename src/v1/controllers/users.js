@@ -1,65 +1,18 @@
+const Sentry = require('@sentry/node')
 const status = require('http-status')
 const bcrypt = require('bcryptjs')
 const jsonWebToken = require('jsonwebtoken')
 const moment = require('moment')
 
 const environment = require('../environment')
-const { User } = require('../../models')
-const {
-  RegistrationConfirmationCodeMissingError,
-  UserNotFoundError,
-  UserAlreadyConfirmedError,
-  ForgotPasswordEmailMissingError,
-  UserNotConfirmedError,
-  PasswordResetMissingCodeError,
-  PasswordResetMissingPasswordError,
-  PasswordResetMismatchError,
-  PasswordResetSamePasswordError
-} = require('../errors')
+const { User } = require('../models')
+const serializers = require('../serializers')
+const errors = require('../errors')
 const {
   sendRegistrationConfirmationEmailQueue,
   sendPasswordResetEmailQueue
+  // sendWelcomeEmailQueue
 } = require('../config/queues')
-
-/**
- * Fetches all users from the database and returns them.
- *
- * @param {Request} req The incoming request object
- * @param {Response} res The outgoing response object
- * @param {Function} next Callback to continue on to next middleware
- *
- * @return {Promise<undefined>}
- *
-async function index(req, res, next) {
-  try {
-    const users = await User.find({})
-    res.status(status.OK).json(users)
-    return next()
-  } catch (err) {
-    return next(err)
-  }
-}
-*/
-
-/**
- * Attemps to find a user and, if found, returns it.
- *
- * @param {Request} req The incoming request object
- * @param {Response} res The outgoing response object
- * @param {Function} next Callback to continue on to next middleware
- *
- * @return {Promise<undefined>}
- *
-async function show(req, res, next) {
-  try {
-    const { user } = req
-    res.status(status.OK).json(user)
-    return next()
-  } catch (err) {
-    return next(err)
-  }
-}
-*/
 
 /**
  * Attempts to create a new user and, if valid, saves it to the database,
@@ -68,92 +21,52 @@ async function show(req, res, next) {
  * @param {Request} req The incoming request object
  * @param {Response} res The outgoing response object
  * @param {Function} next Callback to continue on to next middleware
- *
  * @return {Promise<undefined>}
+ * @swagger
+ * /users:
+ *   post:
+ *     summary: Create a new user
+ *     description: Create a new user and, if valid, return it
+ *     operationId: createUser
+ *     consumes:
+ *       - application/vnd.api+json
+ *     produces:
+ *       - application/vnd.api+json
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - $ref: '#/parameters/UserCreateBodyParameter'
+ *     responses:
+ *       200:
+ *         $ref: '#/responses/UserCreateOkResponse'
+ *       400:
+ *         $ref: '#/responses/BadRequestResponse'
  */
 async function create(req, res, next) {
-  const { body } = req
-  const { firstName, lastName, email, password } = body
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'users')
+    scope.setTag('action', 'create')
+  })
+  const { deserializedBody } = req
+  const { firstName, lastName, email } = deserializedBody
   try {
-    const hashedPassword = bcrypt.hashSync(password, 10) // eslint-disable-line no-sync
-    const newUser = await User.create({
-      firstName,
-      lastName,
-      email,
-      password: hashedPassword
-    })
-    const json = {
-      id: newUser.id,
+    const user = await User.create({
       firstName,
       lastName,
       email
-    }
+    })
     await sendRegistrationConfirmationEmailQueue.add({
       referrer: req.get('Referrer'),
-      user: newUser
+      user
     })
-    res.status(status.OK).json(json)
+    res.body = serializers.users.create.serialize(user)
+    res.set({'Location': `/v1/users/${user.id}`})
+    res.status(status.OK)
     return next()
   } catch (err) {
     return next(err)
   }
 }
-
-/**
- * Attempts to update a user and, if found and valid, returns the newly
- * updated user.
- *
- * @param {Request} req The incoming request object
- * @param {Response} res The outgoing response object
- * @param {Function} next Callback to continue on to next middleware
- *
- * @return {Promise<undefined>}
- *
-async function update(req, res, next) {
-  try {
-    const { currentUser, body } = req
-    const { firstName, lastName, email } = body
-    currentUser.set({
-      firstName,
-      lastName,
-      email
-    })
-    const updatedUser = await currentUser.save()
-    const json = {
-      id: updatedUser.id,
-      firstName: updatedUser.firstName,
-      lastName: updatedUser.lastName,
-      email: updatedUser.email
-    }
-    res.status(status.OK).json(json)
-    return next()
-  } catch (err) {
-    return next(err)
-  }
-}
-*/
-
-/**
- * Attempts to find a user and, if found, deletes it from the database.
- *
- * @param {Request} req The incoming request object
- * @param {Response} res The outgoing response object
- * @param {Function} next Callback to continue on to next middleware
- *
- * @return {Promise<undefined>}
- *
-async function destroy(req, res, next) {
-  try {
-    const { currentUser } = req
-    const { id } = currentUser
-    await User.remove({ _id: id })
-    res.status(status.NO_CONTENT).send()
-    return next()
-  } catch (err) {
-    return next(err)
-  }
-}
-*/
 
 /**
  * Given a confirmation code, attempts to verify user registration.
@@ -161,30 +74,75 @@ async function destroy(req, res, next) {
  * @param {Request} req The incoming request object
  * @param {Response} res The outgoing response object
  * @param {Function} next Callback to continue on to next middleware
- *
  * @return {Promise<undefined>}
+ * @swagger
+ * /users/confirm-registration:
+ *   post:
+ *     summary: Confirm a new user's registration
+ *     description: Confirm a new user's registration
+ *     operationId: confirmRegistration
+ *     consumes:
+ *       - application/vnd.api+json
+ *     produces:
+ *       - application/vnd.api+json
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - $ref: '#/parameters/UserConfirmRegistrationBodyParameter'
+ *       - $ref: '#/parameters/UserConfirmRegistrationCodeParameter'
+ *     responses:
+ *       204:
+ *         $ref: '#/responses/NoContentResponse'
+ *       400:
+ *         $ref: '#/responses/BadRequestResponse'
  */
 async function confirmRegistration(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'users')
+    scope.setTag('action', 'confirmRegistration')
+  })
   try {
-    const { params } = req
-    const { code } = params
+    const { query, deserializedBody } = req
+    const { password, passwordConfirmation } = deserializedBody
+    const { code } = query
     if (!code) {
       res.status(status.BAD_REQUEST)
-      throw new RegistrationConfirmationCodeMissingError()
+      throw new errors.users.RegistrationConfirmationCodeMissingError()
+    }
+    if (!password || !passwordConfirmation) {
+      res.status(status.BAD_REQUEST)
+      throw new errors.users.PasswordResetMissingPasswordError()
+    }
+    if (password !== passwordConfirmation) {
+      res.status(status.BAD_REQUEST)
+      throw new errors.users.PasswordResetMismatchError()
     }
     const jwt = jsonWebToken.verify(code, environment.registrationConfirmation.secret)
-    const user = await User.findOne({ _id: jwt.id }).exec()
+    const user = await User.findOne({
+      where: {
+        id: jwt.id
+      }
+    })
     if (!user) {
       res.status(status.NOT_FOUND)
-      throw new UserNotFoundError()
+      throw new errors.users.NotFoundError()
     }
     if (user.confirmedAt) {
       res.status(status.BAD_REQUEST)
-      throw new UserAlreadyConfirmedError()
+      throw new errors.users.AlreadyConfirmedError()
     }
-    user.set({ confirmedAt: moment() })
+    if (user.passwordDigest) {
+      res.status(status.BAD_REQUEST)
+      throw new errors.users.AlreadySetPasswordError()
+    }
+    const hashedPassword = bcrypt.hashSync(password, 10) // eslint-disable-line no-sync
+    user.set({
+      confirmedAt: moment(),
+      passwordDigest: hashedPassword
+    })
     await user.save()
-    res.status(status.NO_CONTENT).send()
+    // await sendWelcomeEmailQueue.add({user})
+    res.status(status.NO_CONTENT)
     return next()
   } catch (err) {
     return next(err)
@@ -198,31 +156,57 @@ async function confirmRegistration(req, res, next) {
  * @param {Request} req The incoming request object
  * @param {Response} res The outgoing response object
  * @param {Function} next Callback to continue on to next middleware
- *
  * @return {Promise<undefined>}
+ * @swagger
+ * /users/forgot-password:
+ *   post:
+ *     summary: Facilitates a user to reset their password
+ *     description: Facilitates a user to reset their password
+ *     operationId: forgotPassword
+ *     consumes:
+ *       - application/vnd.api+json
+ *     produces:
+ *       - application/vnd.api+json
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - $ref: '#/parameters/UserForgotPasswordBodyParameter'
+ *     responses:
+ *       204:
+ *         $ref: '#/responses/NoContentResponse'
+ *       400:
+ *         $ref: '#/responses/BadRequestResponse'
  */
 async function forgotPassword(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'users')
+    scope.setTag('action', 'forgotPassword')
+  })
   try {
-    const { body } = req
-    const { email } = body
+    const { deserializedBody } = req
+    const { email } = deserializedBody
     if (!email) {
       res.status(status.BAD_REQUEST)
-      throw new ForgotPasswordEmailMissingError()
+      throw new errors.users.ForgotPasswordEmailMissingError()
     }
-    const user = await User.findOne({ email }).exec()
+    const user = await User.findOne({
+      where: {
+        email
+      }
+    })
     if (!user) {
       res.status(status.NOT_FOUND)
-      throw new UserNotFoundError()
+      throw new errors.users.NotFoundError()
     }
     if (!user.confirmedAt) {
       res.status(status.BAD_REQUEST)
-      throw new UserNotConfirmedError()
+      throw new errors.users.NotConfirmedError()
     }
     await sendPasswordResetEmailQueue.add({
       referrer: req.get('Referrer'),
       user
     })
-    res.status(status.NO_CONTENT).send()
+    res.status(status.NO_CONTENT)
     return next()
   } catch (err) {
     return next(err)
@@ -235,44 +219,72 @@ async function forgotPassword(req, res, next) {
  * @param {Request} req The incoming request object
  * @param {Response} res The outgoing response object
  * @param {Function} next Callback to continue on to next middleware
- *
  * @return {Promise<undefined>}
+ * @swagger
+ * /users/reset-password:
+ *   post:
+ *     summary: Reset a user's password
+ *     description: Reset a user's password
+ *     operationId: resetPassword
+ *     consumes:
+ *       - application/vnd.api+json
+ *     produces:
+ *       - application/vnd.api+json
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - $ref: '#/parameters/UserResetPasswordBodyParameter'
+ *       - $ref: '#/parameters/UserResetPasswordCodeParameter'
+ *     responses:
+ *       204:
+ *         $ref: '#/responses/NoContentResponse'
+ *       400:
+ *         $ref: '#/responses/BadRequestResponse'
  */
 async function resetPassword(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'users')
+    scope.setTag('action', 'resetPassword')
+  })
   try {
-    const { body } = req
-    const { code, password, passwordConfirmation } = body
+    const { deserializedBody, query } = req
+    const { password, passwordConfirmation } = deserializedBody
+    const { code } = query
     if (!code) {
       res.status(status.BAD_REQUEST)
-      throw new PasswordResetMissingCodeError()
+      throw new errors.users.PasswordResetMissingCodeError()
     }
     if (!password || !passwordConfirmation) {
       res.status(status.BAD_REQUEST)
-      throw new PasswordResetMissingPasswordError()
+      throw new errors.users.PasswordResetMissingPasswordError()
     }
     if (password !== passwordConfirmation) {
       res.status(status.BAD_REQUEST)
-      throw new PasswordResetMismatchError()
+      throw new errors.users.PasswordResetMismatchError()
     }
     const jwt = jsonWebToken.verify(code, environment.passwordReset.secret)
-    const user = await User.findOne({ _id: jwt.id }).exec()
+    const user = await User.findOne({
+      where: {
+        id: jwt.id
+      }
+    })
     if (!user) {
       res.status(status.NOT_FOUND)
-      throw new UserNotFoundError()
+      throw new errors.users.NotFoundError()
     }
-    const isSamePassword = bcrypt.compareSync(password, user.password) // eslint-disable-line no-sync
+    const isSamePassword = bcrypt.compareSync(password, user.passwordDigest) // eslint-disable-line no-sync
     if (isSamePassword) {
       res.status(status.BAD_REQUEST)
-      throw new PasswordResetSamePasswordError()
+      throw new errors.users.PasswordResetSamePasswordError()
     }
     if (!user.confirmedAt) {
       res.status(status.BAD_REQUEST)
-      throw new UserNotConfirmedError()
+      throw new errors.users.NotConfirmedError()
     }
     const hashedPassword = bcrypt.hashSync(password, 10) // eslint-disable-line no-sync
-    user.set({ password: hashedPassword })
+    user.set({ passwordDigest: hashedPassword })
     await user.save()
-    res.status(status.NO_CONTENT).send()
+    res.status(status.NO_CONTENT)
     return next()
   } catch (err) {
     return next(err)
@@ -280,11 +292,7 @@ async function resetPassword(req, res, next) {
 }
 
 module.exports = {
-  // index,
-  // show,
   create,
-  // update,
-  // destroy,
   confirmRegistration,
   forgotPassword,
   resetPassword
