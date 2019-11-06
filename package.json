@@ -14,11 +14,13 @@
     "start:worker:prod": "$(npm bin)/pm2 start ./worker.js",
     "start:worker:debug": "node --inspect=0.0.0.0:9299 ./worker.js",
     "start:repl": "node ./repl.js",
-    "test": "$(npm bin)/npm-run-all test:*",
+    "test": "snyk test && $(npm bin)/npm-run-all test:*",
     "test:unit": "$(npm bin)/jest ./__tests__/unit",
     "lint": "$(npm bin)/eslint ./src",
     "db:seed": "node ./src/v1/seeds/index.js",
-    "routes": "node ./routes.js"
+    "routes": "node ./routes.js",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "author": "John Goldsmith <john.goldsmith@docket.fyi>",
   "license": "ISC",
@@ -30,7 +32,7 @@
     "@elastic/elasticsearch": "7.4.0",
     "@hapi/joi": "16.1.7",
     "@microsoft/microsoft-graph-client": "2.0.0",
-    "@sentry/node": "5.6.2",
+    "@sentry/node": "5.7.1",
     "accept-language": "3.0.18",
     "bcryptjs": "2.4.3",
     "body-parser": "1.19.0",
@@ -61,17 +63,19 @@
     "autocannon": "4.3.0",
     "clinic": "5.0.0",
     "coveralls": "3.0.7",
-    "express-list-endpoints": "4.0.1",
     "eslint": "6.6.0",
+    "express-list-endpoints": "4.0.1",
     "husky": "3.0.9",
     "jest": "24.1.0",
     "nodemon": "1.19.4",
     "npm-run-all": "4.1.5",
-    "sequelize-cli": "5.5.1"
+    "sequelize-cli": "5.5.1",
+    "snyk": "1.244.0"
   },
   "husky": {
     "hooks": {
       "pre-commit": "npm run lint && npm run test:unit"
     }
-  }
+  },
+  "snyk": true
 }
