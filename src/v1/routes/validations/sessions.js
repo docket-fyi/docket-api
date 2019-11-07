@@ -1,4 +1,4 @@
-const Joi = require('joi')
+const Joi = require('@hapi/joi')
 
 function buildUsefulErrorObject(errors) {
   // return errors.reduce((acc, error) => {

@@ -3,11 +3,13 @@
 const status = require('http-status')
 const moment = require('moment')
 const slugify = require('slugify')
+const Sentry = require('@sentry/node')
 
 const { Event } = require('../models')
 const { createEventReminder } = require('../config/redis')
 const errors = require('../errors')
 const serializers = require('../serializers')
+const stripe = require('../config/stripe')
 
 
 /**
@@ -36,6 +38,10 @@ const serializers = require('../serializers')
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function show(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'my')
+    scope.setTag('action', 'show')
+  })
   try {
     const { currentUser } = req
     res.status(status.OK)
@@ -75,6 +81,10 @@ async function show(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function update(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'my')
+    scope.setTag('action', 'update')
+  })
   try {
     const { currentUser, deserializedBody } = req
     const { firstName, lastName, email, preferredMeasurementUnit } = deserializedBody
@@ -119,6 +129,10 @@ async function update(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function destroy(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'my')
+    scope.setTag('action', 'destroy')
+  })
   try {
     const { currentUser } = req
     const deleteCurrentUser = currentUser.remove()
@@ -162,6 +176,10 @@ async function destroy(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function listEvents(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'my')
+    scope.setTag('action', 'listEvents')
+  })
   try {
     const { currentUser } = req
     const events = await Event.findAll({
@@ -210,6 +228,10 @@ async function listEvents(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function showEvent(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'my')
+    scope.setTag('action', 'showEvent')
+  })
   try {
     const { event } = req
     res.status(status.OK)
@@ -249,6 +271,10 @@ async function showEvent(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function createEvent(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'my')
+    scope.setTag('action', 'createEvent')
+  })
   try {
     const { body, currentUser } = req
     const { name, date /*, reminders*/ } = body
@@ -325,6 +351,10 @@ async function createEvent(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function importEvents(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'my')
+    scope.setTag('action', 'importEvents')
+  })
   try {
     const { body, currentUser } = req
     const { events } = body
@@ -384,6 +414,10 @@ async function importEvents(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function updateEvent(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'my')
+    scope.setTag('action', 'updateEvent')
+  })
   try {
     const { event, body } = req
     const { name, date } = body
@@ -428,9 +462,91 @@ async function updateEvent(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function destroyEvent(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'my')
+    scope.setTag('action', 'destroyEvent')
+  })
   try {
     const { event } = req
     await event.remove()
+    res.status(status.NO_CONTENT)
+    return next()
+  } catch (err) {
+    return next(err)
+  }
+}
+
+/**
+ * Get the current user's membership details.
+ *
+ * @param {Request} req The incoming request object
+ * @param {Response} res The outgoing response object
+ * @param {Function} next Callback to continue on to next middleware
+ * @return  {Promise<undefined>}
+ * @swagger
+ * /my/membership:
+ *   get:
+ *     summary:
+ *     description:
+ *     operationId: showMyMembership
+ *     security:
+ *       - jwt: []
+ *     produces:
+ *       - application/vnd.api+json
+ *     tags:
+ *       - Users
+ *     responses:
+ *       204:
+ *         $ref: '#/responses/NoContentResponse'
+ *       400:
+ *         $ref: '#/responses/BadRequestResponse'
+ */
+async function showMembership(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'my')
+    scope.setTag('action', 'showMembership')
+  })
+  try {
+    const { currentUser } = req
+    res.status(status.NO_CONTENT)
+    return next()
+  } catch (err) {
+    return next(err)
+  }
+}
+
+/**
+ * Update the current user's membership details.
+ *
+ * @param {Request} req The incoming request object
+ * @param {Response} res The outgoing response object
+ * @param {Function} next Callback to continue on to next middleware
+ * @return  {Promise<undefined>}
+ * @swagger
+ * /my/membership:
+ *   patch:
+ *     summary:
+ *     description:
+ *     operationId: updateMyMembership
+ *     security:
+ *       - jwt: []
+ *     produces:
+ *       - application/vnd.api+json
+ *     tags:
+ *       - Users
+ *     responses:
+ *       204:
+ *         $ref: '#/responses/NoContentResponse'
+ *       400:
+ *         $ref: '#/responses/BadRequestResponse'
+ */
+async function updateMembership(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'my')
+    scope.setTag('action', 'updateMembership')
+  })
+  try {
+    const { currentUser } = req
     res.status(status.NO_CONTENT)
     return next()
   } catch (err) {
@@ -447,5 +563,7 @@ module.exports = {
   createEvent,
   importEvents,
   updateEvent,
-  destroyEvent
+  destroyEvent,
+  showMembership,
+  updateMembership
 }

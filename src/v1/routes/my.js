@@ -44,4 +44,7 @@ router.get('/my/events/:eventId', verifyJwt, currentUser, setEvent, setSentryCon
 router.patch('/my/events/:eventId', verifyJwt, validations['/my/events/:eventId'].put, currentUser, setEvent, setSentryContext, my.updateEvent)
 router.delete('/my/events/:eventId', verifyJwt, currentUser, setEvent, setSentryContext, my.destroyEvent)
 
+router.get('/my/membership', verifyJwt, currentUser, setSentryContext, my.showMembership)
+router.patch('/my/membership', verifyJwt, currentUser, setSentryContext, my.updateMembership)
+
 module.exports = router

@@ -1,5 +1,6 @@
 /* eslint-disable max-lines */
 
+const Sentry = require('@sentry/node')
 const status = require('http-status')
 const { google } = require('googleapis')
 const moment = require('moment')
@@ -37,6 +38,10 @@ const serializers = require('../serializers')
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function getOAuthUrl(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'google')
+    scope.setTag('action', 'getOAuthUrl')
+  })
   try {
     const url = oauth2Client.generateAuthUrl({
       // access_type: 'online|offline',
@@ -78,6 +83,10 @@ async function getOAuthUrl(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function getAccessTokens(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'google')
+    scope.setTag('action', 'getAccessTokens')
+  })
   try {
     const { query, currentUser } = req
     const { code } = query
@@ -132,6 +141,10 @@ async function destroyCalendarList(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function showCalendarList(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'google')
+    scope.setTag('action', 'showCalendarList')
+  })
   try {
     return next()
   } catch (err) {
@@ -177,6 +190,10 @@ async function createCalendarList(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function listCalendarLists(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'google')
+    scope.setTag('action', 'listCalendarLists')
+  })
   try {
     const { query } = req
     const { include } = query
@@ -260,6 +277,10 @@ async function replaceCalendarList(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function watchCalendarLists(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'google')
+    scope.setTag('action', 'watchCalendarLists')
+  })
   try {
     return next()
   } catch (err) {
@@ -315,6 +336,10 @@ async function destroyCalendar(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function showCalendar(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'google')
+    scope.setTag('action', 'showCalendar')
+  })
   try {
     return next()
   } catch (err) {
@@ -390,6 +415,10 @@ async function destroyEvent(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function showEvent(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'google')
+    scope.setTag('action', 'showEvent')
+  })
   try {
     return next()
   } catch (err) {
@@ -445,6 +474,10 @@ async function createEvent(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function listEventInstances(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'google')
+    scope.setTag('action', 'listEventInstances')
+  })
   try {
     return next()
   } catch (err) {
@@ -480,6 +513,10 @@ async function listEventInstances(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function listEvents(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'google')
+    scope.setTag('action', 'listEvents')
+  })
   try {
     return next()
   } catch (err) {
@@ -555,6 +592,10 @@ async function replaceEvent(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function watchEvents(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'google')
+    scope.setTag('action', 'watchEvents')
+  })
   try {
     return next()
   } catch (err) {

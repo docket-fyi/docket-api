@@ -1,3 +1,4 @@
+const Sentry = require('@sentry/node')
 const status = require('http-status')
 
 const { Locale, Translation } = require('../models')
@@ -27,6 +28,10 @@ const serializers = require('../serializers')
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function list(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'locales')
+    scope.setTag('action', 'list')
+  })
   try {
     const locales = await Locale.findAll()
     res.status(status.OK)
@@ -63,6 +68,10 @@ async function list(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function listTranslations(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'locales')
+    scope.setTag('action', 'listTranslations')
+  })
   try {
     const { locale } = req
     const translations = await Translation.findAll({
