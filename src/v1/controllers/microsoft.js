@@ -1,5 +1,6 @@
 /* eslint-disable max-lines */
 
+const Sentry = require('@sentry/node')
 const status = require('http-status')
 const qs = require('qs')
 const fetch = require('node-fetch')
@@ -36,6 +37,10 @@ const serializers = require('../serializers')
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function getOAuthUrl(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'microsoft')
+    scope.setTag('action', 'getOAuthUrl')
+  })
   try {
     const { applicationId, tokenHost, authorizePath, redirectUrl, scopes } = environment.microsoft
     const queryParams = {
@@ -81,6 +86,10 @@ async function getOAuthUrl(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function getAccessTokens(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'microsoft')
+    scope.setTag('action', 'getAccessTokens')
+  })
   try {
     const { query, currentUser } = req
     const { code } = query
@@ -141,6 +150,10 @@ async function getAccessTokens(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function listCalendars(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'microsoft')
+    scope.setTag('action', 'listCalendars')
+  })
   try {
     const { currentUser } = req
     const accessToken = currentUser.microsoft.access_token
@@ -189,6 +202,10 @@ async function listCalendars(req, res, next) {
  *         $ref: '#/responses/BadRequestResponse'
  */
 async function listEventsByCalendarId(req, res, next) {
+  Sentry.configureScope(scope => {
+    scope.setTag('controller', 'microsoft')
+    scope.setTag('action', 'listEventsByCalendarId')
+  })
   try {
     return next()
   } catch (err) {
