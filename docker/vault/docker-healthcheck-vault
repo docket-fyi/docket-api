@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -eo pipefail
+
+host="$(hostname -i || echo '127.0.0.1')"
+
+# See https://www.vaultproject.io/api/system/health.html
+status_code=$(curl --fail --write-out %{http_code} --silent --output /dev/null $host:8200/v1/sys/health)
+
+echo $status_code
+
+if [[ "$status_code" -ne 200 ]] ; then
+  exit 1
+fi
+
+exit 0

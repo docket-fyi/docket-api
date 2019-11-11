@@ -1,6 +1,6 @@
 responses:
-  GetMyEventOkResponse:
-    description: OK
+  UserCreateCreatedResponse:
+    description: Created
     schema:
       type: object
       properties:
@@ -9,9 +9,14 @@ responses:
           properties:
             attributes:
               type: object
-              $ref: '#/definitions/Event'
+              $ref: '#/definitions/User'
             type:
               type: string
+            # links:
+            #   type: object
+            #   properties:
+            #     self:
+            #       type: string
         links:
           type: object
           properties:

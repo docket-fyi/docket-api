@@ -2,6 +2,9 @@ const status = require('http-status')
 
 const { User } = require('../models')
 const errors = require('../errors')
+const redis = require('../config/redis').primary
+const cacheKeys = require('../config/cache-keys')
+const environment = require('../environment')
 
 /**
  * Handler for unknown routes.
@@ -24,16 +27,23 @@ async function currentUser(req, res, next) {
       res.status(status.BAD_REQUEST)
       throw new errors.authentication.MalformedJwtError()
     }
-    const currentUser = await User.findOne({
-      where: {
-        id
+    let currentUser = null
+    const cache = await redis.get(cacheKeys.users.show(id))
+    if (!cache) {
+      currentUser = await User.findOne({
+        where: {
+          id
+        }
+      })
+      if (!currentUser) {
+        res.status(status.FORBIDDEN)
+        throw new errors.users.NotFoundError()
       }
-    })
-    if (!currentUser) {
-      res.status(status.FORBIDDEN)
-      throw new errors.users.NotFoundError()
+      await redis.setex(cacheKeys.users.show(currentUser.id), environment.redis.defaultTtl, JSON.stringify(currentUser.toJSON()))
+    } else {
+      currentUser = User.build(JSON.parse(cache))
     }
-    req.currentUser = currentUser
+    req.currentUser = currentUser // eslint-disable-line require-atomic-updates
     return next()
   } catch (err) {
     return next(err)

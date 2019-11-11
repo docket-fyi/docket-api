@@ -2,6 +2,11 @@
 
 version: '2.4'
 services:
+  docket-vault:
+    container_name: docket-vault
+    build: ./docker/vault
+    ports:
+      - 8200:8200
   docket-swagger-ui:
     container_name: docket-swagger-ui
     image: swaggerapi/swagger-ui
@@ -80,6 +85,8 @@ services:
         condition: service_healthy
       docket-elasticsearch:
         condition: service_healthy
+      docket-vault:
+        condition: service_healthy
     links:
       - docket-postgres
       - docket-redis
@@ -103,6 +110,8 @@ services:
       docket-redis:
         condition: service_healthy
       docket-elasticsearch:
+        condition: service_healthy
+      docket-vault:
         condition: service_healthy
       # docket-api:
       #   condition: service_healthy

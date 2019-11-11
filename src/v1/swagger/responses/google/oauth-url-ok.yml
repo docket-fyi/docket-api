@@ -4,6 +4,13 @@ responses:
     schema:
       type: object
       properties:
+        meta:
+          type: object
+        links:
+          type: object
+          properties:
+            self:
+              type: string
         data:
           type: object
           properties:
@@ -14,8 +21,3 @@ responses:
                   type: string
             type:
               type: string
-            links:
-              type: object
-              properties:
-                self:
-                  type: string

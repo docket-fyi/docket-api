@@ -17,7 +17,7 @@ const { from, secret, expiration } = environment.passwordReset
  * @return  {Promise<undefined>}
  */
 async function sendPasswordResetEmail(job) {
-  try {
+  try { // eslint-disable-line no-useless-catch
     const { referrer, user } = job.data
     if (!user) {
       throw new errors.users.PasswordResetEmailUserMissingError()
@@ -44,7 +44,7 @@ async function sendPasswordResetEmail(job) {
     const info = await nodemailer.sendMail(emailData)
     return info
   } catch (err) {
-    throw err // Something else (probably a controller) should catch this
+    throw err
   }
 }
 
