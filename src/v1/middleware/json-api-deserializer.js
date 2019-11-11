@@ -17,7 +17,7 @@ async function jsonApiDeserializer(req, res, next) {
     }
     const deserializer = new Deserializer(opts)
     const deserializedBody = await deserializer.deserialize(body)
-    req.deserializedBody = deserializedBody
+    req.deserializedBody = deserializedBody // eslint-disable-line require-atomic-updates
     return next()
   } catch (err) {
     return next(err)

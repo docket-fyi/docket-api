@@ -29,7 +29,8 @@ async function currentLocale(req, res, next) {
       throw new LocaleNotFoundError()
     }
     */
-    req.currentLocale = locale // NOTE: It's possible for this to be `null`
+    // NOTE: It's possible for this to be `null`
+    req.currentLocale = locale // eslint-disable-line require-atomic-updates
     return next()
   } catch (err) {
     debug(`${err.name}: ${err.message}`)

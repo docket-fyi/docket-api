@@ -17,7 +17,7 @@ const { from, secret, expiration } = environment.registrationConfirmation
  * @return  {undefined}
  */
 async function sendRegistrationConfirmationEmail(job) {
-  try {
+  try { // eslint-disable-line no-useless-catch
     const { referrer, user } = job.data
     if (!user) {
       throw new errors.users.RegistrationConfirmationEmailMissingUserError()

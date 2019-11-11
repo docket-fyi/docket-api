@@ -37,8 +37,8 @@ const {
  *     parameters:
  *       - $ref: '#/parameters/UserCreateBodyParameter'
  *     responses:
- *       200:
- *         $ref: '#/responses/UserCreateOkResponse'
+ *       201:
+ *         $ref: '#/responses/UserCreateCreatedResponse'
  *       400:
  *         $ref: '#/responses/BadRequestResponse'
  */
@@ -60,8 +60,8 @@ async function create(req, res, next) {
       user
     })
     res.body = serializers.users.create.serialize(user)
-    res.set({'Location': `/v1/users/${user.id}`})
-    res.status(status.OK)
+    // res.set({'Location': `/v1/users/${user.id}`})
+    res.status(status.CREATED)
     return next()
   } catch (err) {
     return next(err)

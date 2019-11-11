@@ -14,8 +14,8 @@ responses:
                 $ref: '#/definitions/Locale'
               type:
                 type: string
-              links:
-                type: object
-                properties:
-                  self:
-                    type: string
+        links:
+          type: object
+          properties:
+            self:
+              type: string

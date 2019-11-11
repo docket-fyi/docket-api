@@ -14,8 +14,8 @@ responses:
                 $ref: '#/definitions/Translation'
               type:
                 type: string
-              links:
-                type: object
-                properties:
-                  self:
-                    type: string
+        links:
+          type: object
+          properties:
+            self:
+              type: string

@@ -26,9 +26,8 @@ Event.init({
     unique: true
   },
   date: {
-    type: DataTypes.STRING,
-    required: true,
-    unique: true
+    type: DataTypes.DATE,
+    required: true
   }
 }, {
   sequelize,

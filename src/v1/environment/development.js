@@ -29,7 +29,8 @@ module.exports = {
     port: process.env.REDIS_PORT || '6379',
     username: process.env.REDIS_USERNAME,
     password: process.env.REDIS_PASSWORD,
-    databaseId: process.env.REDIS_DATABASE_ID || '0'
+    databaseId: process.env.REDIS_DATABASE_ID || '0',
+    defaultTtl: process.env.REDIS_DEFAULT_CACHE_TTL_SECONDS || '300' // 5 minutes
   },
   mail: {
     host: process.env.MAIL_HOST,

@@ -9,8 +9,7 @@ const { Event } = require('../models')
 const { createEventReminder } = require('../config/redis')
 const errors = require('../errors')
 const serializers = require('../serializers')
-const stripe = require('../config/stripe')
-
+// const stripe = require('../config/stripe')
 
 /**
  * Returns the current user.
@@ -135,7 +134,7 @@ async function destroy(req, res, next) {
   })
   try {
     const { currentUser } = req
-    const deleteCurrentUser = currentUser.remove()
+    const deleteCurrentUser = currentUser.destroy()
     const deleteAllEventsForCurrentUser = Event.deleteMany({
       where: {
         userId: currentUser.id
@@ -187,12 +186,12 @@ async function listEvents(req, res, next) {
         userId: currentUser.id
       }
     }) // TODO: pagination (limit & offset query params)
-    const eventsWithDiff = events.map(event => ({
-      ...event.toObject(),
-      diff: currentUser.eventDiff(event)
-    }))
+    // const eventsWithDiff = events.map(event => ({
+    //   ...event.toObject(),
+    //   diff: currentUser.eventDiff(event)
+    // }))
     res.status(status.OK)
-    res.body = serializers.my.events.list.serialize(eventsWithDiff)
+    res.body = serializers.my.events.list.serialize(events)
     return next()
   } catch (err) {
     return next(err)
@@ -276,8 +275,10 @@ async function createEvent(req, res, next) {
     scope.setTag('action', 'createEvent')
   })
   try {
-    const { body, currentUser } = req
-    const { name, date /*, reminders*/ } = body
+    const { deserializedBody, currentUser } = req
+    const { name, date /*, reminders*/ } = deserializedBody
+    console.log(date)
+    console.log(moment(date))
     /*
     Repeat every <X> day/week/month/year
       week -> Su/M/Tu/W/Th/F/S
@@ -310,12 +311,12 @@ async function createEvent(req, res, next) {
     */
     createEventReminder(`users:${currentUser._id}:events:${event._id}`, 10 /*moment(date).add(10, 'seconds')*/)
     // createEventReminderForUser(currentUser, event, moment(date).add(10, 'seconds'))
-    const eventWithDiff = {
-      ...event.toObject(),
-      diff: currentUser.eventDiff(event)
-    }
+    // const eventWithDiff = {
+    //   ...event.toObject(),
+    //   diff: currentUser.eventDiff(event)
+    // }
     res.status(status.OK)
-    res.body = serializers.my.events.create.serialize(eventWithDiff)
+    res.body = serializers.my.events.create.serialize(event)
     return next()
   } catch (err) {
     return next(err)
@@ -419,13 +420,8 @@ async function updateEvent(req, res, next) {
     scope.setTag('action', 'updateEvent')
   })
   try {
-    const { event, body } = req
-    const { name, date } = body
-    event.set({
-      name,
-      date
-    })
-    const updatedEvent = await event.save()
+    const { event, deserializedBody } = req
+    const updatedEvent = await event.update(deserializedBody)
     res.status(status.OK)
     res.body = serializers.my.events.update.serialize(updatedEvent)
     return next()
@@ -468,7 +464,7 @@ async function destroyEvent(req, res, next) {
   })
   try {
     const { event } = req
-    await event.remove()
+    await event.destroy()
     res.status(status.NO_CONTENT)
     return next()
   } catch (err) {
@@ -507,7 +503,7 @@ async function showMembership(req, res, next) {
     scope.setTag('action', 'showMembership')
   })
   try {
-    const { currentUser } = req
+    // const { currentUser } = req
     res.status(status.NO_CONTENT)
     return next()
   } catch (err) {
@@ -546,7 +542,7 @@ async function updateMembership(req, res, next) {
     scope.setTag('action', 'updateMembership')
   })
   try {
-    const { currentUser } = req
+    // const { currentUser } = req
     res.status(status.NO_CONTENT)
     return next()
   } catch (err) {

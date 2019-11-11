@@ -9,4 +9,7 @@ module.exports = new JsonApiSerializer('Google', {
   topLevelLinks: {
     self: '/v1/google/oauth-url'
   }
+  // meta: {
+  //   fromCache: data => data.fromCache
+  // }
 })

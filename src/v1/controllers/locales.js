@@ -3,6 +3,9 @@ const status = require('http-status')
 
 const { Locale, Translation } = require('../models')
 const serializers = require('../serializers')
+const redis = require('../config/redis').primary
+const cacheKeys = require('../config/cache-keys')
+const environment = require('../environment')
 
 /**
  * Fetches all locales and returns them.
@@ -33,9 +36,20 @@ async function list(req, res, next) {
     scope.setTag('action', 'list')
   })
   try {
-    const locales = await Locale.findAll()
+    let locales = null
+    const cache = await redis.get(cacheKeys.locales.list)
+    if (!cache) {
+      locales = await Locale.findAll()
+      const localesAsJson = locales.map(locale => locale.toJSON())
+      const localesAsString = JSON.stringify(localesAsJson)
+      await redis.setex(cacheKeys.locales.list, environment.redis.defaultTtl, localesAsString)
+    } else {
+      locales = Locale.build(JSON.parse(cache))
+    }
     res.status(status.OK)
     res.body = serializers.locales.list.serialize(locales)
+    // res.body.meta = res.body.meta || {}
+    // res.body.meta.fromCache = Boolean(cache)
     return next()
   } catch (err) {
     return next(err)
@@ -74,13 +88,24 @@ async function listTranslations(req, res, next) {
   })
   try {
     const { locale } = req
-    const translations = await Translation.findAll({
-      where: {
-        localeId: locale.id
-      }
-    })
+    let translations = null
+    const cache = await redis.get(cacheKeys.locales.listTranslations(locale.code))
+    if (!cache) {
+      translations = await Translation.findAll({
+        where: {
+          localeId: locale.id
+        }
+      })
+      const translationsAsJson = translations.map(translation => translation.toJSON())
+      const translationsAsString = JSON.stringify(translationsAsJson)
+      await redis.setex(cacheKeys.locales.listTranslations(locale.code), environment.redis.defaultTtl, translationsAsString)
+    } else {
+      translations = Translation.build(JSON.parse(cache))
+    }
     res.status(status.OK)
     res.body = serializers.locales.translations.list.serialize(translations)
+    // res.body.meta = res.body.meta || {}
+    // res.body.meta.fromCache = Boolean(cache)
     return next()
   } catch (err) {
     return next(err)

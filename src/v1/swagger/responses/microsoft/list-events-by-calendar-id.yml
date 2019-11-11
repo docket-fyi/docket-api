@@ -14,8 +14,8 @@ responses:
                   type: string
             type:
               type: string
-            links:
-              type: object
-              properties:
-                self:
-                  type: string
+        links:
+          type: object
+          properties:
+            self:
+              type: string

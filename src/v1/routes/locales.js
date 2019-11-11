@@ -5,6 +5,9 @@ const { locales } = require('../controllers')
 // const { verifyJwt } = require('../middleware')
 const errors = require('../errors')
 const { Locale } = require('../models')
+const redis = require('../config/redis').primary
+const cacheKeys = require('../config/cache-keys')
+const environment = require('../environment')
 
 const router = express.Router()
 
@@ -40,16 +43,23 @@ GET response body
 async function setLocale(req, res, next) {
   try {
     const { params } = req
-    const locale = await Locale.findOne({
-      where: {
-        code: params.localeCode
+    let locale = null
+    const cache = await redis.get(cacheKeys.locales.show(params.localeCode))
+    if (!cache) {
+      locale = await Locale.findOne({
+        where: {
+          code: params.localeCode
+        }
+      })
+      if (!locale) {
+        res.status(status.NOT_FOUND)
+        throw new errors.locales.NotFoundError()
       }
-    })
-    if (!locale) {
-      res.status(status.NOT_FOUND)
-      throw new errors.locales.NotFoundError()
+      await redis.setex(cacheKeys.locales.show(params.localeCode), environment.redis.defaultTtl, JSON.stringify(locale.toJSON()))
+    } else {
+      locale = Locale.build(JSON.parse(cache))
     }
-    req.locale = locale
+    req.locale = locale // eslint-disable-line require-atomic-updates
     return next()
   } catch (err) {
     return next(err)
