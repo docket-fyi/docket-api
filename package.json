@@ -62,7 +62,7 @@
     "swagger-jsdoc": "3.4.0"
   },
   "devDependencies": {
-    "autocannon": "4.3.0",
+    "autocannon": "4.4.0",
     "clinic": "5.0.0",
     "coveralls": "3.0.7",
     "eslint": "6.6.0",
