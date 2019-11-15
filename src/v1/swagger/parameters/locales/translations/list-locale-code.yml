@@ -5,3 +5,4 @@ parameters:
     description: Locale code of translations
     required: true
     type: string
+    enum: ['en-US']

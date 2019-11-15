@@ -17,8 +17,8 @@ const environment = require('../environment')
  * @swagger
  * /locales:
  *   get:
- *     summary:
- *     description:
+ *     summary: List locales
+ *     description: List locales
  *     operationId: listLocales
  *     produces:
  *       - application/vnd.api+json
@@ -44,7 +44,7 @@ async function list(req, res, next) {
       const localesAsString = JSON.stringify(localesAsJson)
       await redis.setex(cacheKeys.locales.list, environment.redis.defaultTtl, localesAsString)
     } else {
-      locales = Locale.build(JSON.parse(cache))
+      locales = Locale.build(JSON.parse(cache), {isNewRecord: false})
     }
     res.status(status.OK)
     res.body = serializers.locales.list.serialize(locales)
@@ -66,8 +66,8 @@ async function list(req, res, next) {
  * @swagger
  * /locales/{localeCode}/translations:
  *   get:
- *     summary:
- *     description:
+ *     summary: List translations by locale code
+ *     description: List translations by locale code
  *     operationId: listTranslationsByLocale
  *     produces:
  *       - application/vnd.api+json
@@ -100,10 +100,11 @@ async function listTranslations(req, res, next) {
       const translationsAsString = JSON.stringify(translationsAsJson)
       await redis.setex(cacheKeys.locales.listTranslations(locale.code), environment.redis.defaultTtl, translationsAsString)
     } else {
-      translations = Translation.build(JSON.parse(cache))
+      translations = Translation.build(JSON.parse(cache), {isNewRecord: false})
     }
     res.status(status.OK)
     res.body = serializers.locales.translations.list.serialize(translations)
+    // res.body = serializers.locales.translations.listKv(translations)
     // res.body.meta = res.body.meta || {}
     // res.body.meta.fromCache = Boolean(cache)
     return next()

@@ -11,14 +11,17 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      uuid: {
+        allowNull: false,
+        type: Sequelize.UUID
+      },
       name: {
         allowNull: false,
         type: Sequelize.STRING
       },
       slug: {
         allowNull: false,
-        type: Sequelize.STRING,
-        unique: true
+        type: Sequelize.STRING
       },
       date: {
         allowNull: true,
@@ -45,6 +48,11 @@ module.exports = {
         allowNull: true,
         type: Sequelize.DATE
       }
+    }).then(() => {
+      queryInterface.addConstraint(TABLE_NAME, ['slug', 'date'], {
+        type: 'unique'
+        // name: 'events_slug_date' // The name the Sequelize auto-generates is too long
+      })
     })
   },
 

@@ -4,10 +4,12 @@ module.exports = new JsonApiSerializer('User', {
   attributes: [
     'firstName',
     'lastName',
+    'initials',
     'email',
-    'createdAt',
-    'confirmedAt',
-    'updatedAt'
+    'isPremium',
+    'createdAt'
+    // 'confirmedAt',
+    // 'updatedAt'
   ],
   keyForAttribute: 'camelCase',
   pluralizeType: false,

@@ -19,6 +19,8 @@ module.exports = {
   },
   search: {},
   users: {
-    show: id => key('users', id)
+    show: id => key('users', id),
+    active: key('users', 'active'),
+    sockets: id => key('users', id, 'sockets')
   }
 }

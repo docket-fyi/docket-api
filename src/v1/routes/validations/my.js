@@ -11,6 +11,7 @@ const validations = {
       const { body } = req
       const bodySchema = Joi.object().keys({
         data: Joi.object().keys({
+          type: Joi.string(),
           attributes: Joi.object().keys({
             name: Joi.string().min(1).required(),
             date: Joi.date().required()
@@ -38,6 +39,7 @@ const validations = {
       })
       const bodySchema = Joi.object().keys({
         data: Joi.object().keys({
+          type: Joi.string(),
           attributes: Joi.object().keys({
             name: Joi.string().min(1),
             date: Joi.date()

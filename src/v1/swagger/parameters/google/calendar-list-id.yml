@@ -1,0 +1,7 @@
+parameters:
+  GoogleCalendarListIdPathParameter:
+    name: calendarListId
+    in: path
+    description: Calendar list ID
+    required: true
+    type: string

@@ -41,7 +41,7 @@ async function currentUser(req, res, next) {
       }
       await redis.setex(cacheKeys.users.show(currentUser.id), environment.redis.defaultTtl, JSON.stringify(currentUser.toJSON()))
     } else {
-      currentUser = User.build(JSON.parse(cache))
+      currentUser = User.build(JSON.parse(cache), {isNewRecord: false})
     }
     req.currentUser = currentUser // eslint-disable-line require-atomic-updates
     return next()
