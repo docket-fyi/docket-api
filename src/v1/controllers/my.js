@@ -4,6 +4,7 @@ const status = require('http-status')
 const moment = require('moment')
 const slugify = require('slugify')
 const Sentry = require('@sentry/node')
+const uuid = require('uuid/v4')
 
 const { Event } = require('../models')
 const { createEventReminder } = require('../config/redis')
@@ -62,8 +63,8 @@ async function show(req, res, next) {
  * @swagger
  * /my/profile:
  *   patch:
- *     summary:
- *     description:
+ *     summary: Update the current user's profile
+ *     description: Update the current user's profile
  *     operationId: updateMyProfile
  *     security:
  *       - jwt: []
@@ -112,8 +113,8 @@ async function update(req, res, next) {
  * @swagger
  * /my/profile:
  *   delete:
- *     summary:
- *     description:
+ *     summary: Delete the current user
+ *     description: Delete the current user
  *     operationId: destroyMyProfile
  *     security:
  *       - jwt: []
@@ -159,8 +160,8 @@ async function destroy(req, res, next) {
  * @swagger
  * /my/events:
  *   get:
- *     summary:
- *     description:
+ *     summary: List the current user's events
+ *     description: List the current user's events
  *     operationId: listMyEvents
  *     security:
  *       - jwt: []
@@ -185,7 +186,7 @@ async function listEvents(req, res, next) {
       where: {
         userId: currentUser.id
       }
-    }) // TODO: pagination (limit & offset query params)
+    }) // TODO: Pagination (limit & offset query params)
     // const eventsWithDiff = events.map(event => ({
     //   ...event.toObject(),
     //   diff: currentUser.eventDiff(event)
@@ -209,8 +210,8 @@ async function listEvents(req, res, next) {
  * @swagger
  * /my/events/{eventId}:
  *   get:
- *     summary:
- *     description:
+ *     summary: Get an event for the current user by it's ID
+ *     description: Get an event for the current user by it's ID
  *     operationId: getMyEventById
  *     security:
  *       - jwt: []
@@ -252,8 +253,8 @@ async function showEvent(req, res, next) {
  * @swagger
  * /my/events:
  *   post:
- *     summary:
- *     description:
+ *     summary: Create a new event for the current user
+ *     description: Create a new event for the current user
  *     operationId: createMyEvent
  *     security:
  *       - jwt: []
@@ -277,8 +278,6 @@ async function createEvent(req, res, next) {
   try {
     const { deserializedBody, currentUser } = req
     const { name, date /*, reminders*/ } = deserializedBody
-    console.log(date)
-    console.log(moment(date))
     /*
     Repeat every <X> day/week/month/year
       week -> Su/M/Tu/W/Th/F/S
@@ -299,7 +298,8 @@ async function createEvent(req, res, next) {
       userId: currentUser.id,
       name,
       date: moment(date),
-      slug: slugify(name, {lower: true, remove: /[/*+~.()'"!:@]/g})
+      slug: slugify(name, {lower: true, remove: /[/*+~.()'"!:@]/g}),
+      uuid: uuid()
     })
     /*
     if (!currentUser.isPremium) {
@@ -309,12 +309,7 @@ async function createEvent(req, res, next) {
       createEventReminder(key, expiration)
     })
     */
-    createEventReminder(`users:${currentUser._id}:events:${event._id}`, 10 /*moment(date).add(10, 'seconds')*/)
-    // createEventReminderForUser(currentUser, event, moment(date).add(10, 'seconds'))
-    // const eventWithDiff = {
-    //   ...event.toObject(),
-    //   diff: currentUser.eventDiff(event)
-    // }
+    createEventReminder(`docket:users:${currentUser.id}:events:${event.id}`, 10 /*moment(date).add(10, 'seconds')*/)
     res.status(status.OK)
     res.body = serializers.my.events.create.serialize(event)
     return next()
@@ -334,8 +329,8 @@ async function createEvent(req, res, next) {
  * @swagger
  * /my/events/import:
  *   post:
- *     summary:
- *     description:
+ *     summary: Bulk import events for the current user
+ *     description: Bulk import events for the current user
  *     operationId: importMyEvents
  *     security:
  *       - jwt: []
@@ -396,8 +391,8 @@ async function importEvents(req, res, next) {
  * @swagger
  * /my/events/{eventId}:
  *   patch:
- *     summary:
- *     description:
+ *     summary: Update an event for the current user by it's ID
+ *     description: Update an event for the current user by it's ID
  *     operationId: updateMyEventById
  *     security:
  *       - jwt: []
@@ -440,8 +435,8 @@ async function updateEvent(req, res, next) {
  * @swagger
  * /my/events/{eventId}:
  *   delete:
- *     summary:
- *     description:
+ *     summary: Delete an event for the current user by it's ID
+ *     description: Delete an event for the current user by it's ID
  *     operationId: deleteMyEventById
  *     security:
  *       - jwt: []
@@ -482,8 +477,8 @@ async function destroyEvent(req, res, next) {
  * @swagger
  * /my/membership:
  *   get:
- *     summary:
- *     description:
+ *     summary: Get the current user's membership status
+ *     description: Get the current user's membership status
  *     operationId: showMyMembership
  *     security:
  *       - jwt: []
@@ -521,8 +516,8 @@ async function showMembership(req, res, next) {
  * @swagger
  * /my/membership:
  *   patch:
- *     summary:
- *     description:
+ *     summary: Update the current user's membership status
+ *     description: Update the current user's membership status
  *     operationId: updateMyMembership
  *     security:
  *       - jwt: []

@@ -5,7 +5,10 @@ const TABLE_NAME = 'locales'
 module.exports = {
 
   up: queryInterface/*, Sequelize*/ => {
-    return queryInterface.bulkInsert(TABLE_NAME, [], {})
+    return queryInterface.bulkInsert(TABLE_NAME, [{
+      code: 'en-US',
+      name: 'English (US)'
+    }], {})
   },
 
   down: queryInterface/*, Sequelize*/ => {

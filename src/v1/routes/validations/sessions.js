@@ -1,19 +1,6 @@
 const Joi = require('@hapi/joi')
 
 // function buildUsefulErrorObject(errors) {
-//   return errors.reduce((acc, error) => {
-//     const path = error.path.join('.')
-//     const { type, message } = error
-//     if (!acc.hasOwnProperty(path)) { // eslint-disable-line no-prototype-builtins
-//       acc[path] = {
-//         type,
-//         code: `error.${path}.${type}`,
-//         message,
-//         path
-//       }
-//     }
-//     return acc
-//   }, {})
 //   return errors.map(error => {
 //     const path = error.path.join('.')
 //     const { type, message } = error
@@ -32,6 +19,7 @@ const validations = {
       const { body } = req
       const bodySchema = Joi.object().keys({
         data: Joi.object().keys({
+          type: Joi.string(),
           attributes: Joi.object().keys({
             email: Joi.string().email().required(),
             password: Joi.string().required()

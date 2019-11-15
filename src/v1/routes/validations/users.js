@@ -6,6 +6,7 @@ const validations = {
       const { body } = req
       const bodySchema = Joi.object().keys({
         data: Joi.object().keys({
+          type: Joi.string(),
           attributes: Joi.object().keys({
             email: Joi.string().email().required(),
             firstName: Joi.string().required(),
@@ -18,8 +19,6 @@ const validations = {
       }
       let bodyValidation = bodySchema.validate(body, options)
       if (bodyValidation.error) {
-        // const usefulErrors = buildUsefulErrorObject(bodyValidation.error.details)
-        // return next(usefulErrors)
         return next(bodyValidation.error)
       }
       return next()
@@ -29,10 +28,11 @@ const validations = {
     post: (req, res, next) => {
       const { body, query } = req
       const querySchema = Joi.object().keys({
-          code: Joi.string().required()
+        code: Joi.string().required()
       })
       const bodySchema = Joi.object().keys({
         data: Joi.object().keys({
+          type: Joi.string(),
           attributes: Joi.object().keys({
             password: Joi.string().required(),
             passwordConfirmation: Joi.string().required()
@@ -58,6 +58,7 @@ const validations = {
       const { body } = req
       const bodySchema = Joi.object().keys({
         data: Joi.object().keys({
+          type: Joi.string(),
           attributes: Joi.object().keys({
             email: Joi.string().email().required()
           })
@@ -81,6 +82,7 @@ const validations = {
       })
       const bodySchema = Joi.object().keys({
         data: Joi.object().keys({
+          type: Joi.string(),
           attributes: Joi.object().keys({
             password: Joi.string().required(),
             passwordConfirmation: Joi.string().required()

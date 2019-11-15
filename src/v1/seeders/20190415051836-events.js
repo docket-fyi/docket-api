@@ -4,8 +4,9 @@ const TABLE_NAME = 'events'
 
 module.exports = {
 
-  up: queryInterface/*, Sequelize*/ => {
-    return queryInterface.bulkInsert(TABLE_NAME, [], {})
+  up: (/*queryInterface, Sequelize*/) => {
+    // return queryInterface.bulkInsert(TABLE_NAME, [], {})
+    return Promise.resolve()
   },
 
   down: queryInterface/*, Sequelize*/ => {

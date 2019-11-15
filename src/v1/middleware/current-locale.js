@@ -2,6 +2,11 @@ const acceptLanguage = require('accept-language')
 
 const debug = require('../config/debug').api
 const { Locale } = require('../models')
+const environment = require('../environment')
+const redis = require('../config/redis').primary
+const cacheKeys = require('../config/cache-keys')
+
+const FALLBACK_LOCALE = environment.api.fallbackLocale
 
 /**
  * Inspects the 'Accept-Language' request header to determine a closest
@@ -16,21 +21,53 @@ const { Locale } = require('../models')
 async function currentLocale(req, res, next) {
   try {
     const acceptLanguageHeader = req.get('Accept-Language')
-    const supportedLocales = [] // await Locale.distinct('code')
-    acceptLanguage.languages(supportedLocales)
-    const code = acceptLanguage.get(acceptLanguageHeader)
-    const locale = await Locale.findOne({ code })
-    /**
-     * Intentionally not performing the following check because users should
-     * be able to carry on even if they are using an unsupported language.
-     *
-    if (!locale) {
-      res.status(status.BAD_REQUEST)
-      throw new LocaleNotFoundError()
+
+    let fallbackLocale = null
+    const fallbackLocaleCache = await redis.get(cacheKeys.locales.show(FALLBACK_LOCALE))
+    if (!fallbackLocaleCache) {
+      fallbackLocale = await Locale.findOne({
+        where: {
+          code: 'en-US'
+        }
+      })
+      const fallbackLocaleAsJson = fallbackLocale.toJSON()
+      const fallbackLocaleAsString = JSON.stringify(fallbackLocaleAsJson)
+      await redis.setex(cacheKeys.locales.show(FALLBACK_LOCALE), environment.redis.defaultTtl, fallbackLocaleAsString)
+    } else {
+      fallbackLocale = Locale.build(JSON.parse(fallbackLocaleCache), {newRecord: false})
     }
-    */
-    // NOTE: It's possible for this to be `null`
-    req.currentLocale = locale // eslint-disable-line require-atomic-updates
+
+    let supportedLocales = null
+    const supportedLocalesCache = await redis.get(cacheKeys.locales.list)
+    if (!supportedLocalesCache) {
+      supportedLocales = await Locale.findAll()
+      const supportedLocalesAsJson = supportedLocales.map(locale => locale.toJSON())
+      const supportedLocalesAsString = JSON.stringify(supportedLocalesAsJson)
+      await redis.setex(cacheKeys.locales.list, environment.redis.defaultTtl, supportedLocalesAsString)
+    } else {
+      supportedLocales = JSON.parse(supportedLocalesCache).map(locale => Locale.build(locale, {newRecord: false}))
+    }
+
+    const supportedLocalesAsJson = supportedLocales.map(locale => locale.code)
+    acceptLanguage.languages(supportedLocalesAsJson)
+    const code = acceptLanguage.get(acceptLanguageHeader)
+
+    let locale = null
+    const localeCache = await redis.get(cacheKeys.locales.show(code))
+    if (!localeCache) {
+      locale = await Locale.findOne({
+        where: {
+          code
+        }
+      })
+     const localeAsJson = locale.toJSON()
+     const localeAsString = JSON.stringify(localeAsJson)
+     await redis.setex(cacheKeys.locales.show(code), environment.redis.defaultTtl, localeAsString)
+    } else {
+      locale = Locale.build(JSON.parse(localeCache), {newRecord: false})
+    }
+
+    req.currentLocale = locale || fallbackLocale // eslint-disable-line require-atomic-updates
     return next()
   } catch (err) {
     debug(`${err.name}: ${err.message}`)

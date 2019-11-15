@@ -65,8 +65,8 @@ async function getOAuthUrl(req, res, next) {
  * @swagger
  * /google/tokens:
  *   get:
- *     summary:
- *     description:
+ *     summary: Get Google access tokens
+ *     description: Get Google access tokens
  *     operationId: googleGetAccessTokens
  *     security:
  *       - jwt: []
@@ -75,7 +75,7 @@ async function getOAuthUrl(req, res, next) {
  *     tags:
  *       - Google
  *     parameters:
- *       - $ref: '#/parameters/MicrosoftGetAccessTokensCodeQueryParameter'
+ *       - $ref: '#/parameters/GoogleGetAccessTokensCodeQueryParameter'
  *     responses:
  *       204:
  *         $ref: '#/responses/NoContentResponse'
@@ -123,8 +123,8 @@ async function destroyCalendarList(req, res, next) {
  * @swagger
  * /google/calendars-lists/{calendarListId}:
  *   get:
- *     summary:
- *     description:
+ *     summary: Get a Google calendar list by ID
+ *     description: Get a Google calendar list by ID
  *     operationId: googleShowCalendarListById
  *     security:
  *       - jwt: []
@@ -133,7 +133,7 @@ async function destroyCalendarList(req, res, next) {
  *     tags:
  *       - Google
  *     parameters:
- *       - $ref: '#/parameters/GoogleListCalendarListsIncludeQueryParameter'
+ *       - $ref: '#/parameters/GoogleCalendarListIdPathParameter'
  *     responses:
  *       204:
  *         $ref: '#/responses/NoContentResponse'
@@ -172,8 +172,8 @@ async function createCalendarList(req, res, next) {
  * @swagger
  * /google/calendars-lists:
  *   get:
- *     summary:
- *     description:
+ *     summary: List calendar lists
+ *     description: List calendar lists
  *     operationId: googleListCalendarLists
  *     security:
  *       - jwt: []
@@ -181,8 +181,6 @@ async function createCalendarList(req, res, next) {
  *       - application/vnd.api+json
  *     tags:
  *       - Google
- *     parameters:
- *       - $ref: '#/parameters/GoogleListCalendarListsIncludeQueryParameter'
  *     responses:
  *       204:
  *         $ref: '#/responses/NoContentResponse'
@@ -259,8 +257,8 @@ async function replaceCalendarList(req, res, next) {
  * @swagger
  * /google/calendars-lists/watch:
  *   post:
- *     summary:
- *     description:
+ *     summary: Watch calendar lists
+ *     description: Watch calendar lists
  *     operationId: googleWatchCalendarLists
  *     security:
  *       - jwt: []
@@ -268,8 +266,6 @@ async function replaceCalendarList(req, res, next) {
  *       - application/vnd.api+json
  *     tags:
  *       - Google
- *     parameters:
- *       - $ref: '#/parameters/GoogleListCalendarListsIncludeQueryParameter'
  *     responses:
  *       204:
  *         $ref: '#/responses/NoContentResponse'
@@ -318,8 +314,8 @@ async function destroyCalendar(req, res, next) {
  * @swagger
  * /google/calendars/{calendarId}:
  *   get:
- *     summary:
- *     description:
+ *     summary: Get calendar by ID
+ *     description: Get calendar by ID
  *     operationId: googleShowCalendarById
  *     security:
  *       - jwt: []
@@ -328,7 +324,7 @@ async function destroyCalendar(req, res, next) {
  *     tags:
  *       - Google
  *     parameters:
- *       - $ref: '#/parameters/GoogleListCalendarListsIncludeQueryParameter'
+ *       - $ref: '#/parameters/GoogleCalendarIdPathParameter'
  *     responses:
  *       204:
  *         $ref: '#/responses/NoContentResponse'
@@ -397,9 +393,9 @@ async function destroyEvent(req, res, next) {
  * @swagger
  * /google/calendars/{calendarId}/events/{eventId}:
  *   get:
- *     summary:
- *     description:
- *     operationId: googleWatchCalendarLists
+ *     summary: Get event by ID
+ *     description: Get event by ID
+ *     operationId: googleShowEventById
  *     security:
  *       - jwt: []
  *     produces:
@@ -407,7 +403,8 @@ async function destroyEvent(req, res, next) {
  *     tags:
  *       - Google
  *     parameters:
- *       - $ref: '#/parameters/GoogleListCalendarListsIncludeQueryParameter'
+ *       - $ref: '#/parameters/GoogleCalendarIdPathParameter'
+ *       - $ref: '#/parameters/GoogleEventIdPathParameter'
  *     responses:
  *       204:
  *         $ref: '#/responses/NoContentResponse'
@@ -456,8 +453,8 @@ async function createEvent(req, res, next) {
  * @swagger
  * /google/calendars/{calendarId}/events/{eventId}/instances:
  *   get:
- *     summary:
- *     description:
+ *     summary: Get event instances by ID
+ *     description: Get event instances by ID
  *     operationId: googleListEventInstances
  *     security:
  *       - jwt: []
@@ -466,7 +463,8 @@ async function createEvent(req, res, next) {
  *     tags:
  *       - Google
  *     parameters:
- *       - $ref: '#/parameters/GoogleListCalendarListsIncludeQueryParameter'
+ *       - $ref: '#/parameters/GoogleCalendarIdPathParameter'
+ *       - $ref: '#/parameters/GoogleEventIdPathParameter'
  *     responses:
  *       204:
  *         $ref: '#/responses/NoContentResponse'
@@ -495,9 +493,9 @@ async function listEventInstances(req, res, next) {
  * @swagger
  * /google/calendars/{calendarId}/events:
  *   get:
- *     summary:
- *     description:
- *     operationId: googleListEvents
+ *     summary: List events by calendar ID
+ *     description: List events by calendar ID
+ *     operationId: googleListEventsByCalendarId
  *     security:
  *       - jwt: []
  *     produces:
@@ -505,7 +503,7 @@ async function listEventInstances(req, res, next) {
  *     tags:
  *       - Google
  *     parameters:
- *       - $ref: '#/parameters/GoogleListCalendarListsIncludeQueryParameter'
+ *       - $ref: '#/parameters/GoogleCalendarIdPathParameter'
  *     responses:
  *       204:
  *         $ref: '#/responses/NoContentResponse'
@@ -572,10 +570,10 @@ async function replaceEvent(req, res, next) {
  * @param {Function} next Callback to continue on to next middleware
  * @return {Promise<undefined>}
  * @swagger
- * /google/calendars/:calendarId/events/watch:
+ * /google/calendars/{calendarId}/events/watch:
  *   post:
- *     summary:
- *     description:
+ *     summary: Watch events
+ *     description: Watch events
  *     operationId: googleWatchEvents
  *     security:
  *       - jwt: []
@@ -584,7 +582,7 @@ async function replaceEvent(req, res, next) {
  *     tags:
  *       - Google
  *     parameters:
- *       - $ref: '#/parameters/GoogleListCalendarListsIncludeQueryParameter'
+ *       - $ref: '#/parameters/GoogleCalendarIdPathParameter'
  *     responses:
  *       204:
  *         $ref: '#/responses/NoContentResponse'

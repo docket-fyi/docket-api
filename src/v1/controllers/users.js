@@ -1,8 +1,11 @@
+/* eslint-disable max-lines */
+
 const Sentry = require('@sentry/node')
 const status = require('http-status')
 const bcrypt = require('bcryptjs')
 const jsonWebToken = require('jsonwebtoken')
 const moment = require('moment')
+const uuid = require('uuid/v4')
 
 const environment = require('../environment')
 const { User } = require('../models')
@@ -53,7 +56,9 @@ async function create(req, res, next) {
     const user = await User.create({
       firstName,
       lastName,
-      email
+      email,
+      preferredMeasurementUnit: 'd',
+      uuid: uuid()
     })
     await sendRegistrationConfirmationEmailQueue.add({
       referrer: req.get('Referrer'),

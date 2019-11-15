@@ -2,7 +2,8 @@ module.exports = {
   api: {
     name: process.env.NODE_ENV || 'staging',
     port: process.env.PORT || '3000',
-    version: process.env.VERSION || 'v1'
+    version: process.env.VERSION || 'v1',
+    fallbackLocale: process.env.FALLBACK_LOCALE || 'en-US'
   },
   jwt: {
     secret: process.env.JWT_SECRET,

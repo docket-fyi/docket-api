@@ -21,8 +21,8 @@ const serializers = require('../serializers')
  * @swagger
  * /microsoft/oauth-url:
  *   get:
- *     summary:
- *     description:
+ *     summary: Get Microsoft OAuth URL
+ *     description: Get Microsoft OAuth URL
  *     operationId: microsoftGetOAuthUrl
  *     security:
  *       - jwt: []
@@ -68,8 +68,8 @@ async function getOAuthUrl(req, res, next) {
  * @swagger
  * /microsoft/tokens:
  *   get:
- *     summary:
- *     description:
+ *     summary: Get Microsoft access tokens
+ *     description: Get Microsoft access tokens
  *     operationId: microsoftGetAccessTokens
  *     security:
  *       - jwt: []
@@ -134,8 +134,8 @@ async function getAccessTokens(req, res, next) {
  * @swagger
  * /microsoft/calendars:
  *   get:
- *     summary:
- *     description:
+ *     summary: List Microsoft calendars
+ *     description: List microsoft calendars
  *     operationId: microsoftListCalendars
  *     security:
  *       - jwt: []
@@ -184,8 +184,8 @@ async function listCalendars(req, res, next) {
  * @swagger
  * /microsoft/calendars/{calendarId}/events:
  *   get:
- *     summary:
- *     description:
+ *     summary: List Microsoft events by calendar ID
+ *     description: List Microsoft events by calendar ID
  *     operationId: microsoftListEventsByCalendarId
  *     security:
  *       - jwt: []

@@ -6,11 +6,7 @@ const Sentry = require('@sentry/node')
 const environment = require('../environment')
 const { User } = require('../models')
 const serializers = require('../serializers')
-const {
-  InvalidLoginError,
-  MissingAuthParamError,
-  UserNotConfirmedError
-} = require('../errors')
+const errors = require('../errors')
 
 /**
  * Attempts to find and authenticate a user and, if valid, returns a JWT.
@@ -49,7 +45,7 @@ async function create(req, res, next) {
     const { email, password } = deserializedBody
     if (!email || !password) {
       res.status(status.BAD_REQUEST)
-      throw new MissingAuthParamError()
+      throw new errors.authentication.InvalidLoginError()
     }
     const user = await User.findOne({
       where: {
@@ -58,16 +54,16 @@ async function create(req, res, next) {
     })
     if (!user) {
       res.status(status.BAD_REQUEST)
-      throw new InvalidLoginError()
+      throw new errors.authentication.InvalidLoginError()
     }
     if (!user.confirmedAt) {
       res.status(status.BAD_REQUEST)
-      throw new UserNotConfirmedError()
+      throw new errors.users.NotConfirmedError()
     }
     const isValidLogin = bcrypt.compareSync(password, user.passwordDigest) // eslint-disable-line no-sync
     if (!isValidLogin) {
       res.status(status.BAD_REQUEST)
-      throw new InvalidLoginError()
+      throw new errors.authentication.InvalidLoginError()
     }
     const options = {
       expiresIn: environment.jwt.expiration

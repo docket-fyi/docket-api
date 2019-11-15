@@ -3,10 +3,10 @@ const JsonApiSerializer = require('jsonapi-serializer').Serializer
 module.exports = new JsonApiSerializer('Translation', {
   attributes: [
     'key',
-    'localeId',
+    // 'localeId',
     'text',
-    'createdAt',
-    'updatedAt'
+    // 'createdAt',
+    // 'updatedAt'
   ],
   keyForAttribute: 'camelCase',
   pluralizeType: false,

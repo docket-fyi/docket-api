@@ -57,7 +57,7 @@ async function setLocale(req, res, next) {
       }
       await redis.setex(cacheKeys.locales.show(params.localeCode), environment.redis.defaultTtl, JSON.stringify(locale.toJSON()))
     } else {
-      locale = Locale.build(JSON.parse(cache))
+      locale = Locale.build(JSON.parse(cache), {isNewRecord: false})
     }
     req.locale = locale // eslint-disable-line require-atomic-updates
     return next()
