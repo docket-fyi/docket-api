@@ -25,8 +25,6 @@ const serializers = require('../serializers')
  *     operationId: getGoogleOAuthUrl
  *     consumes:
  *       - application/vnd.api+json
- *     security:
- *       - jwt: []
  *     produces:
  *       - application/vnd.api+json
  *     tags:

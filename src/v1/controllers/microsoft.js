@@ -23,9 +23,7 @@ const serializers = require('../serializers')
  *   get:
  *     summary: Get Microsoft OAuth URL
  *     description: Get Microsoft OAuth URL
- *     operationId: microsoftGetOAuthUrl
- *     security:
- *       - jwt: []
+ *     operationId: getMicrosoftOAuthUrl
  *     produces:
  *       - application/vnd.api+json
  *     tags:

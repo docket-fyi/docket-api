@@ -68,5 +68,10 @@ module.exports = {
   stripe: {
     publicKey: process.env.STRIPE_PUBLIC_KEY,
     secretKey: process.env.STRIPE_SECRET_KEY
+  },
+  elasticsearch: {
+    protocol: process.env.ELASTICSEARCH_PROTOCOL || 'http://',
+    host: process.env.ELASTICSEARCH_HOST || 'docket-elasticsearch',
+    port: process.env.ELASTICSEARCH_PORT || 9200
   }
 }
