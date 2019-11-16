@@ -63,5 +63,10 @@ module.exports = {
   },
   sentry: {
     dsn: process.env.SENTRY_DSN
+  },
+  elasticsearch: {
+    protocol: process.env.ELASTICSEARCH_PROTOCOL || 'http://',
+    host: process.env.ELASTICSEARCH_HOST || 'docket-elasticsearch',
+    port: process.env.ELASTICSEARCH_PORT || 9200
   }
 }

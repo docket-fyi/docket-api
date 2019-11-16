@@ -5,7 +5,7 @@ const { google } = require('../controllers')
 
 const router = express.Router()
 
-router.get('/google/oauth-url', verifyJwt, currentUser, google.getOAuthUrl)
+router.get('/google/oauth-url', google.getOAuthUrl)
 router.get('/google/tokens', verifyJwt, currentUser, google.getAccessTokens)
 
 // @see https://developers.google.com/calendar/v3/reference/?authuser=1#CalendarList

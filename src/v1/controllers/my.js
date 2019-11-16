@@ -10,6 +10,7 @@ const { Event } = require('../models')
 const { createEventReminder } = require('../config/redis')
 const errors = require('../errors')
 const serializers = require('../serializers')
+const elasticsearch = require('../config/elasticsearch')
 // const stripe = require('../config/stripe')
 
 /**
@@ -309,6 +310,13 @@ async function createEvent(req, res, next) {
       createEventReminder(key, expiration)
     })
     */
+    await elasticsearch.index({
+      index: 'docket',
+      refresh: true,
+      body: {
+        ...event.toJSON()
+      }
+    })
     createEventReminder(`docket:users:${currentUser.id}:events:${event.id}`, 10 /*moment(date).add(10, 'seconds')*/)
     res.status(status.OK)
     res.body = serializers.my.events.create.serialize(event)

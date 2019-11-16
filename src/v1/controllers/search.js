@@ -2,6 +2,7 @@ const status = require('http-status')
 const Sentry = require('@sentry/node')
 
 // const environment = require('../environment')
+const elasticsearch = require('../config/elasticsearch')
 const serializers = require('../serializers')
 // const { } = require('../errors')
 
@@ -17,7 +18,7 @@ const serializers = require('../serializers')
  *   get:
  *     summary: Perform a search
  *     description: Perform a search
- *     operationId: listSearch
+ *     operationId: listSearchResults
  *     security:
  *       - jwt: []
  *     produces:
@@ -38,24 +39,29 @@ async function list(req, res, next) {
     scope.setTag('action', 'list')
   })
   try {
-    // const query = req.query
-    // const results = await elasticsearch.search({
-    //   index: 'docket',
-    //   body: {
-    //     query: {
-    //       match: {
-    //         company: query
-    //       }
-    //     }
-    //   }
-    // })
-    const results = {
+    const { currentUser } = req
+    const query = req.query
+    const results = await elasticsearch.search({
+      index: 'docket',
       body: {
-        hits: {
-          hits: []
+        query: {
+          bool: {
+            must: [
+              {
+                match: {
+                  name: query
+                }
+              },
+              {
+                match: {
+                  userId: currentUser.id
+                }
+              }
+            ]
+          }
         }
       }
-    }
+    })
     res.body = serializers.search.list.serialize(results.body.hits.hits)
     res.status(status.OK)
     return next()
