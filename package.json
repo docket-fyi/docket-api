@@ -65,7 +65,7 @@
   "devDependencies": {
     "autocannon": "4.4.0",
     "clinic": "5.0.0",
-    "coveralls": "3.0.7",
+    "coveralls": "3.0.8",
     "eslint": "6.6.0",
     "express-list-endpoints": "4.0.1",
     "husky": "3.0.9",
