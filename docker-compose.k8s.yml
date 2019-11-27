@@ -1,19 +1,13 @@
 # See https://docs.docker.com/compose/compose-file/
 
-version: '2.4'
+version: "3"
 services:
   docket-vault:
     container_name: docket-vault
-    build: ./docker/vault
-    command: vault server -config=/vault/config/local.json
+    # build: ./docker/vault
+    image: docket-api_docket-vault
     ports:
       - 8200:8200
-      - 8201:8201
-    environment:
-      VAULT_LOCAL_CONFIG: '{"backend": {"file": {"path": "/vault/file"}}, "listener": {"tcp": {"address": "0.0.0.0:8200", "tls_disable": 1}}, "default_lease_ttl": "168h", "max_lease_ttl": "720h", "ui": true}'
-      VAULT_API_ADDR: 'http://127.0.0.1:8200'
-    cap_add:
-      - IPC_LOCK
   docket-swagger-ui:
     container_name: docket-swagger-ui
     image: swaggerapi/swagger-ui
@@ -21,12 +15,14 @@ services:
       - 3200:8080
   docket-redis:
     container_name: docket-redis
-    build: ./docker/redis
+    # build: ./docker/redis
+    image: docket-api_docket-redis
     ports:
       - 6379:6379
   docket-postgres:
     container_name: docket-postgres
-    build: ./docker/postgres
+    # build: ./docker/postgres
+    image: docket-api_docket-postgres
     ports:
       - 5432:5432
     # environment:
@@ -35,7 +31,8 @@ services:
   docket-elasticsearch:
     container_name: docket-elasticsearch
     # image: elasticsearch:7.2.0
-    build: ./docker/elasticsearch
+    # build: ./docker/elasticsearch
+    image: docket-api_docket-elasticsearch
     ports:
       - 9200:9200
       - 9300:9300
@@ -56,10 +53,10 @@ services:
     environment:
       ELASTICSEARCH_HOSTS: 'http://docket-elasticsearch:9200'
     depends_on:
-      docket-elasticsearch:
-        condition: service_healthy
-    links:
       - docket-elasticsearch
+        # condition: service_healthy
+    # links:
+    #   - docket-elasticsearch
     # networks:
     #   - docket
   # docket-mongo:
@@ -75,10 +72,8 @@ services:
   docket-api:
     entrypoint: ["./docker-entrypoint.sh"]
     container_name: docket-api
-    build: .
-    environment:
-      VAULT_APPROLE_ROLE_ID: ${VAULT_APPROLE_ROLE_ID}
-      VAULT_APPROLE_ROLE_SECRET_WRAP_TOKEN: ${VAULT_APPROLE_ROLE_SECRET_WRAP_TOKEN}
+    image: docket-api_docket-api
+    # build: .
     # command: npm run start
     # working_dir: /docket/docket-api
     # volumes:
@@ -89,23 +84,23 @@ services:
       # - 9229:9229
       - 9299:9299
     depends_on:
-      docket-postgres:
-        condition: service_healthy
-      docket-redis:
-        condition: service_healthy
-      docket-elasticsearch:
-        condition: service_healthy
-      # docket-vault:
-      #   condition: service_healthy
-    links:
       - docket-postgres
+        # condition: service_healthy
       - docket-redis
+        # condition: service_healthy
       - docket-elasticsearch
+        # condition: service_healthy
       - docket-vault
+        # condition: service_healthy
+    # links:
+    #   - docket-postgres
+    #   - docket-redis
+    #   - docket-elasticsearch
   docket-worker:
     # entrypoint: ["./docker-entrypoint.sh"]
     container_name: docket-worker
-    build: .
+    # build: .
+    image: docket-api_docket-worker
     # command: node --inspect=0.0.0.0 ./index.js
     # command: npm run start:worker
     # working_dir: /docket/docket-worker
@@ -118,18 +113,17 @@ services:
       # - '9299:9299'
     depends_on:
       # - docket-postgres
-      docket-redis:
-        condition: service_healthy
-      docket-elasticsearch:
-        condition: service_healthy
-      # docket-vault:
-      #   condition: service_healthy
+      - docket-redis
+        # condition: service_healthy
+      - docket-elasticsearch
+        # condition: service_healthy
+      - docket-vault
+        # condition: service_healthy
       # docket-api:
       #   condition: service_healthy
       # docket-postgres:
       #   condition: service_healthy
-    links:
-      # - docket-postgres
-      - docket-redis
-      - docket-elasticsearch
-      - docket-vault
+    # links:
+    #   # - docket-postgres
+    #   - docket-redis
+    #   - docket-elasticsearch

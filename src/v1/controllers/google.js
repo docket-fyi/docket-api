@@ -1,4 +1,4 @@
-/* eslint-disable max-lines */
+/* eslint-disable max-lines, no-warning-comments */
 
 const Sentry = require('@sentry/node')
 const status = require('http-status')

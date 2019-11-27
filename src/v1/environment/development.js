@@ -73,5 +73,13 @@ module.exports = {
     protocol: process.env.ELASTICSEARCH_PROTOCOL || 'http://',
     host: process.env.ELASTICSEARCH_HOST || 'docket-elasticsearch',
     port: process.env.ELASTICSEARCH_PORT || 9200
+  },
+  vault: {
+    apiVersion: process.env.VAULT_API_VERSION || 'v1',
+    protocol: process.env.VAULT_PROTOCOL || 'http://',
+    host: process.env.VAULT_HOST || 'docket-vault',
+    port: process.env.VAULT_PORT || 8200,
+    // endpoint: process.env.VAULT_ENDPOINT || 'http://docket-vault:8200',
+    // token: process.env.VAULT_TOKEN,
   }
 }
