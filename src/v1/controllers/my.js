@@ -1,4 +1,4 @@
-/* eslint-disable max-lines */
+/* eslint-disable max-lines, no-warning-comments */
 
 const status = require('http-status')
 const moment = require('moment')

@@ -1,7 +1,7 @@
 module.exports = {
   api: {
     name: process.env.NODE_ENV || 'staging',
-    port: process.env.PORT || '3000',
+    port: process.env.PORT || '3001',
     version: process.env.VERSION || 'v1',
     fallbackLocale: process.env.FALLBACK_LOCALE || 'en-US'
   },
@@ -15,10 +15,10 @@ module.exports = {
     from: process.env.PASSWORD_RESET_FROM || 'no-reply@docket.fyi',
   },
   postgres: {
-    protocol: process.env.DB_PROTOCOL || 'mongodb://',
+    protocol: process.env.DB_PROTOCOL || 'postgresql://',
     host: process.env.DB_HOST || 'docket-postgres',
     port: process.env.DB_PORT || '5432',
-    database: process.env.DB_NAME || 'docket_development',
+    database: process.env.DB_NAME || 'docket_staging',
     useSSL: process.env.DB_USE_SSL || 'false',
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
@@ -26,10 +26,11 @@ module.exports = {
   },
   redis: {
     protocol: process.env.REDIS_PROTOCOL || 'redis://',
-    host: process.env.REDIS_HOST,
+    host: process.env.REDIS_HOST || 'docket-redis',
     port: process.env.REDIS_PORT || '6379',
     username: process.env.REDIS_USERNAME,
     password: process.env.REDIS_PASSWORD,
+    databaseId: process.env.REDIS_DATABASE_ID || '0',
     defaultTtl: process.env.REDIS_DEFAULT_CACHE_TTL_SECONDS || '600' // 10 minutes
   },
   mail: {
@@ -64,9 +65,21 @@ module.exports = {
   sentry: {
     dsn: process.env.SENTRY_DSN
   },
+  stripe: {
+    publicKey: process.env.STRIPE_PUBLIC_KEY,
+    secretKey: process.env.STRIPE_SECRET_KEY
+  },
   elasticsearch: {
     protocol: process.env.ELASTICSEARCH_PROTOCOL || 'http://',
     host: process.env.ELASTICSEARCH_HOST || 'docket-elasticsearch',
     port: process.env.ELASTICSEARCH_PORT || 9200
+  },
+  vault: {
+    apiVersion: process.env.VAULT_API_VERSION || 'v1',
+    protocol: process.env.VAULT_PROTOCOL || 'http://',
+    host: process.env.VAULT_HOST || 'docket-vault',
+    port: process.env.VAULT_PORT || 8200,
+    // endpoint: process.env.VAULT_ENDPOINT || 'http://docket-vault:8200',
+    // token: process.env.VAULT_TOKEN,
   }
 }

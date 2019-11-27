@@ -1,3 +1,5 @@
+/* eslint-disable no-warning-comments */
+
 const socketIO = require('socket.io')
 
 // const debug = require('./debug').socketio
