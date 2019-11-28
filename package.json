@@ -20,7 +20,8 @@
     "db:seed": "node ./src/v1/seeds/index.js",
     "routes": "node ./routes.js",
     "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
+    "prepare": "npm run snyk-protect",
+    "vault:seed": "node ./vault-seed.js"
   },
   "author": "John Goldsmith <john.goldsmith@docket.fyi>",
   "license": "ISC",
@@ -69,6 +70,7 @@
     "eslint": "6.7.1",
     "express-list-endpoints": "4.0.1",
     "husky": "3.1.0",
+    "inquirer": "7.0.0",
     "jest": "24.1.0",
     "nodemon": "2.0.1",
     "npm-run-all": "4.1.5",
