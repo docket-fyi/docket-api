@@ -50,7 +50,7 @@
     "jsonwebtoken": "8.5.1",
     "moment": "2.24.0",
     "node-fetch": "2.6.0",
-    "node-vault": "0.9.11",
+    "node-vault": "0.9.12",
     "nodemailer": "6.3.1",
     "pg": "7.14.0",
     "pg-hstore": "2.3.3",
