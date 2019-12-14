@@ -2,7 +2,6 @@
 
 const debug = require('../config/debug').socketio
 const redis = require('../config/redis').primary
-// const environment = require('../environment')
 const cacheKeys = require('../config/cache-keys')
 
 async function disconnect(socket/*, data*/) {
