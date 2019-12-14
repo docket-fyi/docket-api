@@ -1,0 +1,1145 @@
+####################################################################################################
+# Format version                                                                                   #
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/format-version-structure.html #
+####################################################################################################
+AWSTemplateFormatVersion: "2010-09-09"
+
+##########################################################################################################
+# Description                                                                                            #
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-description-structure.html #
+##########################################################################################################
+Description: >
+  Docket application infrastructure
+
+######################################################################################################
+# Metadata                                                                                           #
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/metadata-section-structure.html #
+######################################################################################################
+# Metadata:
+#   AWS::CloudFormation::Authentication:
+#   AWS::CloudFormation::Init:
+#   AWS::CloudFormation::Interface:
+#   AWS::CloudFormation::Designer:
+
+########################################################################################################
+# Conditions                                                                                           #
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html #
+########################################################################################################
+# Conditions:
+
+#######################################################################################################
+# Transform                                                                                           #
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/transform-section-structure.html #
+#######################################################################################################
+# Transform:
+#   AWS:Serverless:
+#   AWS:Include:
+
+######################################################################################################
+# Mappings                                                                                           #
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/mappings-section-structure.html #
+######################################################################################################
+# Mappings:
+
+########################################################################################################
+# Parameters                                                                                           #
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html #
+########################################################################################################
+Parameters:
+  NodeEnvParameter:
+    AllowedPattern: "[a-z]+"
+    AllowedValues:
+      - "staging"
+      - "production"
+    # ConstraintDescription:
+    # Default:
+    Description: "The environment in which the application will run."
+    # MaxLength:
+    # MaxValue:
+    # MinLength:
+    # MinValue:
+    # NoEcho:
+    Type: "String"
+  PortParameter:
+    # AllowedPattern: "[0-9]+"
+    # AllowedValues:
+    ConstraintDescription: "Must match pattern [0-9]+"
+    Default: 3000
+    Description: "The port that the application will run on."
+    # MaxLength:
+    # MaxValue:
+    # MinLength:
+    # MinValue:
+    # NoEcho:
+    Type: "Number"
+  DebugParameter:
+    # AllowedPattern:
+    # AllowedValues:
+    # ConstraintDescription:
+    Default: "app:*"
+    Description: "Enables/disables specific debugging namespaces."
+    # MaxLength:
+    # MaxValue:
+    # MinLength:
+    # MinValue:
+    # NoEcho:
+    Type: "String"
+  ApiVersionParameter:
+    # AllowedPattern:
+    AllowedValues:
+      - "v1"
+    # ConstraintDescription:
+    Default: "v1"
+    Description: "The version of the application to run."
+    # MaxLength:
+    # MaxValue:
+    # MinLength:
+    # MinValue:
+    # NoEcho:
+    Type: "String"
+  FallbackLocaleParameter:
+    # NB: This covers most locale formats, but is not all-encompassing
+    AllowedPattern: "[a-z]{2}-[A-Z]{2}"
+    AllowedValues:
+      - "en-US"
+    ConstraintDescription: "Must match pattern [a-z]{2}-[A-Z]{2}"
+    Default: "en-US"
+    Description: "The fallback locale."
+    # MaxLength:
+    # MaxValue:
+    # MinLength:
+    # MinValue:
+    # NoEcho:
+    Type: "String"
+  DbMasterUserNameParameter:
+    # AllowedPattern:
+    # AllowedValues:
+    # ConstraintDescription:
+    # Default:
+    Description: "The database master username."
+    # MaxLength:
+    # MaxValue:
+    # MinLength:
+    # MinValue:
+    NoEcho: true
+    Type: "String"
+  DbMasterUserPasswordParameter:
+    # AllowedPattern:
+    # AllowedValues:
+    # ConstraintDescription:
+    # Default:
+    Description: "The database master password."
+    # MaxLength:
+    # MaxValue:
+    # MinLength:
+    # MinValue:
+    NoEcho: true
+    Type: "String"
+  DbHostParameter:
+    # AllowedPattern:
+    # AllowedValues:
+    # ConstraintDescription:
+    # Default:
+    Description: "The database host."
+    # MaxLength:
+    # MaxValue:
+    # MinLength:
+    # MinValue:
+    # NoEcho:
+    Type: "String"
+  RedisHostParameter:
+    # AllowedPattern:
+    # AllowedValues:
+    # ConstraintDescription:
+    # Default:
+    Description: "The Redis host."
+    # MaxLength:
+    # MaxValue:
+    # MinLength:
+    # MinValue:
+    # NoEcho:
+    Type: "String"
+  # Parameter:
+  #   AllowedPattern:
+  #   AllowedValues:
+  #   ConstraintDescription:
+  #   Default:
+  #   Description:
+  #   MaxLength:
+  #   MaxValue:
+  #   MinLength:
+  #   MinValue:
+  #   NoEcho:
+  #   Type:
+
+#######################################################################################################
+# Resources                                                                                           #
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html #
+#######################################################################################################
+Resources:
+  Vpc:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: "10.0.0.0/16"
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: "default"
+      Tags:
+        - Key: "docket-vpc-key"
+          Value: "docket-vpc-value"
+  SubnetOne:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      # AssignIpv6AddressOnCreation: Boolean
+      AvailabilityZone: "us-west-2a"
+      CidrBlock: "10.0.0.0/20"
+      # Ipv6CidrBlock: String
+      # MapPublicIpOnLaunch: Boolean
+      Tags:
+        - Key: "docket-subnet1-key"
+          Value: "docket-subnet1-value"
+      VpcId: !Ref "Vpc"
+  SubnetTwo:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      # AssignIpv6AddressOnCreation: Boolean
+      AvailabilityZone: "us-west-2b"
+      CidrBlock: "10.0.16.0/20"
+      # Ipv6CidrBlock: String
+      # MapPublicIpOnLaunch: Boolean
+      Tags:
+        - Key: "docket-subnet2-key"
+          Value: "docket-subnet2-value"
+      VpcId: !Ref "Vpc"
+  SubnetThree:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      # AssignIpv6AddressOnCreation: Boolean
+      AvailabilityZone: "us-west-2c"
+      CidrBlock: "10.0.32.0/20"
+      # Ipv6CidrBlock: String
+      # MapPublicIpOnLaunch: Boolean
+      Tags:
+        - Key: "docket-subnet3-key"
+          Value: "docket-subnet3-value"
+      VpcId: !Ref "Vpc"
+  SubnetFour:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      # AssignIpv6AddressOnCreation: Boolean
+      AvailabilityZone: "us-west-2d"
+      CidrBlock: "10.0.48.0/20"
+      # Ipv6CidrBlock: String
+      # MapPublicIpOnLaunch: Boolean
+      Tags:
+        - Key: "docket-subnet4-key"
+          Value: "docket-subnet4-value"
+      VpcId: !Ref "Vpc"
+  InternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+        - Key: "docket-internet-gateway-key"
+          Value: "docket-internet-gateway-value"
+  InternetGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      InternetGatewayId: !Ref "InternetGateway"
+      VpcId: !Ref "Vpc"
+      # VpnGatewayId: String
+  RouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      Tags:
+        - Key: "docket-route-table-key"
+          Value: "docket-route-table-value"
+      VpcId: !Ref "Vpc"
+  Route:
+    Type: "AWS::EC2::Route"
+    DependsOn:
+      - "InternetGateway"
+    Properties:
+      DestinationCidrBlock: "0.0.0.0/0"
+      # DestinationIpv6CidrBlock: String
+      # EgressOnlyInternetGatewayId: String
+      GatewayId: !Ref "InternetGateway"
+      # InstanceId: String
+      # NatGatewayId: String
+      # NetworkInterfaceId: String
+      RouteTableId: !Ref "RouteTable"
+      # TransitGatewayId: String
+      # VpcPeeringConnectionId: String
+  SubnetOneRouteTableAssociation:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref "RouteTable"
+      SubnetId: !Ref "SubnetOne"
+  SubnetTwoRouteTableAssociation:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref "RouteTable"
+      SubnetId: !Ref "SubnetTwo"
+  SubnetThreeRouteTableAssociation:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref "RouteTable"
+      SubnetId: !Ref "SubnetThree"
+  SubnetFourRouteTableAssociation:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref "RouteTable"
+      SubnetId: !Ref "SubnetFour"
+  ApiContainerRepository:
+    Type: "AWS::ECR::Repository"
+    Properties:
+      # LifecyclePolicy:
+      #   LifecyclePolicyText: String
+      #   RegistryId: String
+      RepositoryName: "docket/docket-api"
+      # RepositoryPolicyText: Json
+      Tags:
+        - Key: "docket-ecr-key"
+          Value: "docket-ecr-value"
+  WorkerContainerRepository:
+    Type: "AWS::ECR::Repository"
+    Properties:
+      # LifecyclePolicy:
+      #   LifecyclePolicyText: String
+      #   RegistryId: String
+      RepositoryName: "docket/docket-worker"
+      # RepositoryPolicyText: Json
+      # Tags:
+      #   - Key: "docket-ecr-key"
+      #     Value: "docket-ecr-value"
+  TaskDefinition:
+    Type: "AWS::ECS::TaskDefinition"
+    Properties:
+      ContainerDefinitions:
+        - Command:
+            - "npm"
+            - "start"
+          # Cpu: Integer
+          # DependsOn:
+          #   - Condition: String
+          #     ContainerName: String
+          # DisableNetworking: Boolean
+          # DnsSearchDomains:
+          #   - String
+          # DnsServers:
+          #   - String
+          # DockerLabels:
+          #   Key: Value
+          # DockerSecurityOptions:
+          #   - String
+          EntryPoint:
+            - "./docker-entrypoint.sh"
+          Environment:
+            - Name: "NODE_ENV"
+              Value: !Ref "NodeEnvParameter"
+            - Name: "PORT"
+              Value: !Ref "PortParameter"
+            - Name: "DEBUG"
+              Value: !Ref "DebugParameter"
+            - Name: "API_VERSION"
+              Value: !Ref "ApiVersionParameter"
+            - Name: "FALLBACK_LOCALE"
+              Value: !Ref "FallbackLocaleParameter"
+            # - Name: "DB_PROTOCOL"
+            #   Value: !Ref "Parameter"
+            - Name: "DB_HOST"
+              Value: !Ref "DbHostParameter"
+            # - Name: "DB_PORT"
+            #   Value: !Ref "Parameter"
+            - Name: "DB_USERNAME"
+              Value: !Ref "DbMasterUserNameParameter"
+            - Name: "DB_PASSWORD"
+              Value: !Ref "DbMasterUserPasswordParameter"
+            # - Name: "DB_NAME"
+            #   Value: !Ref "Parameter"
+            # - Name: "DB_DIALECT"
+            #   Value: !Ref "Parameter"
+            # - Name: "REDIS_PROTOCOL"
+            #   Value: !Ref "Parameter"
+            - Name: "REDIS_HOST"
+              Value: !Ref "RedisHostParameter"
+            # - Name: "REDIS_PORT"
+            #   Value: !Ref "Parameter"
+            # - Name: "REDIS_USERNAME"
+            #   Value: !Ref "Parameter"
+            # - Name: "REDIS_PASSWORD"
+            #   Value: !Ref "Parameter"
+            # - Name: "REDIS_DATABASE_ID"
+            #   Value: !Ref "Parameter"
+            # - Name: "REDIS_DEFAULT_CACHE_EXPIRY_SECONDS"
+            #   Value: !Ref "Parameter"
+            # - Name: "JWT_SECRET"
+            #   Value: !Ref "Parameter"
+            # - Name: "JWT_EXPIRATION"
+            #   Value: !Ref "Parameter"
+            # - Name: "MAIL_HOST"
+            #   Value: !Ref "Parameter"
+            # - Name: "MAIL_PORT"
+            #   Value: !Ref "Parameter"
+            # - Name: "MAIL_USERNAME"
+            #   Value: !Ref "Parameter"
+            # - Name: "MAIL_PASSWORD"
+            #   Value: !Ref "Parameter"
+            # - Name: "PASSWORD_RESET_SECRET"
+            #   Value: !Ref "Parameter"
+            # - Name: "PASSWORD_RESET_EXPIRATION"
+            #   Value: !Ref "Parameter"
+            # - Name: "PASSWORD_RESET_FROM"
+            #   Value: !Ref "Parameter"
+            # - Name: "REGISTRATION_CONFIRMATION_SECRET"
+            #   Value: !Ref "Parameter"
+            # - Name: "REGISTRATION_CONFIRMATION_EXPIRATION"
+            #   Value: !Ref "Parameter"
+            # - Name: "REGISTRATION_CONFIRMATION_FROM"
+            #   Value: !Ref "Parameter"
+            # - Name: "GOOGLE_CALENDAR_CLIENT_ID"
+            #   Value: !Ref "Parameter"
+            # - Name: "GOOGLE_CALENDAR_CLIENT_SECRET"
+            #   Value: !Ref "Parameter"
+            # - Name: "GOOGLE_CALENDAR_API_KEY"
+            #   Value: !Ref "Parameter"
+            # - Name: "GOOGLE_CALENDAR_REDIRECT_URL"
+            #   Value: !Ref "Parameter"
+            # - Name: "GOOGLE_CALENDAR_SCOPES"
+            #   Value: !Ref "Parameter"
+            # - Name: "MICROSOFT_APPLICATION_ID"
+            #   Value: !Ref "Parameter"
+            # - Name: "MICROSOFT_APPLICATION_PASSWORD"
+            #   Value: !Ref "Parameter"
+            # - Name: "MICROSOFT_TOKEN_HOST"
+            #   Value: !Ref "Parameter"
+            # - Name: "MICROSOFT_AUTHORIZE_PATH"
+            #   Value: !Ref "Parameter"
+            # - Name: "MICROSOFT_TOKEN_PATH"
+            #   Value: !Ref "Parameter"
+            # - Name: "MICROSOFT_REDIRECT_URL"
+            #   Value: !Ref "Parameter"
+            # - Name: "MICROSOFT_SCOPES"
+            #   Value: !Ref "Parameter"
+            # - Name: "STRIPE_PUBLIC_KEY"
+            #   Value: !Ref "Parameter"
+            # - Name: "STRIPE_SECRET_KEY"
+            #   Value: !Ref "Parameter"
+            # - Name: "SENTRY_DSN"
+            #   Value: !Ref "Parameter"
+            # - Name: "ELASTICSEARCH_PROTOCOL"
+            #   Value: !Ref "Parameter"
+            # - Name: "ELASTICSEARCH_HOST"
+            #   Value: !Ref "Parameter"
+            # - Name: "ELASTICSEARCH_PORT"
+            #   Value: !Ref "Parameter"
+            # - Name: "VAULT_API_VERSION"
+            #   Value: !Ref "Parameter"
+            # - Name: "VAULT_PROTOCOL"
+            #   Value: !Ref "Parameter"
+            # - Name: "VAULT_HOST"
+            #   Value: !Ref "Parameter"
+            # - Name: "VAULT_PORT"
+            #   Value: !Ref "Parameter"
+            # - Name: "VAULT_APPROLE_ROLE_ID"
+            #   Value: !Ref "Parameter"
+            # - Name: "VAULT_APPROLE_ROLE_SECRET_WRAP_TOKEN"
+            #   Value: !Ref "Parameter"
+          Essential: true
+          # ExtraHosts:
+          #   - Hostname: String
+          #     IpAddress: String
+          # FirelensConfiguration:
+          #   Options:
+          #     Key: Value
+          #   Type: String
+          # HealthCheck:
+          #   Command:
+          #     - String
+          #   Interval: Integer
+          #   Retries: Integer
+          #   StartPeriod: Integer
+          #   Timeout: Integer
+          # Hostname: String
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ApiContainerRepository}:latest"
+          Interactive: true
+          # Links:
+          #   - String
+          # LinuxParameters:
+          #   Capabilities:
+          #     Add:
+          #       - String
+          #     Drop:
+          #       - String
+          #   Devices:
+          #     - ContainerPath: String
+          #       HostPath: String
+          #       Permissions:
+          #         - String
+          #   InitProcessEnabled: Boolean
+          #   MaxSwap: Integer
+          #   SharedMemorySize: Integer
+          #   Swappiness: Integer
+          #   Tmpfs:
+          #     - ContainerPath: String
+          #       MountOptions:
+          #         - String
+          #       Size: Integer
+          LogConfiguration:
+            LogDriver: "awslogs"
+            Options:
+              awslogs-region: !Ref "AWS::Region"
+              awslogs-group: "docket-log-group"
+              awslogs-stream-prefix: "docket"
+            # SecretOptions:
+            #   - Name: String
+            #     ValueFrom: String
+          # Memory: Integer
+          # MemoryReservation: Integer
+          # MountPoints:
+          #   - ContainerPath: String
+          #     ReadOnly: Boolean
+          #     SourceVolume: String
+          Name: "docket-api"
+          PortMappings:
+            - ContainerPort: 3000
+              # HostPort: 3000
+              Protocol: "tcp"
+          # Privileged: Boolean
+          PseudoTerminal: true
+          # ReadonlyRootFilesystem: Boolean
+          # RepositoryCredentials:
+          #   CredentialsParameter: String
+          # ResourceRequirements:
+          #   - Type: String
+          #     Value: String
+          # Secrets:
+          #   - Name: String
+          #     ValueFrom: String
+          # StartTimeout: Integer
+          # StopTimeout: Integer
+          # SystemControls:
+          #   - Namespace: String
+          #     Value: String
+          # Ulimits:
+          #   - HardLimit: Integer
+          #     Name: String
+          #     SoftLimit: Integer
+          # User: String
+          # VolumesFrom:
+          #   - ReadOnly: Boolean
+          #     SourceContainer: String
+          # WorkingDirectory: String
+      Cpu: 512
+      ExecutionRoleArn: !Ref "ExecutionRole"
+      Family: "docket-task-definition-family"
+      # InferenceAccelerators:
+      #   - DeviceName: String
+      #     DeviceType: String
+      # IpcMode: "host" | "none" | "task"
+      Memory: 1024
+      NetworkMode: "awsvpc"
+      # PidMode: "host" | "task"
+      # PlacementConstraints:
+      #   - Expression: String
+      #     Type: "memberOf"
+      # ProxyConfiguration:
+      #   ContainerName: String
+      #   ProxyConfigurationProperties:
+      #     - Name: String
+      #     - Value: String
+      #   Type: String
+      RequiresCompatibilities:
+        - "FARGATE"
+      Tags:
+        - Key: "task-definition-key"
+          Value: "task-definition-value"
+      TaskRoleArn: !Ref "TaskRole"
+      # Volumes:
+      #   - DockerVolumeConfiguration:
+      #       Autoprovision: Boolean
+      #       Driver: String
+      #       DriverOpts:
+      #         Key: Value
+      #       Labels:
+      #         Key: Value
+      #       Scope: String
+      #     Host:
+      #       SourcePath: String
+      #     Name: String
+  Service:
+    Type: "AWS::ECS::Service"
+    DependsOn:
+      - "LoadBalancerListener"
+    Properties:
+      Cluster: !Ref "Cluster"
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DeploymentController:
+        Type: "ECS"
+      DesiredCount: 0
+      EnableECSManagedTags: true
+      HealthCheckGracePeriodSeconds: 120
+      LaunchType: "FARGATE"
+      LoadBalancers:
+        - ContainerName: "docket-api"
+          ContainerPort: 3000
+          # LoadBalancerName: String
+          TargetGroupArn: !Ref "TargetGroup"
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: "ENABLED"
+          SecurityGroups:
+            - !Ref "ContainerSecurityGroup"
+          Subnets:
+            - !Ref "SubnetOne"
+            - !Ref "SubnetTwo"
+            - !Ref "SubnetThree"
+            - !Ref "SubnetFour"
+      # PlacementConstraints:
+      #   - Expression: String
+      #     Type: "distinctInstance" | "memberOf"
+      # PlacementStrategies:
+      #   - Field: String
+      #     Type: "binpack" | "random" | "spread"
+      PlatformVersion: "LATEST"
+      # PropagateTags: "SERVICE" | "TASK_DEFINITION"
+      # Role: String
+      # SchedulingStrategy: "DAEMON" | "REPLICA"
+      # ServiceName: "docket-api"
+      # ServiceRegistries:
+      #   - ContainerName: String
+      #     ContainerPort: Integer
+      #     Port: Integer
+      #     RegistryArn: String
+      Tags:
+        - Key: "task-service-key"
+          Value: "task-service-value"
+      TaskDefinition: !Ref "TaskDefinition"
+  Cluster:
+    Type: "AWS::ECS::Cluster"
+    Properties:
+      # ClusterName: "docket-cluster"
+      # ClusterSettings:
+      #   - Name: "containerInsights"
+      #     Value: "enabled" | "disabled"
+      Tags:
+        - Key: "docket-cluster-key"
+          Value: "docket-cluster-value"
+  ContainerSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Container security group description"
+      # GroupName: "container-security-group"
+      # SecurityGroupEgress:
+      #   - CidrIp: String
+      #     CidrIpv6: String
+      #     Description: String
+      #     DestinationPrefixListId: String
+      #     DestinationSecurityGroupId: String
+      #     FromPort: Integer
+      #     IpProtocol: String
+      #     ToPort: Integer
+      SecurityGroupIngress:
+        - # CidrIp: "0.0.0.0/0"
+          # CidrIpv6: String
+          Description: "Container security group ingress TCP 80"
+          FromPort: 3000
+          IpProtocol: "tcp"
+          # SourcePrefixListId: String
+          SourceSecurityGroupId: !Ref "LoadBalancerSecurityGroup"
+          # SourceSecurityGroupName: String
+          # SourceSecurityGroupOwnerId: String
+          ToPort: 3000
+        # - # CidrIp: "0.0.0.0/0"
+        #   # CidrIpv6: String
+        #   Description: "Service security group ingress TCP 443"
+        #   FromPort: 443
+        #   IpProtocol: "tcp"
+        #   # SourcePrefixListId: String
+        #   SourceSecurityGroupId: !Ref "LoadBalancerSecurityGroup"
+        #   # SourceSecurityGroupName: String
+        #   # SourceSecurityGroupOwnerId: String
+        #   ToPort: 443
+      Tags:
+        - Key: "container-security-group-key"
+          Value: "container-security-group-value"
+      VpcId: !Ref "Vpc"
+  ExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "ecs-tasks.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Description: "Docket role"
+      # ManagedPolicyArns:
+      #   - "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+      #   - "arn:aws:iam::aws:policy/AmazonEC2ContainerServiceFullAccess"
+      #   - "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
+      # MaxSessionDuration: Integer
+      # Path: String
+      # PermissionsBoundary: String
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "ecr:GetAuthorizationToken"
+                  - "ecr:BatchCheckLayerAvailability"
+                  - "ecr:GetDownloadUrlForLayer"
+                  - "ecr:BatchGetImage"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+          PolicyName: "docket-role-ecs"
+      # RoleName: "docket-execution-role"
+      Tags:
+        - Key: "docket-role-key"
+          Value: "docket-role-value"
+  TaskRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "ecs-tasks.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Description: "Docket role"
+      # ManagedPolicyArns:
+      #   - String
+      # MaxSessionDuration: Integer
+      # Path: String
+      # PermissionsBoundary: String
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "ecr:GetAuthorizationToken"
+                  - "ecr:BatchCheckLayerAvailability"
+                  - "ecr:GetDownloadUrlForLayer"
+                  - "ecr:BatchGetImage"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+          PolicyName: "docket-role-ecs"
+      RoleName: "docket-execution-role"
+      Tags:
+        - Key: "docket-role-key"
+          Value: "docket-role-value"
+  DBSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Database security group description"
+      GroupName: "database-security-group"
+      # SecurityGroupEgress:
+      #   - CidrIp: String
+      #     CidrIpv6: String
+      #     Description: String
+      #     DestinationPrefixListId: String
+      #     DestinationSecurityGroupId: String
+      #     FromPort: Integer
+      #     IpProtocol: String
+      #     ToPort: Integer
+      SecurityGroupIngress:
+        - # CidrIp: "0.0.0.0/0"
+          # CidrIpv6: String
+          Description: "Database security group ingress TCP 5432"
+          FromPort: 5432
+          IpProtocol: "tcp"
+          # SourcePrefixListId: String
+          SourceSecurityGroupId: !Ref "ContainerSecurityGroup"
+          # SourceSecurityGroupName: String
+          # SourceSecurityGroupOwnerId: String
+          ToPort: 5432
+      Tags:
+        - Key: "database-security-group-key"
+          Value: "database-security-group-value"
+      VpcId: !Ref "Vpc"
+  RedisSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Redis security group description"
+      # GroupName: "redis-security-group"
+      # SecurityGroupEgress:
+      #   - CidrIp: String
+      #     CidrIpv6: String
+      #     Description: String
+      #     DestinationPrefixListId: String
+      #     DestinationSecurityGroupId: String
+      #     FromPort: Integer
+      #     IpProtocol: String
+      #     ToPort: Integer
+      SecurityGroupIngress:
+        - # CidrIp: "0.0.0.0/0"
+          # CidrIpv6: String
+          Description: "Redis security group ingress TCP 6379"
+          FromPort: 6379
+          IpProtocol: "tcp"
+          # SourcePrefixListId: String
+          SourceSecurityGroupId: !Ref "ContainerSecurityGroup"
+          # SourceSecurityGroupName: String
+          # SourceSecurityGroupOwnerId: String
+          ToPort: 6379
+      Tags:
+        - Key: "redis-security-group-key"
+          Value: "redis-security-group-value"
+      VpcId: !Ref "Vpc"
+  DbSubnetGroup:
+    Type: "AWS::RDS::DBSubnetGroup"
+    Properties:
+      DBSubnetGroupDescription: "Database subnet group"
+      DBSubnetGroupName: "docket-db-subnet-group"
+      SubnetIds:
+        - !Ref "SubnetOne"
+        - !Ref "SubnetTwo"
+        - !Ref "SubnetThree"
+        - !Ref "SubnetFour"
+      Tags:
+        - Key: "docket-db-subnet-group-key"
+          Value: "docket-db-subnet-group-value"
+  DB:
+    Type: "AWS::RDS::DBInstance"
+    Properties:
+      AllocatedStorage: 5
+      # AllowMajorVersionUpgrade: Boolean
+      # AssociatedRoles:
+      #   - FeatureName: String
+      #     RoleArn: String
+      AutoMinorVersionUpgrade: true
+      # AvailabilityZone: String
+      BackupRetentionPeriod: 7
+      # CharacterSetName: String
+      CopyTagsToSnapshot: true
+      # DBClusterIdentifier: String
+      DBInstanceClass: "db.t2.micro"
+      DBInstanceIdentifier: "docket-db-instance"
+      DBName: "docket_staging"
+      # DBParameterGroupName: String
+      # DBSecurityGroups:
+      #   - !Ref "DBSecurityGroup"
+      # DBSnapshotIdentifier: String
+      DBSubnetGroupName: !Ref "DbSubnetGroup"
+      # DeleteAutomatedBackups: Boolean
+      # DeletionProtection: Boolean
+      # Domain: String
+      # DomainIAMRoleName: String
+      EnableCloudwatchLogsExports:
+        - "postgresql"
+      # EnableIAMDatabaseAuthentication: Boolean
+      # EnablePerformanceInsights: Boolean
+      Engine: "postgres"
+      EngineVersion: "11.5"
+      # Iops: Integer
+      # KmsKeyId: String
+      # LicenseModel: String
+      MasterUsername: !Ref "DbMasterUserNameParameter"
+      MasterUserPassword: !Ref "DbMasterUserPasswordParameter"
+      # MonitoringInterval: Integer
+      # MonitoringRoleArn: String
+      # MultiAZ: Boolean
+      # OptionGroupName: String
+      # PerformanceInsightsKMSKeyId: String
+      # PerformanceInsightsRetentionPeriod: Integer
+      Port: "5432"
+      # PreferredBackupWindow: String
+      # PreferredMaintenanceWindow: String
+      # ProcessorFeatures:
+      #   - Name: String
+      #     Value: String
+      # PromotionTier: Integer
+      PubliclyAccessible: false
+      # SourceDBInstanceIdentifier: String
+      # SourceRegion: String
+      # StorageEncrypted: Boolean
+      # StorageType: String
+      Tags:
+        - Key: "docket-db-key"
+          Value: "docket-db-value"
+      # Timezone: String
+      # UseDefaultProcessorFeatures: Boolean
+      VPCSecurityGroups:
+        - !Ref "DBSecurityGroup"
+  LoadBalancerSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Load balancer description"
+      # GroupName: "load-balancer-security-group"
+      # SecurityGroupEgress:
+      #   - CidrIp: String
+      #     CidrIpv6: String
+      #     Description: String
+      #     DestinationPrefixListId: String
+      #     DestinationSecurityGroupId: String
+      #     FromPort: Integer
+      #     IpProtocol: String
+      #     ToPort: Integer
+      SecurityGroupIngress:
+        - CidrIp: "0.0.0.0/0"
+          # CidrIpv6: String
+          Description: "Load balancer security group ingress TCP 80"
+          FromPort: 80
+          IpProtocol: "tcp"
+          # SourcePrefixListId: String
+          # SourceSecurityGroupId: String
+          # SourceSecurityGroupName: String
+          # SourceSecurityGroupOwnerId: String
+          ToPort: 80
+        # - CidrIp: "0.0.0.0/0"
+        #   # CidrIpv6: String
+        #   Description: "Load balancer security group ingress TCP 443"
+        #   FromPort: 443
+        #   IpProtocol: "tcp"
+        #   # SourcePrefixListId: String
+        #   # SourceSecurityGroupId: String
+        #   # SourceSecurityGroupName: String
+        #   # SourceSecurityGroupOwnerId: String
+        #   ToPort: 443
+      Tags:
+        - Key: "load-balancer-security-group-key"
+          Value: "load-balancer-security-group-value"
+      VpcId: !Ref "Vpc"
+  LoadBalancerListener:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    Properties:
+      # Certificates:
+      #   - CertificateArn: String
+      DefaultActions:
+        - # AuthenticateCognitoConfig:
+          #   AuthenticationRequestExtraParams:
+          #     Key : Value
+          #   OnUnauthenticatedRequest: String
+          #   Scope: String
+          #   SessionCookieName: String
+          #   SessionTimeout: Long
+          #   UserPoolArn: String
+          #   UserPoolClientId: String
+          #   UserPoolDomain: String
+          # AuthenticateOidcConfig:
+          #   AuthenticationRequestExtraParams:
+          #     Key : Value
+          #   AuthorizationEndpoint: String
+          #   ClientId: String
+          #   ClientSecret: String
+          #   Issuer: String
+          #   OnUnauthenticatedRequest: String
+          #   Scope: String
+          #   SessionCookieName: String
+          #   SessionTimeout: Long
+          #   TokenEndpoint: String
+          #   UserInfoEndpoint: String
+          # FixedResponseConfig:
+          #   ContentType: String
+          #   MessageBody: String
+          #   StatusCode: String
+          # Order: Integer
+          # RedirectConfig:
+          #   Host: String
+          #   Path: String
+          #   Port: String
+          #   Protocol: String
+          #   Query: String
+          #   StatusCode: String
+          TargetGroupArn: !Ref "TargetGroup"
+          Type: "forward"
+      LoadBalancerArn: !Ref "LoadBalancer"
+      Port: 80
+      Protocol: "HTTP"
+      # SslPolicy: String
+  LoadBalancer:
+    Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    Properties:
+      # IpAddressType: "dualstack" | "ipv4"
+      # LoadBalancerAttributes:
+      #   - Key: "access_logs.s3.enabled"
+      #     Value: ""
+      #   - Key: "access_logs.s3.bucket"
+      #     Value: ""
+      #   - Key: "access_logs.s3.prefix"
+      #     Value: ""
+      #   - Key: "deletion_protection.enabled"
+      #     Value: ""
+      #   - Key: "idle_timeout.timeout_seconds"
+      #     Value: ""
+      #   - Key: "routing.http.drop_invalid_header_fields.enabled"
+      #     Value: ""
+      #   - Key: "routing.http2.enabled"
+      #     Value: ""
+      #   - Key: "load_balancing.cross_zone.enabled"
+      #     Value: ""
+      Name: "docket-load-balancer"
+      Scheme: "internet-facing"
+      SecurityGroups:
+        - !Ref "LoadBalancerSecurityGroup"
+      # SubnetMappings:
+      #   - AllocationId: String
+      #     SubnetId: String
+      Subnets:
+        - !Ref "SubnetOne"
+        - !Ref "SubnetTwo"
+        - !Ref "SubnetThree"
+        - !Ref "SubnetFour"
+      Tags:
+        - Key: "load-balancer-key"
+          Value: "load-balancer-value"
+      Type: "application"
+  TargetGroup:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Properties:
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 60
+      HealthCheckPath: "/v1/health-check"
+      HealthCheckPort: "3000"
+      HealthCheckProtocol: "HTTP"
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 5
+      Matcher:
+        HttpCode: "200"
+      # Name: "docket-target-group"
+      Port: 3000
+      Protocol: "HTTP"
+      Tags:
+        - Key: "target-group-key"
+          Value: "target-group-value"
+      # TargetGroupAttributes:
+      #   - Key: "load_balancing.algorithm.type"
+      #     Value: ""
+      #   - Key: "load_balancing.algorithm.type"
+      #     Value: ""
+      #   - Key: "slow_start.duration_seconds"
+      #     Value: ""
+      #   - Key: "stickiness.enabled"
+      #     Value: ""
+      #   - Key: "stickiness.type"
+      #     Value: ""
+      #   - Key: "stickiness.lb_cookie.duration_seconds"
+      #     Value: ""
+      #   - Key: "lambda.multi_value_headers.enabled"
+      #     Value: ""
+      #   - Key: "proxy_protocol_v2.enabled"
+      #     Value: ""
+      # Targets:
+      #   - AvailabilityZone: String
+      #     Id: String
+      #     Port: Integer
+      TargetType: "ip"
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref "Vpc"
+  LogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName: "docket-log-group"
+      RetentionInDays: 7
+  RedisSubnetGroup:
+    Type: "AWS::ElastiCache::SubnetGroup"
+    Properties:
+      CacheSubnetGroupName: "docket-redis-subnet-group"
+      Description: "Docket Redis subnet group"
+      SubnetIds:
+        - !Ref "SubnetOne"
+        - !Ref "SubnetTwo"
+        - !Ref "SubnetThree"
+        - !Ref "SubnetFour"
+  RedisParameterGroup:
+    Type: "AWS::ElastiCache::ParameterGroup"
+    Properties:
+      CacheParameterGroupFamily: "redis5.0"
+      Description: "Docket Redis parameter group"
+      Properties:
+        notify-keyspace-events: "AKE"
+  Redis:
+    Type: "AWS::ElastiCache::CacheCluster"
+    Properties:
+      # AutoMinorVersionUpgrade: Boolean
+      # AZMode: String
+      CacheNodeType: "cache.t2.micro"
+      CacheParameterGroupName: !Ref "RedisParameterGroup"
+      # CacheSecurityGroupNames:
+      #   - String
+      CacheSubnetGroupName: !Ref "RedisSubnetGroup"
+      ClusterName: "docket-redis-cluster"
+      Engine: "redis"
+      EngineVersion: "5.0.5"
+      # NotificationTopicArn: String
+      NumCacheNodes: 1
+      Port: 6379
+      # PreferredAvailabilityZone: String
+      # PreferredAvailabilityZones:
+      #   - String
+      # PreferredMaintenanceWindow: String
+      # SnapshotArns:
+      #   - String
+      # SnapshotName: String
+      # SnapshotRetentionLimit: Integer
+      # SnapshotWindow: String
+      Tags:
+        - Key: "docket-redis-key"
+          Value: "docket-redis-value"
+      VpcSecurityGroupIds:
+        - !Ref "RedisSecurityGroup"
+  # Elasticsearch:
+  #   Type: "AWS::Elasticsearch::Domain"
+  #   Properties:
+  #     AccessPolicies: Json
+  #     AdvancedOptions:
+  #       rest.action.multi.allow_explicit_index: Boolean
+  #       indices.fielddata.cache.size: Integer
+  #       indices.query.bool.max_clause_count: Integer
+  #     CognitoOptions:
+  #       Enabled: Boolean
+  #       IdentityPoolId: String
+  #       RoleArn: String
+  #       UserPoolId: String
+  #     DomainName: String
+  #     EBSOptions:
+  #       EBSEnabled: Boolean
+  #       Iops: Integer
+  #       VolumeSize: Integer
+  #       VolumeType: String
+  #     ElasticsearchClusterConfig:
+  #       DedicatedMasterCount: Integer
+  #       DedicatedMasterEnabled: Boolean
+  #       DedicatedMasterType: String
+  #       InstanceCount: Integer
+  #       InstanceType: String
+  #       ZoneAwarenessConfig:
+  #         AvailabilityZoneCount: Integer
+  #       ZoneAwarenessEnabled: Boolean
+  #     ElasticsearchVersion: String
+  #     EncryptionAtRestOptions:
+  #       Enabled: Boolean
+  #       KmsKeyId: String
+  #     LogPublishingOptions:
+  #       CloudWatchLogsLogGroupArn: String
+  #       Enabled: Boolean
+  #     NodeToNodeEncryptionOptions:
+  #       Enabled: Boolean
+  #     SnapshotOptions:
+  #       AutomatedSnapshotStartHour: Integer
+  #     Tags:
+  #       - Key: "docket-elasticsearch-key"
+  #         Value: "docket-elasticsearch-value"
+  #     VPCOptions:
+  #       SecurityGroupIds:
+  #         - String
+  #       SubnetIds:
+  #         - String
+
+#####################################################################################################
+# Outputs                                                                                           #
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html #
+#####################################################################################################
+# Outputs:
+#   FriendlyName:
+#     Description: Information about the value
+#     Value: Value to return
+#     Export:
+#       Name: Value to export

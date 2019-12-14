@@ -1,7 +1,6 @@
 const Sequelize = require('sequelize')
 
 const { postgres } = require('../environment')
-// const debug = require('../config/debug')
 
 const {
   database,

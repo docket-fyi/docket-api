@@ -10,11 +10,6 @@ const primary = new Redis({
   port
   // lazyConnect: true
 })
-primary.on('ready', () => {
-  const options = 'AKE'
-  primary.config('SET', 'notify-keyspace-events', options)
-  debug(`configured notify-keyspace-events = ${options}`)
-})
 // const publisher = new Redis({
 //   host,
 //   port
@@ -53,6 +48,6 @@ module.exports = {
   primary,
   // publisher,
   subscriber,
-  createEventReminder,
+  createEventReminder
   // addSocketToUser
 }
