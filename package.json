@@ -21,7 +21,7 @@
     "routes": "node ./routes.js",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect",
-    "vault:seed": "node ./vault-seed.js"
+    "cz": "$(npm bin)/git-cz"
   },
   "author": "John Goldsmith <john.goldsmith@docket.fyi>",
   "license": "ISC",
@@ -66,7 +66,9 @@
   "devDependencies": {
     "autocannon": "4.4.0",
     "clinic": "5.0.0",
+    "commitizen": "4.0.3",
     "coveralls": "3.0.9",
+    "cz-conventional-changelog": "3.0.2",
     "eslint": "6.7.1",
     "express-list-endpoints": "4.0.1",
     "husky": "3.1.0",
@@ -82,5 +84,10 @@
       "pre-commit": "npm run lint && npm run test:unit"
     }
   },
-  "snyk": true
+  "snyk": true,
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
 }
