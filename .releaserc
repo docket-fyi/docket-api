@@ -1,0 +1,29 @@
+# See https://semantic-release.gitbook.io/semantic-release/usage/configuration
+
+# extends:
+#   -
+branch: "develop"
+# repositoryUrl:
+# tagFormat:
+plugins:
+  -
+    - "@semantic-release/release-notes-generator"
+      # See https://github.com/semantic-release/release-notes-generator#configuration
+    - preset: "angular"
+      # config:
+      # parserOpts:
+      # writerOpts:
+      # host:
+      # linkCompare:
+      # linkReferences:
+      # commit:
+      # issue:
+      # presetConfig:
+  -
+    - "@semantic-release/changelog"
+      # See https://github.com/semantic-release/changelog#configuration
+    - changelogFile: "CHANGELOG.md"
+      # changelogTitle:
+# dryRun: false
+# ci: false
+# debug:
