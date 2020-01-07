@@ -2,7 +2,6 @@ const swaggerJSDoc = require('swagger-jsdoc')
 
 const swaggerDefinition = require('./definition')
 
-
 const options = {
   swaggerDefinition,
   apis: [
