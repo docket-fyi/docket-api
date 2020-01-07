@@ -1,11 +1,30 @@
-describe('V1', () => {
+const index = require('../../../../../src/v1/controllers/index')
 
-  describe('Controllers', () => {
+describe('v1', () => {
+
+  describe('controllers', () => {
 
     describe('index', () => {
 
-      it('...', () => {
-        expect(true).toBe(true)
+      it('exports an object', () => {
+        expect(typeof index).toBe('object')
+      })
+
+      it('namespaces controller methods', () => {
+        const givenKeys = Object.keys(index)
+        const expectedControllers = [
+          'sessions',
+          'docs',
+          'google',
+          'healthCheck',
+          'locales',
+          'my',
+          'microsoft',
+          'users',
+          'search'
+        ]
+        expect(givenKeys).toEqual(expectedControllers)
+        expectedControllers.forEach(controller => expect(typeof index[controller]).toEqual('object'))
       })
 
     })
