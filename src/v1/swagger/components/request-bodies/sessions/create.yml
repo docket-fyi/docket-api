@@ -1,7 +1,7 @@
 components:
   requestBodies:
-    UpdateMyEventBodyParameter:
-      description: Event update parameters
+    SessionCreateRequestBody:
+      description: Session creation parameters
       required: true
       content:
         application/vnd.api+json:
@@ -17,8 +17,11 @@ components:
                 properties:
                   attributes:
                     type: object
+                    required:
+                      - email
+                      - password
                     properties:
-                      name:
+                      email:
                         type: string
-                      date:
+                      password:
                         type: string

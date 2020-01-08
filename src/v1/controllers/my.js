@@ -66,7 +66,7 @@ async function show(req, res, next) {
  *     tags:
  *       - Users
  *     requestBody:
- *       $ref: '#/components/requestBodies/UpdateMyProfileBodyParameter'
+ *       $ref: '#/components/requestBodies/UpdateMyProfileRequestBody'
  *     responses:
  *       200:
  *         $ref: '#/components/responses/UpdateMyProfileOkResponse'
@@ -240,7 +240,7 @@ async function showEvent(req, res, next) {
  *     tags:
  *       - Events
  *     requestBody:
- *       $ref: '#/components/requestBodies/CreateEventBodyParameter'
+ *       $ref: '#/components/requestBodies/CreateEventRequestBody'
  *     responses:
  *       200:
  *         $ref: '#/components/responses/CreateEventOkResponse'
@@ -319,7 +319,7 @@ async function createEvent(req, res, next) {
  *     tags:
  *       - Events
  *     requestBody:
- *       $ref: '#/components/requestBodies/ImportMyEventsBodyParameter'
+ *       $ref: '#/components/requestBodies/ImportMyEventsRequestBody'
  *     responses:
  *       200:
  *         $ref: '#/components/responses/ImportMyEventsOkResponse'
@@ -379,7 +379,7 @@ async function importEvents(req, res, next) {
  *     parameters:
  *       - $ref: '#/components/parameters/UpdateMyEventEventIdPathParameter'
  *     requestBody:
- *       $ref: '#/components/requestBodies/UpdateMyEventBodyParameter'
+ *       $ref: '#/components/requestBodies/UpdateMyEventRequestBody'
  *     responses:
  *       200:
  *         $ref: '#/components/responses/UpdateMyEventOkResponse'

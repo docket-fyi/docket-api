@@ -1,7 +1,7 @@
 components:
   requestBodies:
-    UpdateMyProfileBodyParameter:
-      description: User update parameters
+    UserConfirmRegistrationRequestBody:
+      description: Confirm registration body parameter
       required: true
       content:
         application/vnd.api+json:
@@ -17,12 +17,11 @@ components:
                 properties:
                   attributes:
                     type: object
+                    required:
+                      - password
+                      - passwordConfirmation
                     properties:
-                      email:
+                      password:
                         type: string
-                      firstName:
-                        type: string
-                      lastName:
-                        type: string
-                      preferredMeasurementUnit:
+                      passwordConfirmation:
                         type: string

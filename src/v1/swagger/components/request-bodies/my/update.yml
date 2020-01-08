@@ -1,7 +1,7 @@
 components:
   requestBodies:
-    UserCreateBodyParameter:
-      description: User creation parameters
+    UpdateMyProfileRequestBody:
+      description: User update parameters
       required: true
       content:
         application/vnd.api+json:
@@ -17,13 +17,12 @@ components:
                 properties:
                   attributes:
                     type: object
-                    required:
-                      - email
-                      - firstName
                     properties:
                       email:
                         type: string
                       firstName:
                         type: string
                       lastName:
+                        type: string
+                      preferredMeasurementUnit:
                         type: string
