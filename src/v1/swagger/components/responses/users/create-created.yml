@@ -1,0 +1,27 @@
+components:
+  responses:
+    UserCreateCreatedResponse:
+      description: Created
+      content:
+        application/vnd.api+json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  attributes:
+                    type: object
+                    $ref: '#/components/schemas/User'
+                  type:
+                    type: string
+                  # links:
+                  #   type: object
+                  #   properties:
+                  #     self:
+                  #       type: string
+              links:
+                type: object
+                properties:
+                  self:
+                    type: string

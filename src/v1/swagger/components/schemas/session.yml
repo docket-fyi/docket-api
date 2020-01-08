@@ -1,0 +1,7 @@
+components:
+  schemas:
+    Session:
+      type: object
+      properties:
+        jwt:
+          type: string

@@ -2,7 +2,7 @@ const status = require('http-status')
 const Sentry = require('@sentry/node')
 
 // const environment = require('../environment')
-const elasticsearch = require('../config/elasticsearch')
+// const elasticsearch = require('../config/elasticsearch')
 const serializers = require('../serializers')
 // const { } = require('../errors')
 
@@ -19,19 +19,15 @@ const serializers = require('../serializers')
  *     summary: Perform a search
  *     description: Perform a search
  *     operationId: listSearchResults
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Search
  *     parameters:
- *       - $ref: '#/parameters/SearchListQueryParameter'
+ *       - $ref: '#/components/parameters/SearchListQueryParameter'
  *     responses:
  *       200:
- *         $ref: '#/responses/SearchListOkResponse'
+ *         $ref: '#/components/responses/SearchListOkResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function list(req, res, next) {
   Sentry.configureScope(scope => {
@@ -39,29 +35,36 @@ async function list(req, res, next) {
     scope.setTag('action', 'list')
   })
   try {
-    const { currentUser } = req
-    const query = req.query
-    const results = await elasticsearch.search({
-      index: 'docket',
+    // const { currentUser } = req
+    // const query = req.query
+    // const results = await elasticsearch.search({
+    //   index: 'docket',
+    //   body: {
+    //     query: {
+    //       bool: {
+    //         must: [
+    //           {
+    //             match: {
+    //               name: query
+    //             }
+    //           },
+    //           {
+    //             match: {
+    //               userId: currentUser.id
+    //             }
+    //           }
+    //         ]
+    //       }
+    //     }
+    //   }
+    // })
+    const results = {
       body: {
-        query: {
-          bool: {
-            must: [
-              {
-                match: {
-                  name: query
-                }
-              },
-              {
-                match: {
-                  userId: currentUser.id
-                }
-              }
-            ]
-          }
+        hits: {
+          hits: []
         }
       }
-    })
+    }
     res.body = serializers.search.list.serialize(results.body.hits.hits)
     res.status(status.OK)
     return next()

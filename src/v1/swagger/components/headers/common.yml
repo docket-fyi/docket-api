@@ -1,0 +1,30 @@
+components:
+  headers:
+    CreatedResourceLocation:
+      description: The location of the created resource object
+      schema:
+        type: string
+        format: url
+    ResourceLocation:
+      description: The location of the resource object
+      schema:
+        type: string
+        format: url
+    Allow:
+      description: Contains a list of the target resource's currently supported methods.
+      schema:
+        type: string
+    Content-Location:
+      description: >
+        References a URI that can be used as an identifier for a
+        specific resource corresponding to the representation in
+        this message's payload.
+      schema:
+        type: string
+    WWW-Authenticate:
+      description: >
+        Indicates the authentication scheme(s) and parameters applicable
+        to the target resource.
+      schema:
+        type: string
+        enum: [Bearer]

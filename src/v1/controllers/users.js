@@ -31,19 +31,16 @@ const {
  *     summary: Create a new user
  *     description: Create a new user and, if valid, return it
  *     operationId: createUser
- *     consumes:
- *       - application/vnd.api+json
- *     produces:
- *       - application/vnd.api+json
+ *     security: []
  *     tags:
  *       - Users
- *     parameters:
- *       - $ref: '#/parameters/UserCreateBodyParameter'
+ *     requestBody:
+ *       $ref: '#/components/requestBodies/UserCreateBodyParameter'
  *     responses:
  *       201:
- *         $ref: '#/responses/UserCreateCreatedResponse'
+ *         $ref: '#/components/responses/UserCreateCreatedResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function create(req, res, next) {
   Sentry.configureScope(scope => {
@@ -86,20 +83,18 @@ async function create(req, res, next) {
  *     summary: Confirm a new user's registration
  *     description: Confirm a new user's registration
  *     operationId: confirmRegistration
- *     consumes:
- *       - application/vnd.api+json
- *     produces:
- *       - application/vnd.api+json
+ *     security: []
  *     tags:
  *       - Users
+ *     requestBody:
+ *       $ref: '#/components/requestBodies/UserConfirmRegistrationBodyParameter'
  *     parameters:
- *       - $ref: '#/parameters/UserConfirmRegistrationBodyParameter'
- *       - $ref: '#/parameters/UserConfirmRegistrationCodeParameter'
+ *       - $ref: '#/components/parameters/UserConfirmRegistrationCodeParameter'
  *     responses:
  *       204:
- *         $ref: '#/responses/NoContentResponse'
+ *         $ref: '#/components/responses/NoContentResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function confirmRegistration(req, res, next) {
   Sentry.configureScope(scope => {
@@ -168,19 +163,16 @@ async function confirmRegistration(req, res, next) {
  *     summary: Facilitates a user to reset their password
  *     description: Facilitates a user to reset their password
  *     operationId: forgotPassword
- *     consumes:
- *       - application/vnd.api+json
- *     produces:
- *       - application/vnd.api+json
+ *     security: []
  *     tags:
  *       - Users
- *     parameters:
- *       - $ref: '#/parameters/UserForgotPasswordBodyParameter'
+ *     requestBody:
+ *       $ref: '#/components/requestBodies/UserForgotPasswordBodyParameter'
  *     responses:
  *       204:
- *         $ref: '#/responses/NoContentResponse'
+ *         $ref: '#/components/responses/NoContentResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function forgotPassword(req, res, next) {
   Sentry.configureScope(scope => {
@@ -231,22 +223,21 @@ async function forgotPassword(req, res, next) {
  *     summary: Reset a user's password
  *     description: Reset a user's password
  *     operationId: resetPassword
- *     consumes:
- *       - application/vnd.api+json
- *     produces:
- *       - application/vnd.api+json
+ *     security: []
  *     tags:
  *       - Users
+ *     requestBody:
+ *       $ref: '#/components/requestBodies/UserResetPasswordBodyParameter'
  *     parameters:
- *       - $ref: '#/parameters/UserResetPasswordBodyParameter'
- *       - $ref: '#/parameters/UserResetPasswordCodeParameter'
+ *       - $ref: '#/components/parameters/UserResetPasswordCodeParameter'
  *     responses:
  *       204:
- *         $ref: '#/responses/NoContentResponse'
+ *         $ref: '#/components/responses/NoContentResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function resetPassword(req, res, next) {
+
   Sentry.configureScope(scope => {
     scope.setTag('controller', 'users')
     scope.setTag('action', 'resetPassword')

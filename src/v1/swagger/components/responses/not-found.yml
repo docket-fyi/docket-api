@@ -1,0 +1,8 @@
+components:
+  responses:
+    NotFoundResponse:
+      description: Not Found
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/ClientError'

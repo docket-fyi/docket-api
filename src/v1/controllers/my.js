@@ -10,7 +10,7 @@ const { Event } = require('../models')
 const { createEventReminder } = require('../config/redis')
 const errors = require('../errors')
 const serializers = require('../serializers')
-const elasticsearch = require('../config/elasticsearch')
+// const elasticsearch = require('../config/elasticsearch')
 // const stripe = require('../config/stripe')
 
 /**
@@ -26,17 +26,13 @@ const elasticsearch = require('../config/elasticsearch')
  *     summary: Return the current user's profile
  *     description: Return the current user's profile
  *     operationId: getMyProfile
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Users
  *     responses:
  *       200:
- *         $ref: '#/responses/GetMyProfileOkResponse'
+ *         $ref: '#/components/responses/GetMyProfileOkResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function show(req, res, next) {
   Sentry.configureScope(scope => {
@@ -67,19 +63,15 @@ async function show(req, res, next) {
  *     summary: Update the current user's profile
  *     description: Update the current user's profile
  *     operationId: updateMyProfile
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Users
- *     parameters:
- *       - $ref: '#/parameters/UpdateMyProfileBodyParameter'
+ *     requestBody:
+ *       $ref: '#/components/requestBodies/UpdateMyProfileBodyParameter'
  *     responses:
  *       200:
- *         $ref: '#/responses/UpdateMyProfileOkResponse'
+ *         $ref: '#/components/responses/UpdateMyProfileOkResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function update(req, res, next) {
   Sentry.configureScope(scope => {
@@ -117,17 +109,13 @@ async function update(req, res, next) {
  *     summary: Delete the current user
  *     description: Delete the current user
  *     operationId: destroyMyProfile
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Users
  *     responses:
  *       204:
- *         $ref: '#/responses/NoContentResponse'
+ *         $ref: '#/components/responses/NoContentResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function destroy(req, res, next) {
   Sentry.configureScope(scope => {
@@ -164,17 +152,13 @@ async function destroy(req, res, next) {
  *     summary: List the current user's events
  *     description: List the current user's events
  *     operationId: listMyEvents
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Events
  *     responses:
  *       200:
- *         $ref: '#/responses/ListMyEventsOkResponse'
+ *         $ref: '#/components/responses/ListMyEventsOkResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function listEvents(req, res, next) {
   Sentry.configureScope(scope => {
@@ -214,19 +198,15 @@ async function listEvents(req, res, next) {
  *     summary: Get an event for the current user by it's ID
  *     description: Get an event for the current user by it's ID
  *     operationId: getMyEventById
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Events
  *     parameters:
- *       - $ref: '#/parameters/GetMyEventEventIdPathParameter'
+ *       - $ref: '#/components/parameters/GetMyEventEventIdPathParameter'
  *     responses:
  *       200:
- *         $ref: '#/responses/GetMyEventOkResponse'
+ *         $ref: '#/components/responses/GetMyEventOkResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function showEvent(req, res, next) {
   Sentry.configureScope(scope => {
@@ -257,19 +237,15 @@ async function showEvent(req, res, next) {
  *     summary: Create a new event for the current user
  *     description: Create a new event for the current user
  *     operationId: createMyEvent
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Events
- *     parameters:
- *       - $ref: '#/parameters/CreateEventBodyParameter'
+ *     requestBody:
+ *       $ref: '#/components/requestBodies/CreateEventBodyParameter'
  *     responses:
  *       200:
- *         $ref: '#/responses/CreateEventOkResponse'
+ *         $ref: '#/components/responses/CreateEventOkResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function createEvent(req, res, next) {
   Sentry.configureScope(scope => {
@@ -310,13 +286,13 @@ async function createEvent(req, res, next) {
       createEventReminder(key, expiration)
     })
     */
-    await elasticsearch.index({
-      index: 'docket',
-      refresh: true,
-      body: {
-        ...event.toJSON()
-      }
-    })
+    // await elasticsearch.index({
+    //   index: 'docket',
+    //   refresh: true,
+    //   body: {
+    //     ...event.toJSON()
+    //   }
+    // })
     createEventReminder(`docket:users:${currentUser.id}:events:${event.id}`, 10 /*moment(date).add(10, 'seconds')*/)
     res.status(status.OK)
     res.body = serializers.my.events.create.serialize(event)
@@ -340,19 +316,15 @@ async function createEvent(req, res, next) {
  *     summary: Bulk import events for the current user
  *     description: Bulk import events for the current user
  *     operationId: importMyEvents
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Events
- *     parameters:
- *       - $ref: '#/parameters/ImportMyEventsBodyParameter'
+ *     requestBody:
+ *       $ref: '#/components/requestBodies/ImportMyEventsBodyParameter'
  *     responses:
  *       200:
- *         $ref: '#/responses/ImportMyEventsOkResponse'
+ *         $ref: '#/components/responses/ImportMyEventsOkResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function importEvents(req, res, next) {
   Sentry.configureScope(scope => {
@@ -402,20 +374,17 @@ async function importEvents(req, res, next) {
  *     summary: Update an event for the current user by it's ID
  *     description: Update an event for the current user by it's ID
  *     operationId: updateMyEventById
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Events
  *     parameters:
- *       - $ref: '#/parameters/UpdateMyEventEventIdPathParameter'
- *       - $ref: '#/parameters/UpdateMyEventBodyParameter'
+ *       - $ref: '#/components/parameters/UpdateMyEventEventIdPathParameter'
+ *     requestBody:
+ *       $ref: '#/components/requestBodies/UpdateMyEventBodyParameter'
  *     responses:
  *       200:
- *         $ref: '#/responses/UpdateMyEventOkResponse'
+ *         $ref: '#/components/responses/UpdateMyEventOkResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function updateEvent(req, res, next) {
   Sentry.configureScope(scope => {
@@ -446,19 +415,15 @@ async function updateEvent(req, res, next) {
  *     summary: Delete an event for the current user by it's ID
  *     description: Delete an event for the current user by it's ID
  *     operationId: deleteMyEventById
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Events
  *     parameters:
- *       - $ref: '#/parameters/DeleteMyEventEventIdPathParameter'
+ *       - $ref: '#/components/parameters/DeleteMyEventEventIdPathParameter'
  *     responses:
  *       204:
- *         $ref: '#/responses/NoContentResponse'
+ *         $ref: '#/components/responses/NoContentResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function destroyEvent(req, res, next) {
   Sentry.configureScope(scope => {
@@ -488,17 +453,13 @@ async function destroyEvent(req, res, next) {
  *     summary: Get the current user's membership status
  *     description: Get the current user's membership status
  *     operationId: showMyMembership
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Users
  *     responses:
  *       204:
- *         $ref: '#/responses/NoContentResponse'
+ *         $ref: '#/components/responses/NoContentResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function showMembership(req, res, next) {
   Sentry.configureScope(scope => {
@@ -527,17 +488,13 @@ async function showMembership(req, res, next) {
  *     summary: Update the current user's membership status
  *     description: Update the current user's membership status
  *     operationId: updateMyMembership
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Users
  *     responses:
  *       204:
- *         $ref: '#/responses/NoContentResponse'
+ *         $ref: '#/components/responses/NoContentResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function updateMembership(req, res, next) {
   Sentry.configureScope(scope => {

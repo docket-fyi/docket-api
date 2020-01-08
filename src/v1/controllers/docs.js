@@ -14,16 +14,19 @@ const { spec } = require('../swagger/spec')
  * @swagger
  * /docs:
  *   get:
- *     summary: Get the Swagger 2.0 spec
- *     description: Get the Swagger 2.0 spec
+ *     summary: Get the OpenAPI 3.x spec
+ *     description: Get the OpenAPI 3.x spec
  *     operationId: getDocs
+ *     security: []
  *     tags:
  *       - Docs
  *     responses:
  *       200:
  *         description: OK
- *         schema:
- *           type: object
+ *         content:
+ *           application/vnd.api+json:
+ *             schema:
+ *               type: object
  */
 function index(req, res, next) {
   try {

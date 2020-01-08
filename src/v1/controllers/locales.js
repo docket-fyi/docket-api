@@ -20,15 +20,14 @@ const environment = require('../environment')
  *     summary: List locales
  *     description: List locales
  *     operationId: listLocales
- *     produces:
- *       - application/vnd.api+json
+ *     security: []
  *     tags:
  *       - Locales
  *     responses:
  *       200:
- *         $ref: '#/responses/ListLocalesOkResponse'
+ *         $ref: '#/components/responses/ListLocalesOkResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function list(req, res, next) {
   Sentry.configureScope(scope => {
@@ -69,17 +68,16 @@ async function list(req, res, next) {
  *     summary: List translations by locale code
  *     description: List translations by locale code
  *     operationId: listTranslationsByLocale
- *     produces:
- *       - application/vnd.api+json
+ *     security: []
  *     tags:
  *       - Translations
  *     parameters:
- *       - $ref: '#/parameters/ListTranslationsByLocaleCodePathParameter'
+ *       - $ref: '#/components/parameters/ListTranslationsByLocaleCodePathParameter'
  *     responses:
  *       200:
- *         $ref: '#/responses/ListTranslationsByLocaleOkResponse'
+ *         $ref: '#/components/responses/ListTranslationsByLocaleOkResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function listTranslations(req, res, next) {
   Sentry.configureScope(scope => {

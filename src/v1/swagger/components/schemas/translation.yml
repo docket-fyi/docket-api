@@ -1,0 +1,11 @@
+components:
+  schemas:
+    Translation:
+      type: object
+      properties:
+        key:
+          type: string
+        localeId:
+          type: integer
+        text:
+          type: string

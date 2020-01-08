@@ -1,5 +1,0 @@
-responses:
-  NotFoundResponse:
-    description: Not Found
-    schema:
-      $ref: '#/definitions/ClientError'

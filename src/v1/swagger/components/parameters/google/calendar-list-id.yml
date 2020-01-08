@@ -1,0 +1,9 @@
+components:
+  parameters:
+    GoogleCalendarListIdPathParameter:
+      name: calendarListId
+      in: path
+      description: Calendar list ID
+      required: true
+      schema:
+        type: string

@@ -1,0 +1,8 @@
+components:
+  responses:
+    BadRequestResponse:
+      description: Bad Request
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/ClientError'

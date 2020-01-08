@@ -1,0 +1,8 @@
+components:
+  responses:
+    UnprocessableEntityResponse:
+      description: Unprocessable Entity
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/ClientError'

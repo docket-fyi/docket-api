@@ -1,0 +1,27 @@
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        uuid:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        initials:
+          type: string
+        email:
+          type: string
+        preferredMeasurementUnit:
+          type: string
+        isPremium:
+          type: boolean
+        confirmedAt:
+          type: string
+        updatedAt:
+          type: string
+        deletedAt:
+          type: string

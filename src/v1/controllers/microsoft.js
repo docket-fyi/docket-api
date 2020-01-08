@@ -24,15 +24,14 @@ const serializers = require('../serializers')
  *     summary: Get Microsoft OAuth URL
  *     description: Get Microsoft OAuth URL
  *     operationId: getMicrosoftOAuthUrl
- *     produces:
- *       - application/vnd.api+json
+ *     security: []
  *     tags:
  *       - Microsoft
  *     responses:
  *       200:
- *         $ref: '#/responses/MicrosoftGetOAuthUrlOkResponse'
+ *         $ref: '#/components/responses/MicrosoftGetOAuthUrlOkResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function getOAuthUrl(req, res, next) {
   Sentry.configureScope(scope => {
@@ -69,19 +68,15 @@ async function getOAuthUrl(req, res, next) {
  *     summary: Get Microsoft access tokens
  *     description: Get Microsoft access tokens
  *     operationId: microsoftGetAccessTokens
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Microsoft
  *     parameters:
- *       - $ref: '#/parameters/MicrosoftGetAccessTokensCodeQueryParameter'
+ *       - $ref: '#/components/parameters/MicrosoftGetAccessTokensCodeQueryParameter'
  *     responses:
  *       204:
- *         $ref: '#/responses/NoContentResponse'
+ *         $ref: '#/components/responses/NoContentResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function getAccessTokens(req, res, next) {
   Sentry.configureScope(scope => {
@@ -135,17 +130,13 @@ async function getAccessTokens(req, res, next) {
  *     summary: List Microsoft calendars
  *     description: List microsoft calendars
  *     operationId: microsoftListCalendars
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Microsoft
  *     responses:
  *       200:
- *         $ref: '#/responses/MicrosoftListCalendarsOkResponse'
+ *         $ref: '#/components/responses/MicrosoftListCalendarsOkResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function listCalendars(req, res, next) {
   Sentry.configureScope(scope => {
@@ -185,19 +176,15 @@ async function listCalendars(req, res, next) {
  *     summary: List Microsoft events by calendar ID
  *     description: List Microsoft events by calendar ID
  *     operationId: microsoftListEventsByCalendarId
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Microsoft
  *     parameters:
- *       - $ref: '#/parameters/MicrosoftListEventsByCalendarIdCalendarIdPathParameter'
+ *       - $ref: '#/components/parameters/MicrosoftListEventsByCalendarIdCalendarIdPathParameter'
  *     responses:
  *       200:
- *         $ref: '#/responses/MicrosoftListCalendarEventsByCalendarIdOkResponse'
+ *         $ref: '#/components/responses/MicrosoftListCalendarEventsByCalendarIdOkResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function listEventsByCalendarId(req, res, next) {
   Sentry.configureScope(scope => {

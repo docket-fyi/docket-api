@@ -21,19 +21,16 @@ const errors = require('../errors')
  *     summary: Create a new session
  *     description: Create a new session and, if valid, returns an authentication token (JWT)
  *     operationId: createSession
- *     consumes:
- *       - application/vnd.api+json
- *     produces:
- *       - application/vnd.api+json
+ *     security: []
  *     tags:
  *       - Sessions
- *     parameters:
- *       - $ref: '#/parameters/SessionCreateBodyParameter'
+ *     requestBody:
+ *       $ref: '#/components/requestBodies/SessionCreateBodyParameter'
  *     responses:
  *       200:
- *         $ref: '#/responses/SessionCreateOkResponse'
+ *         $ref: '#/components/responses/SessionCreateOkResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function create(req, res, next) {
   Sentry.configureScope(scope => {
