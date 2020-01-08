@@ -1,0 +1,9 @@
+components:
+  parameters:
+    GoogleEventIdPathParameter:
+      name: eventId
+      in: path
+      description: Event ID
+      required: true
+      schema:
+        type: string

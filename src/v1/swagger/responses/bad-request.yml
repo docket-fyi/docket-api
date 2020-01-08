@@ -1,5 +1,0 @@
-responses:
-  BadRequestResponse:
-    description: Bad Request
-    schema:
-      $ref: '#/definitions/ClientError'

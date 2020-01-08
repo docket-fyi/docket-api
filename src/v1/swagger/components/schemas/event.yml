@@ -1,0 +1,23 @@
+components:
+  schemas:
+    Event:
+      type: object
+      properties:
+        id:
+          type: integer
+        uuid:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        date:
+          type: string
+        userId:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        deletedAt:
+          type: string

@@ -23,17 +23,14 @@ const serializers = require('../serializers')
  *     summary: Get the OAuth2 URL for Google services
  *     description: Get the OAuth2 URL for Google services
  *     operationId: getGoogleOAuthUrl
- *     consumes:
- *       - application/vnd.api+json
- *     produces:
- *       - application/vnd.api+json
+ *     security: []
  *     tags:
  *       - Google
  *     responses:
  *       200:
- *         $ref: '#/responses/GoogleOAuthUrlOkResponse'
+ *         $ref: '#/components/responses/GoogleOAuthUrlOkResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function getOAuthUrl(req, res, next) {
   Sentry.configureScope(scope => {
@@ -66,19 +63,15 @@ async function getOAuthUrl(req, res, next) {
  *     summary: Get Google access tokens
  *     description: Get Google access tokens
  *     operationId: googleGetAccessTokens
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Google
  *     parameters:
- *       - $ref: '#/parameters/GoogleGetAccessTokensCodeQueryParameter'
+ *       - $ref: '#/components/parameters/GoogleGetAccessTokensCodeQueryParameter'
  *     responses:
  *       204:
- *         $ref: '#/responses/NoContentResponse'
+ *         $ref: '#/components/responses/NoContentResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function getAccessTokens(req, res, next) {
   Sentry.configureScope(scope => {
@@ -124,19 +117,15 @@ async function destroyCalendarList(req, res, next) {
  *     summary: Get a Google calendar list by ID
  *     description: Get a Google calendar list by ID
  *     operationId: googleShowCalendarListById
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Google
  *     parameters:
- *       - $ref: '#/parameters/GoogleCalendarListIdPathParameter'
+ *       - $ref: '#/components/parameters/GoogleCalendarListIdPathParameter'
  *     responses:
  *       204:
- *         $ref: '#/responses/NoContentResponse'
+ *         $ref: '#/components/responses/NoContentResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function showCalendarList(req, res, next) {
   Sentry.configureScope(scope => {
@@ -173,17 +162,13 @@ async function createCalendarList(req, res, next) {
  *     summary: List calendar lists
  *     description: List calendar lists
  *     operationId: googleListCalendarLists
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Google
  *     responses:
  *       204:
- *         $ref: '#/responses/NoContentResponse'
+ *         $ref: '#/components/responses/NoContentResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function listCalendarLists(req, res, next) {
   Sentry.configureScope(scope => {
@@ -258,17 +243,13 @@ async function replaceCalendarList(req, res, next) {
  *     summary: Watch calendar lists
  *     description: Watch calendar lists
  *     operationId: googleWatchCalendarLists
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Google
  *     responses:
  *       204:
- *         $ref: '#/responses/NoContentResponse'
+ *         $ref: '#/components/responses/NoContentResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function watchCalendarLists(req, res, next) {
   Sentry.configureScope(scope => {
@@ -315,19 +296,15 @@ async function destroyCalendar(req, res, next) {
  *     summary: Get calendar by ID
  *     description: Get calendar by ID
  *     operationId: googleShowCalendarById
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Google
  *     parameters:
- *       - $ref: '#/parameters/GoogleCalendarIdPathParameter'
+ *       - $ref: '#/components/parameters/GoogleCalendarIdPathParameter'
  *     responses:
  *       204:
- *         $ref: '#/responses/NoContentResponse'
+ *         $ref: '#/components/responses/NoContentResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function showCalendar(req, res, next) {
   Sentry.configureScope(scope => {
@@ -394,20 +371,16 @@ async function destroyEvent(req, res, next) {
  *     summary: Get event by ID
  *     description: Get event by ID
  *     operationId: googleShowEventById
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Google
  *     parameters:
- *       - $ref: '#/parameters/GoogleCalendarIdPathParameter'
- *       - $ref: '#/parameters/GoogleEventIdPathParameter'
+ *       - $ref: '#/components/parameters/GoogleCalendarIdPathParameter'
+ *       - $ref: '#/components/parameters/GoogleEventIdPathParameter'
  *     responses:
  *       204:
- *         $ref: '#/responses/NoContentResponse'
+ *         $ref: '#/components/responses/NoContentResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function showEvent(req, res, next) {
   Sentry.configureScope(scope => {
@@ -454,20 +427,16 @@ async function createEvent(req, res, next) {
  *     summary: Get event instances by ID
  *     description: Get event instances by ID
  *     operationId: googleListEventInstances
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Google
  *     parameters:
- *       - $ref: '#/parameters/GoogleCalendarIdPathParameter'
- *       - $ref: '#/parameters/GoogleEventIdPathParameter'
+ *       - $ref: '#/components/parameters/GoogleCalendarIdPathParameter'
+ *       - $ref: '#/components/parameters/GoogleEventIdPathParameter'
  *     responses:
  *       204:
- *         $ref: '#/responses/NoContentResponse'
+ *         $ref: '#/components/responses/NoContentResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function listEventInstances(req, res, next) {
   Sentry.configureScope(scope => {
@@ -494,19 +463,15 @@ async function listEventInstances(req, res, next) {
  *     summary: List events by calendar ID
  *     description: List events by calendar ID
  *     operationId: googleListEventsByCalendarId
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Google
  *     parameters:
- *       - $ref: '#/parameters/GoogleCalendarIdPathParameter'
+ *       - $ref: '#/components/parameters/GoogleCalendarIdPathParameter'
  *     responses:
  *       204:
- *         $ref: '#/responses/NoContentResponse'
+ *         $ref: '#/components/responses/NoContentResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function listEvents(req, res, next) {
   Sentry.configureScope(scope => {
@@ -573,19 +538,15 @@ async function replaceEvent(req, res, next) {
  *     summary: Watch events
  *     description: Watch events
  *     operationId: googleWatchEvents
- *     security:
- *       - jwt: []
- *     produces:
- *       - application/vnd.api+json
  *     tags:
  *       - Google
  *     parameters:
- *       - $ref: '#/parameters/GoogleCalendarIdPathParameter'
+ *       - $ref: '#/components/parameters/GoogleCalendarIdPathParameter'
  *     responses:
  *       204:
- *         $ref: '#/responses/NoContentResponse'
+ *         $ref: '#/components/responses/NoContentResponse'
  *       400:
- *         $ref: '#/responses/BadRequestResponse'
+ *         $ref: '#/components/responses/BadRequestResponse'
  */
 async function watchEvents(req, res, next) {
   Sentry.configureScope(scope => {

@@ -1,0 +1,9 @@
+components:
+  parameters:
+    UserConfirmRegistrationCodeParameter:
+      name: code
+      in: query
+      description: Confirm registration code parameter
+      required: true
+      schema:
+        type: string

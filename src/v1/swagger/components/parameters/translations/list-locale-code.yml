@@ -1,0 +1,11 @@
+components:
+  parameters:
+    ListTranslationsByLocaleCodePathParameter:
+      name: localeCode
+      in: path
+      description: Locale code of translations
+      required: true
+      schema:
+        type: string
+        enum: ['en-US']
+        default: 'en-US'

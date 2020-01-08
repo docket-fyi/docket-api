@@ -1,6 +1,0 @@
-definitions:
-  Search:
-    type: object
-    # properties:
-    #   jwt:
-    #     type: string

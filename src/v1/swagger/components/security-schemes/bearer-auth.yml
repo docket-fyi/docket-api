@@ -1,0 +1,10 @@
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      description: >
+        HTTP Authorization utilizing the Bearer scheme
+        ([RFC6750](https://tools.ietf.org/html/rfc6750)) using a
+        JSON Web Token ([RFC7519](https://tools.ietf.org/html/rfc7519))
+      scheme: bearer
+      bearerFormat: JWT

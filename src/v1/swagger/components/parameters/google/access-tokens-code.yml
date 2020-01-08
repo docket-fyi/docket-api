@@ -1,0 +1,9 @@
+components:
+  parameters:
+    GoogleGetAccessTokensCodeQueryParameter:
+      name: code
+      in: query
+      description: Code
+      required: true
+      schema:
+        type: string

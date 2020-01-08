@@ -1,0 +1,9 @@
+components:
+  parameters:
+    UpdateMyEventEventIdPathParameter:
+      name: eventId
+      in: path
+      description: ID of event to update
+      required: true
+      schema:
+        type: integer

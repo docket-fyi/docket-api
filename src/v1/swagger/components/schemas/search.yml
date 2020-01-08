@@ -1,0 +1,7 @@
+components:
+  schemas:
+    Search:
+      type: object
+      # properties:
+      #   jwt:
+      #     type: string

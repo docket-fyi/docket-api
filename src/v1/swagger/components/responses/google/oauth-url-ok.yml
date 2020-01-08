@@ -1,0 +1,26 @@
+components:
+  responses:
+    GoogleOAuthUrlOkResponse:
+      description: OK
+      content:
+        application/vnd.api+json:
+          schema:
+            type: object
+            properties:
+              meta:
+                type: object
+              links:
+                type: object
+                properties:
+                  self:
+                    type: string
+              data:
+                type: object
+                properties:
+                  attributes:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                  type:
+                    type: string

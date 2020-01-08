@@ -1,0 +1,9 @@
+components:
+  parameters:
+    GetMyEventEventIdPathParameter:
+      name: eventId
+      in: path
+      description: ID of event to get
+      required: true
+      schema:
+        type: integer

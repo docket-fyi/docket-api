@@ -1,5 +1,0 @@
-responses:
-  UnprocessableEntityResponse:
-    description: Unprocessable Entity
-    schema:
-      $ref: '#/definitions/ClientError'

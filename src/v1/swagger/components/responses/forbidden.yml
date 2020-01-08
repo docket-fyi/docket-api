@@ -1,0 +1,8 @@
+components:
+  responses:
+    ForbiddenResponse:
+      description: Forbidden (missing auth header, malformed auth header, invalid auth header)
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/ClientError'

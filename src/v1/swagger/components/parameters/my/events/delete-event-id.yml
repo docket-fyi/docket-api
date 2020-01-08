@@ -1,0 +1,9 @@
+components:
+  parameters:
+    DeleteMyEventEventIdPathParameter:
+      name: eventId
+      in: path
+      description: ID of event to delete
+      required: true
+      schema:
+        type: integer

@@ -1,0 +1,27 @@
+components:
+  requestBodies:
+    UserConfirmRegistrationBodyParameter:
+      description: Confirm registration body parameter
+      required: true
+      content:
+        application/vnd.api+json:
+          schema:
+            type: object
+            required:
+              - data
+            properties:
+              data:
+                type: object
+                required:
+                  - attributes
+                properties:
+                  attributes:
+                    type: object
+                    required:
+                      - password
+                      - passwordConfirmation
+                    properties:
+                      password:
+                        type: string
+                      passwordConfirmation:
+                        type: string

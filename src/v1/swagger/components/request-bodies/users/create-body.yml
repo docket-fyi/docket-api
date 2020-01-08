@@ -1,0 +1,29 @@
+components:
+  requestBodies:
+    UserCreateBodyParameter:
+      description: User creation parameters
+      required: true
+      content:
+        application/vnd.api+json:
+          schema:
+            type: object
+            required:
+              - data
+            properties:
+              data:
+                type: object
+                required:
+                  - attributes
+                properties:
+                  attributes:
+                    type: object
+                    required:
+                      - email
+                      - firstName
+                    properties:
+                      email:
+                        type: string
+                      firstName:
+                        type: string
+                      lastName:
+                        type: string
