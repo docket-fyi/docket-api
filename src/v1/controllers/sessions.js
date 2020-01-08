@@ -25,7 +25,7 @@ const errors = require('../errors')
  *     tags:
  *       - Sessions
  *     requestBody:
- *       $ref: '#/components/requestBodies/SessionCreateBodyParameter'
+ *       $ref: '#/components/requestBodies/SessionCreateRequestBody'
  *     responses:
  *       200:
  *         $ref: '#/components/responses/SessionCreateOkResponse'

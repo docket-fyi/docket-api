@@ -1,7 +1,7 @@
 components:
   requestBodies:
-    UserConfirmRegistrationBodyParameter:
-      description: Confirm registration body parameter
+    UpdateMyEventRequestBody:
+      description: Event update parameters
       required: true
       content:
         application/vnd.api+json:
@@ -17,11 +17,8 @@ components:
                 properties:
                   attributes:
                     type: object
-                    required:
-                      - password
-                      - passwordConfirmation
                     properties:
-                      password:
+                      name:
                         type: string
-                      passwordConfirmation:
+                      date:
                         type: string

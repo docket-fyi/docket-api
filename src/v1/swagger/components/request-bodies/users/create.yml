@@ -1,7 +1,7 @@
 components:
   requestBodies:
-    UserForgotPasswordBodyParameter:
-      description: Forgot password body parameter
+    UserCreateRequestBody:
+      description: User creation parameters
       required: true
       content:
         application/vnd.api+json:
@@ -19,6 +19,11 @@ components:
                     type: object
                     required:
                       - email
+                      - firstName
                     properties:
                       email:
+                        type: string
+                      firstName:
+                        type: string
+                      lastName:
                         type: string

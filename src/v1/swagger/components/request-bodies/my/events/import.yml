@@ -1,6 +1,6 @@
 components:
   requestBodies:
-    ImportMyEventsBodyParameter:
+    ImportMyEventsRequestBody:
       description: Event import parameters
       required: true
       content:

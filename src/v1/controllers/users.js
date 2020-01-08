@@ -35,7 +35,7 @@ const {
  *     tags:
  *       - Users
  *     requestBody:
- *       $ref: '#/components/requestBodies/UserCreateBodyParameter'
+ *       $ref: '#/components/requestBodies/UserCreateRequestBody'
  *     responses:
  *       201:
  *         $ref: '#/components/responses/UserCreateCreatedResponse'
@@ -87,7 +87,7 @@ async function create(req, res, next) {
  *     tags:
  *       - Users
  *     requestBody:
- *       $ref: '#/components/requestBodies/UserConfirmRegistrationBodyParameter'
+ *       $ref: '#/components/requestBodies/UserConfirmRegistrationRequestBody'
  *     parameters:
  *       - $ref: '#/components/parameters/UserConfirmRegistrationCodeParameter'
  *     responses:
@@ -167,7 +167,7 @@ async function confirmRegistration(req, res, next) {
  *     tags:
  *       - Users
  *     requestBody:
- *       $ref: '#/components/requestBodies/UserForgotPasswordBodyParameter'
+ *       $ref: '#/components/requestBodies/UserForgotPasswordRequestBody'
  *     responses:
  *       204:
  *         $ref: '#/components/responses/NoContentResponse'
@@ -227,7 +227,7 @@ async function forgotPassword(req, res, next) {
  *     tags:
  *       - Users
  *     requestBody:
- *       $ref: '#/components/requestBodies/UserResetPasswordBodyParameter'
+ *       $ref: '#/components/requestBodies/UserResetPasswordRequestBody'
  *     parameters:
  *       - $ref: '#/components/parameters/UserResetPasswordCodeParameter'
  *     responses:
