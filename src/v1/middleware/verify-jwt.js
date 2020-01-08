@@ -20,12 +20,14 @@ function verifyJwt(req, res, next) {
   try {
     const authorizationHeader = req.get('Authorization')
     if (!authorizationHeader) {
-      res.status(status.BAD_REQUEST)
+      res.status(status.UNAUTHORIZED)
+      res.set('WWW-Authenticate', 'Bearer')
       throw new errors.authentication.AuthorizationHeaderMissingError()
     }
     const hasBearer = authorizationHeader.startsWith(PREFIX)
     if (!hasBearer) {
-      res.status(status.BAD_REQUEST)
+      res.status(status.UNAUTHORIZED)
+      res.set('WWW-Authenticate', 'Bearer')
       throw new errors.authentication.MalformedAuthorizationHeaderError()
     }
     const rawJwt = authorizationHeader.split(PREFIX)[1]
