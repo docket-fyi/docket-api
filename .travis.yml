@@ -9,7 +9,7 @@ before_script:
   - "./cc-test-reporter before-build"
 script:
   - npm run lint
-  - npm run test:unit -- --detectOpenHandles --runInBand
+  - npm run test:unit -- --forceExit
   - cat ./coverage/lcov.info | $(npm bin)/coveralls
 after_script:
   - "./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT"
