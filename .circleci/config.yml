@@ -46,13 +46,11 @@ jobs:
           name: Upload test results to Coveralls
           command: cat ./coverage/lcov.info | $(npm bin)/coveralls
       - store_artifacts:
-          path: junit.xml
-          destination: test
+          path: test-results
       - store_artifacts:
           path: coverage
-          destination: coverage
       - store_test_results:
-          path: junit.xml
+          path: test-results
 workflows:
   version: 2
   lint_and_test:
