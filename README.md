@@ -6,6 +6,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/docket-fyi/docket-api/badge.svg?branch=develop)](https://coveralls.io/github/docket-fyi/docket-api?branch=develop)
 [![David DM](https://david-dm.org/docket-fyi/docket-api.svg)](https://david-dm.org)
 [![Known Vulnerabilities](https://snyk.io/test/github/docket-fyi/docket-api/badge.svg)](https://snyk.io/test/github/docket-fyi/docket-api) [![Greenkeeper badge](https://badges.greenkeeper.io/docket-fyi/docket-api.svg)](https://greenkeeper.io/)
+[![CircleCI](https://circleci.com/gh/docket-fyi/docket-api/tree/develop.svg?style=svg)](https://circleci.com/gh/docket-fyi/docket-api/tree/develop)
 
 ## Google
 
