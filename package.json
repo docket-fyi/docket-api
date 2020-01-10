@@ -75,7 +75,7 @@
     "express-list-endpoints": "4.0.1",
     "husky": "3.1.0",
     "inquirer": "7.0.1",
-    "jest": "24.1.0",
+    "jest": "24.9.0",
     "jest-junit": "10.0.0",
     "nodemon": "2.0.2",
     "npm-run-all": "4.1.5",

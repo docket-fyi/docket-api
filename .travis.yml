@@ -10,7 +10,7 @@ before_script:
 script:
   - npm run lint
   - npm run test:unit -- --forceExit
-  - cat ./coverage/lcov.info | $(npm bin)/coveralls
+  - cat ./coverage/lcov.info | $(npm bin)/coveralls # Coveralls has built-in support for Travis
 after_script:
   - "./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT"
 # deploy:
