@@ -70,8 +70,6 @@ workflows:
       - aws-ecr/build-and-push-image:
           repo: "${AWS_ECR_REPOSITORY_NAME}"
           tag: "${CIRCLE_SHA1}"
-  update_aws_ecs:
-    jobs:
       # - aws-ecs/deploy-service-update:
       #     requires:
       #       - aws-ecr/build-and-push-image
