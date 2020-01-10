@@ -58,47 +58,6 @@ jobs:
           path: coverage
       - store_test_results:
           path: test-results
-  # build_and_push_docker_image:
-  #   working_directory: ~/docket/docket-api
-  #   docker:
-  #     - image: docker:stable-git
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: Update NPM
-  #         command: sudo npm i -g npm@latest
-  #     - restore_cache:
-  #         key: dependency-cache-{{ checksum "package-lock.json" }}
-  #     - run:
-  #         name: Install NPM packages
-  #         command: npm ci
-  #     - save_cache:
-  #         paths:
-  #           - ./node_modules
-  #         key: dependency-cache-{{ checksum "package-lock.json" }}
-  #     - run:
-  #         name: Export AWS ECR URI environment variable
-  #         command: export AWS_ECR_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$AWS_ECR_REPOSITORY_NAME
-  #     - run:
-  #         name: Export Docker tag environment variable
-  #         command: export DOCKER_TAG=$AWS_ECR_URI:$CIRCLE_SHA1
-  #     - run:
-  #         name: Get AWS ECS login
-  #         command: eval $(aws ecr get-login --no-include-email)
-  #     - run:
-  #         name: Build Docker image
-  #         command: docker build -f ./Dockerfile -t $DOCKER_TAG .
-  #     - run:
-  #         name: Push Docker image
-  #         command: docker push $DOCKER_URI
-  # update_cloudformation:
-  #   working_directory: ~/docket/docket-api
-  #   docker:
-  #     - image: circleci/node:12.10.0
-  #   steps:
-  #     - run:
-  #         name: Update AWS CloudFormation stack
-  #         command: aws ecs update-stack $CFN_SERVICE_STACK_NAME aws/cloudformation/stack.yml --docker_image_url $DOCKER_IMAGE_URL:build-$BITBUCKET_BUILD_NUMBER
 workflows:
   version: 2
   lint_and_test:
@@ -107,18 +66,43 @@ workflows:
       - test
   build_and_push_image:
     jobs:
+      # See https://circleci.com/orbs/registry/orb/circleci/aws-ecr#commands-build-and-push-image
       - aws-ecr/build-and-push-image:
-          # account-url: "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
-          # aws-access-key-id: "${AWS_ACCESS_KEY_ID}"
-          # aws-secret-access-key: "${AWS_SECRET_ACCESS_KEY}"
-          # context: myContext
-          # create-repo: true
-          # dockerfile: "Dockerfile"
-          # path: pathToMyDockerfile
-          # profile-name: myProfileName
-          # region: "${AWS_REGION}"
           repo: "${AWS_ECR_REPOSITORY_NAME}"
           tag: "${CIRCLE_SHA1}"
+  update_aws_ecs:
+    jobs:
+      # - aws-ecs/deploy-service-update:
+      #     requires:
+      #       - aws-ecr/build-and-push-image
+      #     # docker-image-for-job:
+      #     # aws-access-key-id:
+      #     # aws-secret-access-key:
+      #     # aws-region:
+      #     family: "${AWS_ECS_FAMILY}"
+      #     cluster-name: "${AWS_ECS_CLUSTER}"
+      #     # service-name:
+      #     # deployment-controller:
+      #     container-image-name-updates: "container=${AWS_ECS_SERVICE},tag=${CIRCLE_SHA1}"
+      #     # container-env-var-updates:
+      #     # force-new-deployment:
+      #     # verify-revision-is-deployed:
+      #     # max-poll-attempts:
+      #     # poll-interval:
+      #     # fail-on-verification-timeout:
+      - aws-ecs/update-task-definition:
+          requires:
+            - aws-ecr/build-and-push-image
+          # docker-image-for-job:
+          # aws-access-key-id:
+          # aws-secret-access-key:
+          # aws-region:
+          family: "${AWS_ECS_FAMILY}"
+          container-image-name-updates: "container=${AWS_ECS_CONTAINER},tag=${CIRCLE_SHA1}"
+          # container-env-var-updates:
   # update_cloudformation:
   #   jobs:
-  #     - update_cloudformation
+  #     - aws-cli/:
+  #         requires:
+  #           - aws/cli
+  #         command: aws ecs update-stack $CFN_SERVICE_STACK_NAME aws/cloudformation/stack.yml --docker_image_url $DOCKER_IMAGE_URL:build-$BITBUCKET_BUILD_NUMBER
