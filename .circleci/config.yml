@@ -44,7 +44,7 @@ jobs:
           command: npm run test:unit
       - run:
           name: Upload test results to Coveralls
-          command: cat ./coverage/lcov.info | $(npm bin)/coveralls
+          command: cat ./coverage/lcov.info | $(npm bin)/coveralls # Configured using environment variables in CircleCI
       - store_artifacts:
           path: test-results
       - store_artifacts:
