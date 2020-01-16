@@ -64,43 +64,21 @@ workflows:
     jobs:
       - lint
       - test
-  build_and_push_image:
+  build_push_and_deploy_image:
     jobs:
       # See https://circleci.com/orbs/registry/orb/circleci/aws-ecr#commands-build-and-push-image
       - aws-ecr/build-and-push-image:
           repo: "${AWS_ECR_REPOSITORY_NAME}"
           tag: "${CIRCLE_SHA1}"
-      # - aws-ecs/deploy-service-update:
-      #     requires:
-      #       - aws-ecr/build-and-push-image
-      #     # docker-image-for-job:
-      #     # aws-access-key-id:
-      #     # aws-secret-access-key:
-      #     # aws-region:
-      #     family: "${AWS_ECS_FAMILY}"
-      #     cluster-name: "${AWS_ECS_CLUSTER}"
-      #     # service-name:
-      #     # deployment-controller:
-      #     container-image-name-updates: "container=${AWS_ECS_SERVICE},tag=${CIRCLE_SHA1}"
-      #     # container-env-var-updates:
-      #     # force-new-deployment:
-      #     # verify-revision-is-deployed:
-      #     # max-poll-attempts:
-      #     # poll-interval:
-      #     # fail-on-verification-timeout:
+      # See https://circleci.com/orbs/registry/orb/circleci/aws-ecs#jobs-update-task-definition
       - aws-ecs/update-task-definition:
           requires:
             - aws-ecr/build-and-push-image
-          # docker-image-for-job:
-          # aws-access-key-id:
-          # aws-secret-access-key:
-          # aws-region:
           family: "${AWS_ECS_FAMILY}"
           container-image-name-updates: "container=${AWS_ECS_CONTAINER},tag=${CIRCLE_SHA1}"
-          # container-env-var-updates:
   # update_cloudformation:
   #   jobs:
   #     - aws-cli/:
   #         requires:
   #           - aws/cli
-  #         command: aws ecs update-stack $CFN_SERVICE_STACK_NAME aws/cloudformation/stack.yml --docker_image_url $DOCKER_IMAGE_URL:build-$BITBUCKET_BUILD_NUMBER
+  #         command: aws cloudformation update-stack $CFN_SERVICE_STACK_NAME ./aws/cloudformation/stack.yml --docker_image_url $DOCKER_IMAGE_URL:build-$BITBUCKET_BUILD_NUMBER
