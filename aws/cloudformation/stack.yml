@@ -9,7 +9,7 @@ AWSTemplateFormatVersion: "2010-09-09"
 # See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-description-structure.html #
 ##########################################################################################################
 Description: >
-  Docket application infrastructure
+  Docket API application infrastructure
 
 ######################################################################################################
 # Metadata                                                                                           #
@@ -292,9 +292,26 @@ Resources:
   ApiContainerRepository:
     Type: "AWS::ECR::Repository"
     Properties:
-      # LifecyclePolicy:
-      #   LifecyclePolicyText: String
-      #   RegistryId: String
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Removes untagged images",
+                "selection": {
+                  "tagStatus": "untagged",
+                  "countType": "sinceImagePushed",
+                  "countNumber": 1,
+                  "countUnit": "days"
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+        RegistryId: !Ref "AWS::AccountId"
       RepositoryName: "docket/docket-api"
       # RepositoryPolicyText: Json
       Tags:
@@ -303,9 +320,26 @@ Resources:
   WorkerContainerRepository:
     Type: "AWS::ECR::Repository"
     Properties:
-      # LifecyclePolicy:
-      #   LifecyclePolicyText: String
-      #   RegistryId: String
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Removes untagged images",
+                "selection": {
+                  "tagStatus": "untagged",
+                  "countType": "sinceImagePushed",
+                  "countNumber": 1,
+                  "countUnit": "days"
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+        RegistryId: !Ref "AWS::AccountId"
       RepositoryName: "docket/docket-worker"
       # RepositoryPolicyText: Json
       # Tags:
@@ -643,7 +677,7 @@ Resources:
       SecurityGroupIngress:
         - # CidrIp: "0.0.0.0/0"
           # CidrIpv6: String
-          Description: "Container security group ingress TCP 80"
+          Description: "Container security group ingress TCP 3000"
           FromPort: 3000
           IpProtocol: "tcp"
           # SourcePrefixListId: String
@@ -651,16 +685,6 @@ Resources:
           # SourceSecurityGroupName: String
           # SourceSecurityGroupOwnerId: String
           ToPort: 3000
-        # - # CidrIp: "0.0.0.0/0"
-        #   # CidrIpv6: String
-        #   Description: "Service security group ingress TCP 443"
-        #   FromPort: 443
-        #   IpProtocol: "tcp"
-        #   # SourcePrefixListId: String
-        #   SourceSecurityGroupId: !Ref "LoadBalancerSecurityGroup"
-        #   # SourceSecurityGroupName: String
-        #   # SourceSecurityGroupOwnerId: String
-        #   ToPort: 443
       Tags:
         - Key: "container-security-group-key"
           Value: "container-security-group-value"
@@ -883,26 +907,26 @@ Resources:
       #     IpProtocol: String
       #     ToPort: Integer
       SecurityGroupIngress:
-        - CidrIp: "0.0.0.0/0"
-          # CidrIpv6: String
-          Description: "Load balancer security group ingress TCP 80"
-          FromPort: 80
-          IpProtocol: "tcp"
-          # SourcePrefixListId: String
-          # SourceSecurityGroupId: String
-          # SourceSecurityGroupName: String
-          # SourceSecurityGroupOwnerId: String
-          ToPort: 80
         # - CidrIp: "0.0.0.0/0"
         #   # CidrIpv6: String
-        #   Description: "Load balancer security group ingress TCP 443"
-        #   FromPort: 443
+        #   Description: "Load balancer security group ingress TCP 80"
+        #   FromPort: 80
         #   IpProtocol: "tcp"
         #   # SourcePrefixListId: String
         #   # SourceSecurityGroupId: String
         #   # SourceSecurityGroupName: String
         #   # SourceSecurityGroupOwnerId: String
-        #   ToPort: 443
+        #   ToPort: 80
+        - CidrIp: "0.0.0.0/0"
+          # CidrIpv6: String
+          Description: "Load balancer security group ingress TCP 443"
+          FromPort: 443
+          IpProtocol: "tcp"
+          # SourcePrefixListId: String
+          # SourceSecurityGroupId: String
+          # SourceSecurityGroupName: String
+          # SourceSecurityGroupOwnerId: String
+          ToPort: 443
       Tags:
         - Key: "load-balancer-security-group-key"
           Value: "load-balancer-security-group-value"
@@ -910,8 +934,8 @@ Resources:
   LoadBalancerListener:
     Type: "AWS::ElasticLoadBalancingV2::Listener"
     Properties:
-      # Certificates:
-      #   - CertificateArn: String
+      Certificates:
+        - CertificateArn: !Ref "APICertificate"
       DefaultActions:
         - # AuthenticateCognitoConfig:
           #   AuthenticationRequestExtraParams:
@@ -951,8 +975,8 @@ Resources:
           TargetGroupArn: !Ref "TargetGroup"
           Type: "forward"
       LoadBalancerArn: !Ref "LoadBalancer"
-      Port: 80
-      Protocol: "HTTP"
+      Port: 443
+      Protocol: "HTTPS"
       # SslPolicy: String
   LoadBalancer:
     Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
@@ -1085,6 +1109,33 @@ Resources:
           Value: "docket-redis-value"
       VpcSecurityGroupIds:
         - !Ref "RedisSecurityGroup"
+  LoadBalancerToSubdomainARecord:
+    Type: "AWS::Route53::RecordSet"
+    DependsOn:
+      - "LoadBalancer"
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt "LoadBalancer.DNSName"
+        # EvaluateTargetHealth: Boolean
+        HostedZoneId: !GetAtt "LoadBalancer.CanonicalHostedZoneID"
+      # Comment: String
+      # Failover: String
+      # GeoLocation:
+      #   ContinentCode: String
+      #   CountryCode: String
+      #   SubdivisionCode: String
+      # HealthCheckId: String
+      # HostedZoneId: String
+      HostedZoneName: "docket.fyi."
+      # MultiValueAnswer: Boolean
+      Name: "api.staging.docket.fyi."
+      # Region: String
+      # ResourceRecords:
+      #   - String
+      # SetIdentifier: String
+      # TTL: String
+      Type: "A"
+      # Weight: Integer
   # Elasticsearch:
   #   Type: "AWS::Elasticsearch::Domain"
   #   Properties:
@@ -1132,14 +1183,27 @@ Resources:
   #         - String
   #       SubnetIds:
   #         - String
+  APICertificate:
+    Type: "AWS::CertificateManager::Certificate"
+    Properties:
+      DomainName: "api.staging.docket.fyi"
+      # DomainValidationOptions:
+      #   - DomainName: String
+      #     ValidationDomain: String
+      # SubjectAlternativeNames:
+      #   - String
+      # Tags:
+      #   - Key: String
+      #     Value: String
+      ValidationMethod: "DNS"
 
 #####################################################################################################
 # Outputs                                                                                           #
 # See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html #
 #####################################################################################################
 # Outputs:
-#   FriendlyName:
-#     Description: Information about the value
-#     Value: Value to return
+#   LoadBalancerDNSName:
+#     Description: "Load balancer DNS name"
+#     Value: !GetAtt "LoadBalancer.DNSName"
 #     Export:
-#       Name: Value to export
+#       Name: !Join [ ":", [ !Ref "AWS::StackName", "LoadBalancer", "DNSName" ] ]
