@@ -58,22 +58,6 @@ jobs:
           path: coverage
       - store_test_results:
           path: test-results
-  build_push_and_deploy_image:
-    working_directory: ~/docket/docket-api
-    docker:
-      - image: circleci/buildpack-deps:trusty
-    steps:
-      - checkout
-      # See https://circleci.com/orbs/registry/orb/circleci/aws-ecr#commands-build-and-push-image
-      - aws-ecr/build-and-push-image:
-          repo: "${AWS_ECR_REPOSITORY_NAME}"
-          tag: "${CIRCLE_SHA1}"
-      # See https://circleci.com/orbs/registry/orb/circleci/aws-ecs#jobs-update-task-definition
-      - aws-ecs/update-task-definition:
-          requires:
-            - aws-ecr/build-and-push-image
-          family: "${AWS_ECS_FAMILY}"
-          container-image-name-updates: "container=${AWS_ECS_CONTAINER},tag=${CIRCLE_SHA1}"
   update_cloudformation:
     working_directory: ~/docket/docket-api
     docker:
@@ -91,9 +75,22 @@ jobs:
               --capabilities CAPABILITY_NAMED_IAM
 workflows:
   version: 2
-  deploy:
+  lint_and_test:
     jobs:
       - lint
       - test
-      - build_push_and_deploy_image
+  build_push_and_deploy_image:
+    jobs:
+      # See https://circleci.com/orbs/registry/orb/circleci/aws-ecr#commands-build-and-push-image
+      - aws-ecr/build-and-push-image:
+          repo: "${AWS_ECR_REPOSITORY_NAME}"
+          tag: "${CIRCLE_SHA1}"
+      # See https://circleci.com/orbs/registry/orb/circleci/aws-ecs#jobs-update-task-definition
+      - aws-ecs/update-task-definition:
+          requires:
+            - aws-ecr/build-and-push-image
+          family: "${AWS_ECS_FAMILY}"
+          container-image-name-updates: "container=${AWS_ECS_CONTAINER},tag=${CIRCLE_SHA1}"
+  update_cloudformation:
+    jobs:
       - update_cloudformation
