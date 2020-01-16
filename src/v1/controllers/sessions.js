@@ -25,7 +25,30 @@ const errors = require('../errors')
  *     tags:
  *       - Sessions
  *     requestBody:
- *       $ref: '#/components/requestBodies/SessionCreateRequestBody'
+ *       description: Session creation parameters
+ *       required: true
+ *       content:
+ *         application/vnd.api+json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - data
+ *             properties:
+ *               data:
+ *                 type: object
+ *                 required:
+ *                   - attributes
+ *                 properties:
+ *                   attributes:
+ *                     type: object
+ *                     required:
+ *                       - email
+ *                       - password
+ *                     properties:
+ *                       email:
+ *                         type: string
+ *                       password:
+ *                         type: string
  *     responses:
  *       200:
  *         $ref: '#/components/responses/SessionCreateOkResponse'

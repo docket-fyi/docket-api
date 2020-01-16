@@ -66,7 +66,31 @@ async function show(req, res, next) {
  *     tags:
  *       - Users
  *     requestBody:
- *       $ref: '#/components/requestBodies/UpdateMyProfileRequestBody'
+ *       description: User update parameters
+ *       required: true
+ *       content:
+ *         application/vnd.api+json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - data
+ *             properties:
+ *               data:
+ *                 type: object
+ *                 required:
+ *                   - attributes
+ *                 properties:
+ *                   attributes:
+ *                     type: object
+ *                     properties:
+ *                       email:
+ *                         type: string
+ *                       firstName:
+ *                         type: string
+ *                       lastName:
+ *                         type: string
+ *                       preferredMeasurementUnit:
+ *                         type: string
  *     responses:
  *       200:
  *         $ref: '#/components/responses/UpdateMyProfileOkResponse'
@@ -240,7 +264,27 @@ async function showEvent(req, res, next) {
  *     tags:
  *       - Events
  *     requestBody:
- *       $ref: '#/components/requestBodies/CreateEventRequestBody'
+ *       description: Event creation parameters
+ *       required: true
+ *       content:
+ *         application/vnd.api+json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - data
+ *             properties:
+ *               data:
+ *                 type: object
+ *                 required:
+ *                   - attributes
+ *                 properties:
+ *                   attributes:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                       date:
+ *                         type: string
  *     responses:
  *       200:
  *         $ref: '#/components/responses/CreateEventOkResponse'
@@ -319,7 +363,27 @@ async function createEvent(req, res, next) {
  *     tags:
  *       - Events
  *     requestBody:
- *       $ref: '#/components/requestBodies/ImportMyEventsRequestBody'
+ *       description: Event import parameters
+ *       required: true
+ *       content:
+ *         application/vnd.api+json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - data
+ *             properties:
+ *               data:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     attributes:
+ *                       type: object
+ *                       properties:
+ *                         name:
+ *                           type: string
+ *                         date:
+ *                           type: string
  *     responses:
  *       200:
  *         $ref: '#/components/responses/ImportMyEventsOkResponse'
@@ -379,7 +443,27 @@ async function importEvents(req, res, next) {
  *     parameters:
  *       - $ref: '#/components/parameters/UpdateMyEventEventIdPathParameter'
  *     requestBody:
- *       $ref: '#/components/requestBodies/UpdateMyEventRequestBody'
+ *       description: Event update parameters
+ *       required: true
+ *       content:
+ *         application/vnd.api+json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - data
+ *             properties:
+ *               data:
+ *                 type: object
+ *                 required:
+ *                   - attributes
+ *                 properties:
+ *                   attributes:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                       date:
+ *                         type: string
  *     responses:
  *       200:
  *         $ref: '#/components/responses/UpdateMyEventOkResponse'
