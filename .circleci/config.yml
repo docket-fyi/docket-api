@@ -58,6 +58,19 @@ jobs:
           path: coverage
       - store_test_results:
           path: test-results
+  update_cloudformation:
+    working_directory: ~/docket/docket-api
+    docker:
+      - image: alpine:latest
+    steps:
+      - checkout
+      - run:
+          name: Update CloudFormation
+          command: |
+            aws cloudformation deploy \
+              --stack-name $AWS_CLOUDFORMATION_STACK_NAME \
+              --template-file ./aws/cloudformation/stack.yml \
+              --no-fail-on-empty-changeset
 workflows:
   version: 2
   lint_and_test:
@@ -76,9 +89,7 @@ workflows:
             - aws-ecr/build-and-push-image
           family: "${AWS_ECS_FAMILY}"
           container-image-name-updates: "container=${AWS_ECS_CONTAINER},tag=${CIRCLE_SHA1}"
-  # update_cloudformation:
-  #   jobs:
-  #     - aws-cli/:
-  #         requires:
-  #           - aws/cli
-  #         command: aws cloudformation update-stack $CFN_SERVICE_STACK_NAME ./aws/cloudformation/stack.yml --docker_image_url $DOCKER_IMAGE_URL:build-$BITBUCKET_BUILD_NUMBER
+  update_cloudformation:
+    jobs:
+      - aws-cli/setup
+      - update_cloudformation
