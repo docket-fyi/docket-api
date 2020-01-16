@@ -1,7 +1,7 @@
 version: 2.1
 orbs:
   # See https://circleci.com/orbs/registry/orb/circleci/aws-cli
-  # aws-cli: circleci/aws-cli@0.1.19
+  aws-cli: circleci/aws-cli@0.1.19
   # See https://circleci.com/orbs/registry/orb/circleci/aws-ecr
   aws-ecr: circleci/aws-ecr@6.7.0
   # See https://circleci.com/orbs/registry/orb/circleci/aws-ecs
