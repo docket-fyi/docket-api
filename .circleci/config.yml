@@ -64,6 +64,7 @@ jobs:
       - image: alpine:latest
     steps:
       - checkout
+      - aws-cli/setup
       - run:
           name: Update CloudFormation
           command: |
@@ -91,5 +92,4 @@ workflows:
           container-image-name-updates: "container=${AWS_ECS_CONTAINER},tag=${CIRCLE_SHA1}"
   update_cloudformation:
     jobs:
-      - aws-cli/setup
       - update_cloudformation
