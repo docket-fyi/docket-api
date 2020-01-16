@@ -35,7 +35,32 @@ const {
  *     tags:
  *       - Users
  *     requestBody:
- *       $ref: '#/components/requestBodies/UserCreateRequestBody'
+ *       description: User creation parameters
+ *       required: true
+ *       content:
+ *         application/vnd.api+json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - data
+ *             properties:
+ *               data:
+ *                 type: object
+ *                 required:
+ *                   - attributes
+ *                 properties:
+ *                   attributes:
+ *                     type: object
+ *                     required:
+ *                       - email
+ *                       - firstName
+ *                     properties:
+ *                       email:
+ *                         type: string
+ *                       firstName:
+ *                         type: string
+ *                       lastName:
+ *                         type: string
  *     responses:
  *       201:
  *         $ref: '#/components/responses/UserCreateCreatedResponse'
@@ -87,7 +112,30 @@ async function create(req, res, next) {
  *     tags:
  *       - Users
  *     requestBody:
- *       $ref: '#/components/requestBodies/UserConfirmRegistrationRequestBody'
+ *       description: Confirm registration body parameter
+ *       required: true
+ *       content:
+ *         application/vnd.api+json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - data
+ *             properties:
+ *               data:
+ *                 type: object
+ *                 required:
+ *                   - attributes
+ *                 properties:
+ *                   attributes:
+ *                     type: object
+ *                     required:
+ *                       - password
+ *                       - passwordConfirmation
+ *                     properties:
+ *                       password:
+ *                         type: string
+ *                       passwordConfirmation:
+ *                         type: string
  *     parameters:
  *       - $ref: '#/components/parameters/UserConfirmRegistrationCodeParameter'
  *     responses:
@@ -167,7 +215,27 @@ async function confirmRegistration(req, res, next) {
  *     tags:
  *       - Users
  *     requestBody:
- *       $ref: '#/components/requestBodies/UserForgotPasswordRequestBody'
+ *       description: Forgot password body parameter
+ *       required: true
+ *       content:
+ *         application/vnd.api+json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - data
+ *             properties:
+ *               data:
+ *                 type: object
+ *                 required:
+ *                   - attributes
+ *                 properties:
+ *                   attributes:
+ *                     type: object
+ *                     required:
+ *                       - email
+ *                     properties:
+ *                       email:
+ *                         type: string
  *     responses:
  *       204:
  *         $ref: '#/components/responses/NoContentResponse'
@@ -227,7 +295,30 @@ async function forgotPassword(req, res, next) {
  *     tags:
  *       - Users
  *     requestBody:
- *       $ref: '#/components/requestBodies/UserResetPasswordRequestBody'
+ *       description: Reset password body parameter
+ *       required: true
+ *       content:
+ *         application/vnd.api+json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - data
+ *             properties:
+ *               data:
+ *                 type: object
+ *                 required:
+ *                   - attributes
+ *                 properties:
+ *                   attributes:
+ *                     type: object
+ *                     required:
+ *                       - password
+ *                       - passwordConfirmation
+ *                     properties:
+ *                       password:
+ *                         type: string
+ *                       passwordConfirmation:
+ *                         type: string
  *     parameters:
  *       - $ref: '#/components/parameters/UserResetPasswordCodeParameter'
  *     responses:
