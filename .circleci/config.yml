@@ -61,7 +61,7 @@ jobs:
   update_cloudformation:
     working_directory: ~/docket/docket-api
     docker:
-      - image: alpine:latest
+      - image: circleci/buildpack-deps:trusty
     steps:
       - checkout
       - aws-cli/setup
