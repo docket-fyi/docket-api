@@ -1,5 +1,6 @@
 node_modules/
 .env
+vault-seeds.js
 coverage/
 junit.xml
 .idea/
