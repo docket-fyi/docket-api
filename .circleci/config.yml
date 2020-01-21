@@ -73,6 +73,7 @@ jobs:
               --template-file ./aws/cloudformation/stack.yml \
               --no-fail-on-empty-changeset \
               --capabilities CAPABILITY_NAMED_IAM
+              --s3-bucket docket-cloudformation
 workflows:
   version: 2
   lint_and_test:
