@@ -372,12 +372,12 @@ Resources:
               Value: !Ref "DbHostParameter"
             # - Name: "DB_PORT"
             #   Value: !Ref "Parameter"
-            - Name: "DB_USERNAME"
-              # Value: !Ref "DbMasterUserNameParameter"
-              Value: !Join ["", ["{{resolve:", "ssm", ":", "db-master-user-name", "-", !Ref "NodeEnvParameter", ":", "1", "}}"]]
-            - Name: "DB_PASSWORD"
-              # Value: !Ref "DbMasterUserPasswordParameter"
-              Value: !Join ["", ["{{resolve:", "ssm", ":", "db-master-user-password", "-", !Ref "NodeEnvParameter", ":", "1", "}}"]]
+            # - Name: "DB_USERNAME"
+            #   # Value: !Ref "DbMasterUserNameParameter"
+            #   Value: !Join ["", ["{{resolve:", "ssm", ":", "db-master-user-name", "-", !Ref "NodeEnvParameter", ":", "1", "}}"]]
+            # - Name: "DB_PASSWORD"
+            #   # Value: !Ref "DbMasterUserPasswordParameter"
+            #   Value: !Join ["", ["{{resolve:", "ssm", ":", "db-master-user-password", "-", !Ref "NodeEnvParameter", ":", "1", "}}"]]
             - Name: "VAULT_APPROLE_ROLE_ID"
               Value: !Join ["", ["{{resolve:", "ssm", ":", "vault-app-role-id", "-", !Ref "NodeEnvParameter", ":", "1", "}}"]]
             - Name: "VAULT_APPROLE_ROLE_SECRET_WRAP_TOKEN"
