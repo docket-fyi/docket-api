@@ -72,7 +72,7 @@ jobs:
               --stack-name $AWS_CLOUDFORMATION_STACK_NAME \
               --template-file ./aws/cloudformation/stack.yml \
               --no-fail-on-empty-changeset \
-              --capabilities CAPABILITY_NAMED_IAM
+              --capabilities CAPABILITY_NAMED_IAM \
               --s3-bucket docket-cloudformation
 workflows:
   version: 2
