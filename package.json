@@ -67,7 +67,7 @@
     "uuid": "3.3.3"
   },
   "devDependencies": {
-    "@semantic-release/changelog": "3.0.6",
+    "@semantic-release/changelog": "5.0.0",
     "autocannon": "4.4.1",
     "aws-sdk": "2.605.0",
     "clinic": "5.0.0",
