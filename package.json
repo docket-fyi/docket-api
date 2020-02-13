@@ -39,7 +39,7 @@
     "accept-language": "3.0.18",
     "bcryptjs": "2.4.3",
     "body-parser": "1.19.0",
-    "bull": "3.12.1",
+    "bull": "3.13.0",
     "cors": "2.8.5",
     "debug": "4.1.1",
     "dotenv": "8.2.0",
