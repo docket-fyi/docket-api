@@ -47,7 +47,7 @@
     "express-pino-logger": "4.0.0",
     "googleapis": "46.0.0",
     "http-status": "1.4.2",
-    "ioredis": "4.14.1",
+    "ioredis": "4.16.0",
     "json-api-serializer": "2.2.2",
     "jsonapi-serializer": "3.6.5",
     "jsonwebtoken": "8.5.1",
