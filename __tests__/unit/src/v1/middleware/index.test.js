@@ -15,8 +15,6 @@ describe('v1', () => {
           'currentLocale',
           'setGoogleOAuthCredentials',
           'clearGoogleOAuthCredentials',
-          'logRequest',
-          'logResponse',
           'routeNotFound',
           'error',
           'verifyJwt',

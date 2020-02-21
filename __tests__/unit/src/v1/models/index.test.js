@@ -9,12 +9,13 @@ describe('v1', () => {
       it('exports an object', () => {
         expect(typeof index).toBe('object')
         const expectedKeys = [
-          'User',
-          'Event',
-          'Locale',
-          'Translation',
-          'GoogleCredential',
-          'MicrosoftCredential'
+          'init',
+          'getUserModel',
+          'getEventModel',
+          'getLocaleModel',
+          'getTranslationModel',
+          'getGoogleCredentialModel',
+          'getMicrosoftCredentialModel'
         ]
         expectedKeys.forEach(key => {
           expect(index).toHaveProperty(key)
