@@ -1,0 +1,362 @@
+# This template is intended to...
+#
+# Setup stack (setup.yml)
+#  |
+#  | import
+#  +--------> Root stack (root.yml)
+#              |
+#              | parameters
+#              +------------> Config stack (config.yml)
+#              | parameters
+#              +------------> Network stack (network.yml; outputs VPC & subnets)
+#              | parameters
+#              +------------> Vault stack (vault.yml)
+#              | parameters
+#              +------------> App stack (app.yml; outputs container security group ID)
+#              | parameters
+#              +------------> Data stack (data.yml) <─ You are here
+#
+# Run the following command to create/update this stack:
+#
+# aws cloudformation deploy \
+#   --template-file ./aws/cloudformation/data.yml \
+#   --stack-name DocketEnvApiDataStack \
+#   --profile docket \
+#   --parameter-overrides \
+#     ApplicationNameParameter=value \
+#     EnvironmentNameParameter=ENV \
+#     ComponentNameParameter=value \
+#     DatabaseMasterUsernameSsmVersionParameter=value \
+#     DatabaseMasterUserPasswordSsmVersionParameter=value
+#
+########################################################################
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/format-version-structure.html
+AWSTemplateFormatVersion: "2010-09-09"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-description-structure.html
+Description: "Docket API data storage infrastructure"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/metadata-section-structure.html
+# Metadata:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html
+# Conditions:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/transform-section-structure.html
+# Transform:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/mappings-section-structure.html
+# Mappings:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+Parameters:
+  ApplicationNameParameter:
+    AllowedPattern: "^[a-z]+$"
+    Description: "The name of the application"
+    Type: "String"
+    Default: "docket"
+  EnvironmentNameParameter:
+    AllowedPattern: "^[a-z]+$"
+    AllowedValues:
+      - "staging"
+      - "production"
+    Default: "staging"
+    ConstraintDescription: "Must match pattern ^[a-z]+$"
+    Description: "The environment in which the application will run."
+    Type: "String"
+  ComponentNameParameter:
+    ConstraintDescription: "Must match pattern ^[a-z]+$"
+    Description: "The application component name"
+    AllowedPattern: "^[a-z]+$"
+    Default: "data"
+    Type: "String"
+  DatabaseMasterUsernameSsmVersionParameter:
+    Description: "Database master username SSM key version"
+    Type: "Number"
+    Default: 1
+  DatabaseMasterUserPasswordSsmVersionParameter:
+    Description: "Database master password SSM key version"
+    Type: "Number"
+    Default: 1
+  ApiContainerSecurityGroupIdParameter:
+    Description: "API container security group ID"
+    Type: "String"
+  VpcIdParameter:
+    Description: "VPC ID"
+    Type: "String"
+  SubnetOneIdParameter:
+    Description: "Subnet #1 ID"
+    Type: "String"
+  SubnetTwoIdParameter:
+    Description: "Subnet #2 ID"
+    Type: "String"
+  SubnetThreeIdParameter:
+    Description: "Subnet #3 ID"
+    Type: "String"
+  SubnetFourIdParameter:
+    Description: "Subnet #4 ID"
+    Type: "String"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
+Resources:
+  DatabaseSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Database security group description"
+      GroupName:
+        Fn::Join:
+          - "-"
+          - - !Ref "ApplicationNameParameter"
+            - !Ref "EnvironmentNameParameter"
+            - "database-security-group"
+      # SecurityGroupEgress:
+      #   - CidrIp: String
+      #     CidrIpv6: String
+      #     Description: String
+      #     DestinationPrefixListId: String
+      #     DestinationSecurityGroupId: String
+      #     FromPort: Integer
+      #     IpProtocol: String
+      #     ToPort: Integer
+      SecurityGroupIngress:
+        - # CidrIp: "0.0.0.0/0"
+          # CidrIpv6: String
+          Description: "Database security group ingress TCP 5432"
+          FromPort: 5432
+          IpProtocol: "tcp"
+          # SourcePrefixListId: String
+          SourceSecurityGroupId: !Ref "ApiContainerSecurityGroupIdParameter"
+          # SourceSecurityGroupName: String
+          # SourceSecurityGroupOwnerId: String
+          ToPort: 5432
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+      VpcId: !Ref "VpcIdParameter"
+  DatabaseSubnetGroup:
+    Type: "AWS::RDS::DBSubnetGroup"
+    Properties:
+      DBSubnetGroupDescription: "Database subnet group"
+      DBSubnetGroupName:
+        Fn::Join:
+          - "-"
+          - - !Ref "ApplicationNameParameter"
+            - !Ref "EnvironmentNameParameter"
+            - "database-subnet-group"
+      SubnetIds:
+        - !Ref "SubnetOneIdParameter"
+        - !Ref "SubnetTwoIdParameter"
+        - !Ref "SubnetThreeIdParameter"
+        - !Ref "SubnetFourIdParameter"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+  Database:
+    Type: "AWS::RDS::DBInstance"
+    Properties:
+      AllocatedStorage: 5
+      # AllowMajorVersionUpgrade: Boolean
+      # AssociatedRoles:
+      #   - FeatureName: String
+      #     RoleArn: String
+      AutoMinorVersionUpgrade: true
+      # AvailabilityZone: String
+      BackupRetentionPeriod: 7
+      # CharacterSetName: String
+      CopyTagsToSnapshot: true
+      # DBClusterIdentifier: String
+      DBInstanceClass: "db.t2.micro"
+      # DBInstanceIdentifier:
+      #   Fn::Join:
+      #     - "-"
+      #     - - !Ref "ApplicationNameParameter"
+      #       - !Ref "EnvironmentNameParameter"
+      #       - "database-instance"
+      DBName:
+        Fn::Join:
+          - "_"
+          - - !Ref "ApplicationNameParameter"
+            - !Ref "EnvironmentNameParameter"
+      # DBParameterGroupName: String
+      # DBSecurityGroups:
+      #   - !Ref "DatabaseSecurityGroup"
+      # DBSnapshotIdentifier: String
+      DBSubnetGroupName: !Ref "DatabaseSubnetGroup"
+      # DeleteAutomatedBackups: Boolean
+      # DeletionProtection: Boolean
+      # Domain: String
+      # DomainIAMRoleName: String
+      EnableCloudwatchLogsExports:
+        - "postgresql"
+      # EnableIAMDatabaseAuthentication: Boolean
+      # EnablePerformanceInsights: Boolean
+      Engine: "postgres"
+      EngineVersion: "11.5"
+      # Iops: Integer
+      # KmsKeyId: String
+      # LicenseModel: String
+      MasterUsername:
+        Fn::Join:
+          - ""
+          - - "{{resolve:"
+            - "ssm"
+            - ":"
+            - !Join ["-", [!Ref "EnvironmentNameParameter", "database", "masterUsername"]] # See 10-config.yml
+            - ":"
+            - !Ref "DatabaseMasterUsernameSsmVersionParameter"
+            - "}}"
+      MasterUserPassword:
+        Fn::Join:
+          - ""
+          - - "{{resolve:"
+            - "ssm"
+            - ":"
+            - !Join ["-", [!Ref "EnvironmentNameParameter", "database", "masterUserPassword"]] # See 10-config.yml
+            - ":"
+            - !Ref "DatabaseMasterUsernameSsmVersionParameter"
+            - "}}"
+      # MonitoringInterval: Integer
+      # MonitoringRoleArn: String
+      # MultiAZ: Boolean
+      # OptionGroupName: String
+      # PerformanceInsightsKMSKeyId: String
+      # PerformanceInsightsRetentionPeriod: Integer
+      Port: "5432"
+      # PreferredBackupWindow: String
+      # PreferredMaintenanceWindow: String
+      # ProcessorFeatures:
+      #   - Name: String
+      #     Value: String
+      # PromotionTier: Integer
+      PubliclyAccessible: false
+      # SourceDBInstanceIdentifier: String
+      # SourceRegion: String
+      # StorageEncrypted: Boolean
+      # StorageType: String
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+      # Timezone: String
+      # UseDefaultProcessorFeatures: Boolean
+      VPCSecurityGroups:
+        - !Ref "DatabaseSecurityGroup"
+  RedisSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Redis security group description"
+      # GroupName: "redis-security-group"
+      # SecurityGroupEgress:
+      #   - CidrIp: String
+      #     CidrIpv6: String
+      #     Description: String
+      #     DestinationPrefixListId: String
+      #     DestinationSecurityGroupId: String
+      #     FromPort: Integer
+      #     IpProtocol: String
+      #     ToPort: Integer
+      SecurityGroupIngress:
+        - # CidrIp: "0.0.0.0/0"
+          # CidrIpv6: String
+          Description: "Redis security group ingress TCP 6379"
+          FromPort: 6379
+          IpProtocol: "tcp"
+          # SourcePrefixListId: String
+          SourceSecurityGroupId: !Ref "ApiContainerSecurityGroupIdParameter"
+          # SourceSecurityGroupName: String
+          # SourceSecurityGroupOwnerId: String
+          ToPort: 6379
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+      VpcId: !Ref "VpcIdParameter"
+  RedisSubnetGroup:
+    Type: "AWS::ElastiCache::SubnetGroup"
+    Properties:
+      CacheSubnetGroupName:
+        Fn::Join:
+          - "-"
+          - - !Ref "ApplicationNameParameter"
+            - !Ref "EnvironmentNameParameter"
+            - "redis-subnet-group"
+      Description: "Docket Redis subnet group"
+      SubnetIds:
+        - !Ref "SubnetOneIdParameter"
+        - !Ref "SubnetTwoIdParameter"
+        - !Ref "SubnetThreeIdParameter"
+        - !Ref "SubnetFourIdParameter"
+  RedisParameterGroup:
+    Type: "AWS::ElastiCache::ParameterGroup"
+    Properties:
+      CacheParameterGroupFamily: "redis5.0"
+      Description: "Docket Redis parameter group"
+      Properties:
+        notify-keyspace-events: "AKE"
+  Redis:
+    Type: "AWS::ElastiCache::CacheCluster"
+    Properties:
+      # AutoMinorVersionUpgrade: Boolean
+      # AZMode: String
+      CacheNodeType: "cache.t2.micro"
+      CacheParameterGroupName: !Ref "RedisParameterGroup"
+      # CacheSecurityGroupNames:
+      #   - String
+      CacheSubnetGroupName: !Ref "RedisSubnetGroup"
+      ClusterName:
+        Fn::Join:
+          - "-"
+          - - !Ref "ApplicationNameParameter"
+            - !Ref "EnvironmentNameParameter"
+            - "redis-cluster"
+      Engine: "redis"
+      EngineVersion: "5.0.5"
+      # NotificationTopicArn: String
+      NumCacheNodes: 1
+      Port: 6379
+      # PreferredAvailabilityZone: String
+      # PreferredAvailabilityZones:
+      #   - String
+      # PreferredMaintenanceWindow: String
+      # SnapshotArns:
+      #   - String
+      # SnapshotName: String
+      # SnapshotRetentionLimit: Integer
+      # SnapshotWindow: String
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+      VpcSecurityGroupIds:
+        - !Ref "RedisSecurityGroup"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html
+# Outputs:

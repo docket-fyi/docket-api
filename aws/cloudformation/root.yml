@@ -1,0 +1,257 @@
+# This template is intended to create any necessary secrets and/or
+# configuration values needed for subsequent resources -- it turns
+# CloudFormation parameters into SSM key/value pairs. This is the
+# top-most parent stack for all other nested stacks.
+#
+# Setup stack (setup.yml)
+#  |
+#  | import
+#  +--------> Root stack (root.yml) <─ You are here
+#              |
+#              | parameters
+#              +------------> Config stack (config.yml)
+#              | parameters
+#              +------------> Network stack (network.yml; outputs VPC & subnets)
+#              | parameters
+#              +------------> Vault stack (vault.yml)
+#              | parameters
+#              +------------> App stack (app.yml; outputs container security group ID)
+#              | parameters
+#              +------------> Data stack (data.yml)
+#
+# Run the following command to create/update this stack:
+#
+# AWS_CLOUDFORMATION_STACK_NAME=ApiRoot TEMPLATE_FILE_PATH=./aws/cloudformation/root.yml npm run aws:cloudformation
+#
+# Which equates to:
+#
+# aws cloudformation deploy \
+#   --template-file ./aws/cloudformation/root.yml \
+#   --stack-name DocketEnvApiRootStack \
+#   --profile docket \
+#   --capabilities CAPABILITY_NAMED_IAM \
+#   --parameter-overrides \
+#     ApplicationNameParameter=value \
+#     EnvironmentNameParameter=ENV \
+#     DbMasterUsernameParameter=value \
+#     DbMasterUserPasswordParameter=value \
+#     VaultAppRoleIdParameter=value \
+#     VaultAppRoleSecretWrapTokenParameter=value
+#
+########################################################################
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/format-version-structure.html
+AWSTemplateFormatVersion: "2010-09-09"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-description-structure.html
+Description: "Docket API root stack"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/metadata-section-structure.html
+# Metadata:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html
+# Conditions:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/transform-section-structure.html
+# Transform:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/mappings-section-structure.html
+# Mappings:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+Parameters:
+  ApplicationNameParameter:
+    AllowedPattern: "^[a-z]+$"
+    Description: "The name of the application"
+    Type: "String"
+    Default: "docket"
+  EnvironmentNameParameter:
+    AllowedPattern: "^[a-z]+$"
+    AllowedValues:
+      - "staging"
+      - "production"
+    Default: "staging"
+    Description: "The environment in which the application will run"
+    Type: "String"
+  DbMasterUsernameParameter:
+    Description: "Database master user name"
+    NoEcho: true
+    Type: "String"
+  DbMasterUserPasswordParameter:
+    Description: "Database master user password"
+    NoEcho: true
+    Type: "String"
+  VaultAppRoleIdParameter:
+    Description: "Vault AppRole ID"
+    NoEcho: true
+    Type: "String"
+  VaultAppRoleSecretWrapTokenParameter:
+    Description: "Vault AppRole secret wrap token"
+    NoEcho: true
+    Type: "String"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
+Resources:
+  ConfigStack:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      Parameters:
+        ApplicationNameParameter: !Ref "ApplicationNameParameter"
+        EnvironmentNameParameter: !Ref "EnvironmentNameParameter"
+        DbMasterUsernameParameter: !Ref "DbMasterUsernameParameter"
+        DbMasterUserPasswordParameter: !Ref "DbMasterUserPasswordParameter"
+        VaultAppRoleIdParameter: !Ref "VaultAppRoleIdParameter"
+        VaultAppRoleSecretWrapTokenParameter: !Ref "VaultAppRoleSecretWrapTokenParameter"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: "config"
+        - Key: "ParentStackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+        - Key: "TemplateUrl"
+          Value:
+            Fn::Join:
+              - ""
+              - - "http://"
+                - !ImportValue "CloudFormationTemplatesS3BucketDomainName"
+                - "/config.yml"
+      TemplateURL:
+        Fn::Join:
+          - ""
+          - - "http://"
+            - !ImportValue "CloudFormationTemplatesS3BucketDomainName"
+            - "/config.yml"
+  NetworkStack:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      Parameters:
+        ApplicationNameParameter: !Ref "ApplicationNameParameter"
+        EnvironmentNameParameter: !Ref "EnvironmentNameParameter"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: "network"
+        - Key: "ParentStackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+        - Key: "TemplateUrl"
+          Value:
+            Fn::Join:
+              - ""
+              - - "http://"
+                - !ImportValue "CloudFormationTemplatesS3BucketDomainName"
+                - "/network.yml"
+      TemplateURL:
+        Fn::Join:
+          - ""
+          - - "http://"
+            - !ImportValue "CloudFormationTemplatesS3BucketDomainName"
+            - "/network.yml"
+  VaultStack:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      Parameters:
+        ApplicationNameParameter: !Ref "ApplicationNameParameter"
+        EnvironmentNameParameter: !Ref "EnvironmentNameParameter"
+        VpcIdParameter: !GetAtt ["NetworkStack", "Outputs.VpcId"]
+        SubnetOneIdParameter: !GetAtt ["NetworkStack", "Outputs.SubnetOneId"]
+        SubnetTwoIdParameter: !GetAtt ["NetworkStack", "Outputs.SubnetTwoId"]
+        SubnetThreeIdParameter: !GetAtt ["NetworkStack", "Outputs.SubnetThreeId"]
+        SubnetFourIdParameter: !GetAtt ["NetworkStack", "Outputs.SubnetFourId"]
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: "vault"
+        - Key: "ParentStackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "TemplateUrl"
+          Value:
+            Fn::Join:
+              - ""
+              - - "http://"
+                - !ImportValue "CloudFormationTemplatesS3BucketDomainName"
+                - "/vault.yml"
+      TemplateURL:
+        Fn::Join:
+          - ""
+          - - "http://"
+            - !ImportValue "CloudFormationTemplatesS3BucketDomainName"
+            - "/vault.yml"
+  DataStack:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      Parameters:
+        ApplicationNameParameter: !Ref "ApplicationNameParameter"
+        EnvironmentNameParameter: !Ref "EnvironmentNameParameter"
+        ApiContainerSecurityGroupIdParameter: !GetAtt ["AppStack", "Outputs.ApiContainerSecurityGroupId"]
+        VpcIdParameter: !GetAtt ["NetworkStack", "Outputs.VpcId"]
+        SubnetOneIdParameter: !GetAtt ["NetworkStack", "Outputs.SubnetOneId"]
+        SubnetTwoIdParameter: !GetAtt ["NetworkStack", "Outputs.SubnetTwoId"]
+        SubnetThreeIdParameter: !GetAtt ["NetworkStack", "Outputs.SubnetThreeId"]
+        SubnetFourIdParameter: !GetAtt ["NetworkStack", "Outputs.SubnetFourId"]
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: "data"
+        - Key: "ParentStackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "TemplateUrl"
+          Value:
+            Fn::Join:
+              - ""
+              - - "http://"
+                - !ImportValue "CloudFormationTemplatesS3BucketDomainName"
+                - "/data.yml"
+      TemplateURL:
+        Fn::Join:
+          - ""
+          - - "http://"
+            - !ImportValue "CloudFormationTemplatesS3BucketDomainName"
+            - "/data.yml"
+  AppStack:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      Parameters:
+        ApplicationNameParameter: !Ref "ApplicationNameParameter"
+        EnvironmentNameParameter: !Ref "EnvironmentNameParameter"
+        VpcIdParameter: !GetAtt ["NetworkStack", "Outputs.VpcId"]
+        SubnetOneIdParameter: !GetAtt ["NetworkStack", "Outputs.SubnetOneId"]
+        SubnetTwoIdParameter: !GetAtt ["NetworkStack", "Outputs.SubnetTwoId"]
+        SubnetThreeIdParameter: !GetAtt ["NetworkStack", "Outputs.SubnetThreeId"]
+        SubnetFourIdParameter: !GetAtt ["NetworkStack", "Outputs.SubnetFourId"]
+        # VaultHostParameter: !Ref "VaultHostParameter"
+        # VaultProtocolParameter: !Ref "VaultProtocolParameter"
+        # VaultPortParameter: !Ref "VaultPortParameter"
+        # DbHostParameter: !Ref "DbHostParameter"
+        # RedisHostParameter: !Ref "RedisHostParameter"
+        # CloudFormationTemplatesS3BucketUrlParameter: !ImportValue "CloudFormationTemplatesS3BucketDomainName" # Pass the environment name to the child stack
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: "app"
+        - Key: "ParentStackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "TemplateUrl"
+          Value:
+            Fn::Join:
+              - ""
+              - - "http://"
+                - !ImportValue "CloudFormationTemplatesS3BucketDomainName"
+                - "/app.yml"
+      TemplateURL:
+        Fn::Join:
+          - ""
+          - - "http://"
+            - !ImportValue "CloudFormationTemplatesS3BucketDomainName"
+            - "/app.yml"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html
+# Outputs:

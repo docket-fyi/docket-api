@@ -1,0 +1,147 @@
+# This template is intended to create any necessary secrets and/or
+# configuration values needed for subsequent resources -- it turns
+# CloudFormation parameters into SSM key/value pairs.
+#
+# Setup stack (setup.yml)
+#  |
+#  | import
+#  +--------> Root stack (root.yml)
+#              |
+#              | parameters
+#              +------------> Config stack (config.yml) <─ You are here
+#              | parameters
+#              +------------> Network stack (network.yml; outputs VPC & subnets)
+#              | parameters
+#              +------------> Vault stack (vault.yml)
+#              | parameters
+#              +------------> App stack (app.yml; outputs container security group ID)
+#              | parameters
+#              +------------> Data stack (data.yml)
+#
+# Run the following command to create/update this stack:
+#
+# aws cloudformation deploy \
+#   --template-file ./aws/cloudformation/config.yml \
+#   --stack-name DocketEnvApiConfigStack \
+#   --profile docket \
+#   --capabilities CAPABILITY_NAMED_IAM \
+#   --parameter-overrides \
+#     ApplicationNameParameter=value \
+#     EnvironmentNameParameter=ENV \
+#     ComponentNameParameter=value \
+#     DbMasterUsernameParameter=value \
+#     DbMasterUserPasswordParameter=value \
+#     VaultAppRoleIdParameter=value \
+#     VaultAppRoleSecretWrapTokenParameter=value
+#
+########################################################################
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/format-version-structure.html
+AWSTemplateFormatVersion: "2010-09-09"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-description-structure.html
+Description: "Docket API secrets"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/metadata-section-structure.html
+# Metadata:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html
+# Conditions:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/transform-section-structure.html
+# Transform:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/mappings-section-structure.html
+# Mappings:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+Parameters:
+  ApplicationNameParameter:
+    AllowedPattern: "^[a-z]+$"
+    Description: "The name of the application"
+    Type: "String"
+    Default: "docket"
+  EnvironmentNameParameter:
+    AllowedPattern: "^[a-z]+$"
+    AllowedValues:
+      - "staging"
+      - "production"
+    Description: "The environment in which the application will run"
+    Type: "String"
+    Default: "staging"
+  ComponentNameParameter:
+    ConstraintDescription: "Must match pattern ^[a-z]+$"
+    Description: "The application component name"
+    AllowedPattern: "^[a-z]+$"
+    Default: "config"
+    Type: "String"
+  DbMasterUsernameParameter:
+    Description: "Database master user name"
+    NoEcho: true
+    Type: "String"
+  DbMasterUserPasswordParameter:
+    Description: "Database master user password"
+    NoEcho: true
+    Type: "String"
+  VaultAppRoleIdParameter:
+    Description: "Vault AppRole ID"
+    NoEcho: true
+    Type: "String"
+  VaultAppRoleSecretWrapTokenParameter:
+    Description: "Vault AppRole secret wrap token"
+    NoEcho: true
+    Type: "String"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
+Resources:
+  DbMasterUsernameSSMParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Name: !Join ["-", [!Ref "EnvironmentNameParameter", "database", "masterUsername"]]
+      Tier: "Standard"
+      Type: "String"
+      Value: !Ref "DbMasterUsernameParameter"
+      Tags:
+        Application: !Ref "ApplicationNameParameter"
+        Component: !Ref "ComponentNameParameter"
+        StackName: !Ref "AWS::StackName"
+        Environment: !Ref "EnvironmentNameParameter"
+  DbMasterUserPasswordSSMParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Name: !Join ["-", [!Ref "EnvironmentNameParameter", "database", "masterUserPassword"]]
+      Tier: "Standard"
+      Type: "String"
+      Value: !Ref "DbMasterUserPasswordParameter"
+      Tags:
+        Application: !Ref "ApplicationNameParameter"
+        Component: !Ref "ComponentNameParameter"
+        StackName: !Ref "AWS::StackName"
+        Environment: !Ref "EnvironmentNameParameter"
+  VaultAppRoleIdSSMParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Name: !Join ["-", [!Ref "EnvironmentNameParameter", "vault", "appRoleId"]]
+      Tier: "Standard"
+      Type: "String"
+      Value: !Ref "VaultAppRoleIdParameter"
+      Tags:
+        Application: !Ref "ApplicationNameParameter"
+        Component: !Ref "ComponentNameParameter"
+        StackName: !Ref "AWS::StackName"
+        Environment: !Ref "EnvironmentNameParameter"
+  VaultAppRoleSecretWrapTokenSSMParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Name: !Join ["-", [!Ref "EnvironmentNameParameter", "vault", "appRoleSecretWrapToken"]]
+      Tier: "Standard"
+      Type: "String"
+      Value: !Ref "VaultAppRoleSecretWrapTokenParameter"
+      Tags:
+        Application: !Ref "ApplicationNameParameter"
+        Component: !Ref "ComponentNameParameter"
+        StackName: !Ref "AWS::StackName"
+        Environment: !Ref "EnvironmentNameParameter"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html
+# Outputs:

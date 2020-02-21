@@ -1,0 +1,218 @@
+# This template is intended to create the bare minimum AWS resources to
+# make all subsequent CloudFormation stack creations successful (alleviates
+# chicken-and-egg scenarios). For example, this template creates an S3
+# bucket where all CloudFormation templates are placed because subsequent
+# templates create nested stacks, and nested stacks must pull a template
+# from an S3 bucket.
+#
+# Setup stack (setup.yml)
+#  |
+#  | import
+#  +--------> Root stack (root.yml) <─ You are here
+#              |
+#              | parameters
+#              +------------> Config stack (config.yml)
+#              | parameters
+#              +------------> Network stack (network.yml; outputs VPC & subnets)
+#              | parameters
+#              +------------> Vault stack (vault.yml)
+#              | parameters
+#              +------------> App stack (app.yml; outputs container security group ID)
+#              | parameters
+#              +------------> Data stack (data.yml)
+#
+# This template MUST adhere to the following rules:
+#
+# 1. This template MAY require CloudFormation parameters.
+# 2. This template MAY export values for other templates to import.
+# 3. This template MUST NOT have any cross-stack references.
+# 4. This template MAY reference other resources created by only this template.
+#
+# Run the following command to create/update this stack:
+#
+# AWS_CLOUDFORMATION_STACK_NAME=ApiSetup TEMPLATE_FILE_PATH=./aws/cloudformation/setup.yml npm run aws:cloudformation
+#
+# Which equates to:
+#
+# aws cloudformation deploy \
+#   --template-file ./aws/cloudformation/setup.yml \
+#   --stack-name DocketEnvApiSetupStack \
+#   --profile docket \
+#   --parameter-overrides \
+#     ApplicationNameParameter=value \
+#     ComponentNameParameter=value \
+#     EnvironmentNameParameter=ENV
+#
+# Once the stack is created, run the following command to upload all
+# *.yml files to the bucket:
+#
+# aws s3 sync \
+#   ./aws/cloudformation/ s3://$(aws cloudformation describe-stacks --profile docket --stack-name DocketStagingApiSetupStack --output text --query 'Stacks[0].Outputs[?OutputKey==`CloudFormationTemplatesS3BucketName`].{OutputValue:OutputValue}[0].OutputValue') \
+#   --exclude "*" \
+#   --include "*.yml" \
+#   --profile docket
+#
+# Run the following commands to upload an API Docker image to ECR:
+#
+# $(aws ecr get-login --no-include-email --profile docket)
+# docker build -t docket/docket-api .
+# docker tag docket/docket-api:latest 763583018324.dkr.ecr.us-west-2.amazonaws.com/docket/docket-api:latest
+# docker push 763583018324.dkr.ecr.us-west-2.amazonaws.com/docket/docket-api:latest
+#
+########################################################################
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/format-version-structure.html
+AWSTemplateFormatVersion: "2010-09-09"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-description-structure.html
+Description: "Docket API setup infrastructure"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/metadata-section-structure.html
+# Metadata:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html
+# Conditions:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/transform-section-structure.html
+# Transform:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/mappings-section-structure.html
+# Mappings:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+Parameters:
+  ApplicationNameParameter:
+    ConstraintDescription: "Must match pattern ^[a-z]+$"
+    Description: "The application name"
+    AllowedPattern: "^[a-z]+$"
+    Default: "docket"
+    Type: "String"
+  EnvironmentNameParameter:
+    AllowedPattern: "^[a-z]+$"
+    AllowedValues:
+      - "staging"
+      - "production"
+    Default: "staging"
+    ConstraintDescription: "Must match pattern ^[a-z]+$"
+    Description: "The environment in which the application will run"
+    Type: "String"
+  ComponentNameParameter:
+    ConstraintDescription: "Must match pattern ^[a-z]+$"
+    Description: "The application component name"
+    AllowedPattern: "^[a-z]+$"
+    Default: "api"
+    Type: "String"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
+Resources:
+  CloudFormationTemplatesS3Bucket:
+    Type: "AWS::S3::Bucket"
+    # DeletionPolicy: "Retain" | "Delete" | "Snapshot"
+    Properties:
+      BucketName:
+        Fn::Join:
+          - "-"
+          - - !Ref "ApplicationNameParameter"
+            - !Ref "EnvironmentNameParameter"
+            - !Ref "ComponentNameParameter"
+            - "cloudformation-templates"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+  ApiImageRepository:
+    Type: "AWS::ECR::Repository"
+    Properties:
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Removes untagged images",
+                "selection": {
+                  "tagStatus": "untagged",
+                  "countType": "sinceImagePushed",
+                  "countNumber": 1,
+                  "countUnit": "days"
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+        RegistryId: !Ref "AWS::AccountId"
+      RepositoryName: "docket/docket-api"
+      # RepositoryPolicyText: Json
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+  WorkerImageRepository:
+    Type: "AWS::ECR::Repository"
+    Properties:
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Removes untagged images",
+                "selection": {
+                  "tagStatus": "untagged",
+                  "countType": "sinceImagePushed",
+                  "countNumber": 1,
+                  "countUnit": "days"
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+        RegistryId: !Ref "AWS::AccountId"
+      RepositoryName: "docket/docket-worker"
+      # RepositoryPolicyText: Json
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html
+Outputs:
+  CloudFormationTemplatesS3BucketDomainName:
+    Description: "Domain name of S3 bucket containing CloudFormation templates used for nested stacks"
+    Value: !GetAtt "CloudFormationTemplatesS3Bucket.DomainName"
+    Export:
+      Name: "CloudFormationTemplatesS3BucketDomainName"
+  CloudFormationTemplatesS3BucketName:
+    Description: "Name of S3 bucket containing CloudFormation templates used for nested stacks"
+    Value: !Ref "CloudFormationTemplatesS3Bucket"
+  Export:
+      Name: "CloudFormationTemplatesS3BucketName"
+  ApiImageRepositoryName:
+    Description: "Name of API image repository"
+    Value: !Ref "ApiImageRepository"
+    Export:
+      Name: "ApiImageRepositoryName"
+  WorkerImageRepositoryName:
+    Description: "Name of worker image repository"
+    Value: !Ref "WorkerImageRepository"
+    Export:
+      Name: "WorkerImageRepositoryName"

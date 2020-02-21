@@ -1,0 +1,1110 @@
+# This template is intended to...
+#
+# Setup stack (setup.yml)
+#  |
+#  | import
+#  +--------> Root stack (root.yml)
+#              |
+#              | parameters
+#              +------------> Config stack (config.yml)
+#              | parameters
+#              +------------> Network stack (network.yml; outputs VPC & subnets)
+#              | parameters
+#              +------------> Vault stack (vault.yml)
+#              | parameters
+#              +------------> App stack (app.yml; outputs container security group ID) <─ You are here
+#              | parameters
+#              +------------> Data stack (data.yml)
+#
+# Run the following command to create/update this stack:
+#
+# aws cloudformation deploy \
+#   --template-file ./aws/cloudformation/app.yml \
+#   --stack-name DocketEnvApiAppStack \
+#   --profile docket \
+#   --parameter-overrides \
+#     ApplicationNameParameter=value \
+#     EnvironmentNameParameter=ENV \
+#     ComponentNameParameter=value
+#
+########################################################################
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/format-version-structure.html
+AWSTemplateFormatVersion: "2010-09-09"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-description-structure.html
+Description: "Docket API application infrastructure"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/metadata-section-structure.html
+# Metadata:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html
+# Conditions:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/transform-section-structure.html
+# Transform:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/mappings-section-structure.html
+# Mappings:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+Parameters:
+  ApplicationNameParameter:
+    AllowedPattern: "^[a-z]+$"
+    Description: "The name of the application"
+    Type: "String"
+    Default: "docket"
+  EnvironmentNameParameter: # This will come from the parent stack
+    AllowedPattern: "^[a-z]+$"
+    AllowedValues:
+      - "staging"
+      - "production"
+    Default: "staging"
+    ConstraintDescription: "Must match pattern ^[a-z]+$"
+    Description: "The environment in which the application will run."
+    Type: "String"
+  ComponentNameParameter:
+    ConstraintDescription: "Must match pattern ^[a-z]+$"
+    Description: "The application component name"
+    AllowedPattern: "^[a-z]+$"
+    Default: "app"
+    Type: "String"
+  VpcIdParameter:
+    Description: "VPC ID"
+    Type: "String"
+  SubnetOneIdParameter:
+    Description: "Subnet #1 ID"
+    Type: "String"
+  SubnetTwoIdParameter:
+    Description: "Subnet #2 ID"
+    Type: "String"
+  SubnetThreeIdParameter:
+    Description: "Subnet #3 ID"
+    Type: "String"
+  SubnetFourIdParameter:
+    Description: "Subnet #4 ID"
+    Type: "String"
+  DatabaseMasterUserPasswordSsmVersionParameter:
+    Description: "Database master user password SSM version"
+    Type: "String"
+    Default: "1"
+  DatabaseMasterUsernameSsmVersionParameter:
+    Description: "Database master username SSM version"
+    Type: "String"
+    Default: "1"
+  # NodeEnvParameter:
+  #   AllowedPattern: "^[a-z]+$"
+  #   AllowedValues:
+  #     - "staging"
+  #     - "production"
+  #   ConstraintDescription: "Must match pattern ^[a-z]+$"
+  #   # Default:
+  #   Description: "The environment in which the application will run."
+  #   # MaxLength:
+  #   # MaxValue:
+  #   # MinLength:
+  #   # MinValue:
+  #   # NoEcho:
+  #   Type: "String"
+  ApiPortParameter:
+    # AllowedPattern: "^[0-9]+$"
+    # AllowedValues:
+    ConstraintDescription: "Must match pattern ^[0-9]+$"
+    Default: 3000
+    Description: "The port that the application will run on."
+    # MaxLength:
+    # MaxValue:
+    # MinLength:
+    # MinValue:
+    # NoEcho:
+    Type: "Number"
+  ApiDebugParameter:
+    # AllowedPattern:
+    # AllowedValues:
+    # ConstraintDescription:
+    Default: "app:*"
+    Description: "Enables/disables specific debugging namespaces."
+    # MaxLength:
+    # MaxValue:
+    # MinLength:
+    # MinValue:
+    # NoEcho:
+    Type: "String"
+  ApiVersionParameter:
+    # AllowedPattern:
+    AllowedValues:
+      - "v1"
+    # ConstraintDescription:
+    Default: "v1"
+    Description: "The version of the application to run."
+    # MaxLength:
+    # MaxValue:
+    # MinLength:
+    # MinValue:
+    # NoEcho:
+    Type: "String"
+  FallbackLocaleParameter:
+    # NB: This covers most locale formats, but is not all-encompassing
+    AllowedPattern: "[a-z]{2}-[A-Z]{2}"
+    AllowedValues:
+      - "en-US"
+    ConstraintDescription: "Must match pattern [a-z]{2}-[A-Z]{2}"
+    Default: "en-US"
+    Description: "The fallback locale."
+    # MaxLength:
+    # MaxValue:
+    # MinLength:
+    # MinValue:
+    # NoEcho:
+    Type: "String"
+  # DbMasterUserNameParameter:
+  #   # AllowedPattern:
+  #   # AllowedValues:
+  #   # ConstraintDescription:
+  #   # Default:
+  #   Description: "The database master username."
+  #   # MaxLength:
+  #   # MaxValue:
+  #   # MinLength:
+  #   # MinValue:
+  #   NoEcho: true
+  #   Type: "String"
+  # DbMasterUserPasswordParameter:
+  #   # AllowedPattern:
+  #   # AllowedValues:
+  #   # ConstraintDescription:
+  #   # Default:
+  #   Description: "The database master password."
+  #   # MaxLength:
+  #   # MaxValue:
+  #   # MinLength:
+  #   # MinValue:
+  #   NoEcho: true
+  #   Type: "String"
+  # DbHostParameter:
+  #   # AllowedPattern:
+  #   # AllowedValues:
+  #   # ConstraintDescription:
+  #   # Default:
+  #   Description: "The database host."
+  #   # MaxLength:
+  #   # MaxValue:
+  #   # MinLength:
+  #   # MinValue:
+  #   # NoEcho:
+  #   Type: "String"
+  # RedisHostParameter:
+  #   # AllowedPattern:
+  #   # AllowedValues:
+  #   # ConstraintDescription:
+  #   # Default:
+  #   Description: "The Redis host."
+  #   # MaxLength:
+  #   # MaxValue:
+  #   # MinLength:
+  #   # MinValue:
+  #   # NoEcho:
+  #   Type: "String"
+  # VaultProtocolParameter:
+  #   # AllowedPattern:
+  #   # AllowedValues:
+  #   # ConstraintDescription:
+  #   Default: "https"
+  #   Description: "The Vault protocol"
+  #   # MaxLength:
+  #   # MaxValue:
+  #   # MinLength:
+  #   # MinValue:
+  #   # NoEcho:
+  #   Type: "String"
+  # VaultHostParameter:
+  #   # AllowedPattern:
+  #   # AllowedValues:
+  #   # ConstraintDescription:
+  #   # Default:
+  #   Description: "The Vault host"
+  #   # MaxLength:
+  #   # MaxValue:
+  #   # MinLength:
+  #   # MinValue:
+  #   # NoEcho:
+  #   Type: "String"
+  # VaultPortParameter:
+  #   # AllowedPattern:
+  #   # AllowedValues:
+  #   # ConstraintDescription:
+  #   Default: 443
+  #   Description: "The Vault port"
+  #   # MaxLength:
+  #   # MaxValue:
+  #   # MinLength:
+  #   # MinValue:
+  #   # NoEcho:
+  #   Type: "String"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
+Resources:
+  ApiCluster:
+    Type: "AWS::ECS::Cluster"
+    Properties:
+      ClusterName:
+        Fn::Join:
+          - "-"
+          - - !Ref "ApplicationNameParameter"
+            - !Ref "EnvironmentNameParameter"
+            - "api"
+      # ClusterSettings:
+      #   - Name: "containerInsights"
+      #     Value: "enabled" | "disabled"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+  ApiTaskDefinition:
+    Type: "AWS::ECS::TaskDefinition"
+    Properties:
+      ContainerDefinitions:
+        - Command:
+            - "npm"
+            - "start"
+          # Cpu: Integer
+          # DependsOn:
+          #   - Condition: String
+          #     ContainerName: String
+          # DisableNetworking: Boolean
+          # DnsSearchDomains:
+          #   - String
+          # DnsServers:
+          #   - String
+          # DockerLabels:
+          #   Key: Value
+          # DockerSecurityOptions:
+          #   - String
+          EntryPoint:
+            - "./docker-entrypoint.sh"
+          Environment:
+            - Name: "NODE_ENV"
+              Value: !Ref "EnvironmentNameParameter"
+            - Name: "PORT"
+              Value: !Ref "ApiPortParameter"
+            - Name: "DEBUG"
+              Value: !Ref "ApiDebugParameter"
+            - Name: "API_VERSION"
+              Value: !Ref "ApiVersionParameter"
+            - Name: "FALLBACK_LOCALE"
+              Value: !Ref "FallbackLocaleParameter"
+            # - Name: "DB_PROTOCOL"
+            #   Value: !Ref "DbProtocolParameter"
+            # - Name: "DB_HOST"
+            #   Value: !Ref "DbHostParameter"
+            # - Name: "DB_PORT"
+            #   Value: !Ref "DbPortParameter"
+            - Name: "DB_USERNAME"
+              # Value: !Ref "DbMasterUsernameParameter"
+              Value: # !Join ["", ["{{resolve:", "ssm", ":", "db-master-user-name", "-", !Ref "EnvironmentNameParameter", ":", "1", "}}"]]
+                Fn::Join:
+                  - ""
+                  - - "{{resolve:"
+                    - "ssm"
+                    - ":"
+                    - !Join ["-", [!Ref "EnvironmentNameParameter", "database", "masterUsername"]] # See 10-config.yml
+                    - ":"
+                    - !Ref "DatabaseMasterUsernameSsmVersionParameter"
+                    - "}}"
+            - Name: "DB_PASSWORD"
+              # Value: !Ref "DbMasterUserPasswordParameter"
+              Value: # !Join ["", ["{{resolve:", "ssm", ":", "db-master-user-password", "-", !Ref "EnvironmentNameParameter", ":", "1", "}}"]]
+                Fn::Join:
+                  - ""
+                  - - "{{resolve:"
+                    - "ssm"
+                    - ":"
+                    - !Join ["-", [!Ref "EnvironmentNameParameter", "database", "masterUserPassword"]] # See 10-config.yml
+                    - ":"
+                    - !Ref "DatabaseMasterUserPasswordSsmVersionParameter"
+                    - "}}"
+            - Name: "VAULT_APPROLE_ROLE_ID"
+              Value: # !Join ["", ["{{resolve:", "ssm", ":", "vault-app-role-id", "-", !Ref "EnvironmentNameParameter", ":", "1", "}}"]]
+                Fn::Join:
+                  - ""
+                  - - "{{resolve:"
+                    - "ssm"
+                    - ":"
+                    - !Join ["-", [!Ref "EnvironmentNameParameter", "vault", "appRoleId"]] # See 10-config.yml
+                    - ":"
+                    - !Ref "DatabaseMasterUsernameSsmVersionParameter"
+                    - "}}"
+            - Name: "VAULT_APPROLE_SECRET_WRAP_TOKEN"
+              Value: # !Join ["", ["{{resolve:", "ssm", ":", "vault-app-role-secret-wrap-token", "-", !Ref "EnvironmentNameParameter", ":", "1", "}}"]]
+                Fn::Join:
+                  - ""
+                  - - "{{resolve:"
+                    - "ssm"
+                    - ":"
+                    - !Join ["-", [!Ref "EnvironmentNameParameter", "vault", "appRoleSecretWrapToken"]] # See 10-config.yml
+                    - ":"
+                    - !Ref "DatabaseMasterUsernameSsmVersionParameter"
+                    - "}}"
+            # - Name: "DB_NAME"
+            #   Value: !Ref "DbNameParameter"
+            # - Name: "DB_DIALECT"
+            #   Value: !Ref "DbDialectParameter"
+            # - Name: "REDIS_PROTOCOL"
+            #   Value: !Ref "RedisProtocolParameter"
+            # - Name: "REDIS_HOST"
+            #   Value: !Ref "RedisHostParameter"
+            # - Name: "REDIS_PORT"
+            #   Value: !Ref "RedisPortParameter"
+            # - Name: "REDIS_USERNAME"
+            #   Value: !Ref "RedisUsernameParameter"
+            # - Name: "REDIS_PASSWORD"
+            #   Value: !Ref "RedisPasswordParameter"
+            # - Name: "REDIS_DATABASE_ID"
+            #   Value: !Ref "RedisDbIdParameter"
+            # - Name: "REDIS_DEFAULT_CACHE_EXPIRY_SECONDS"
+            #   Value: !Ref "RedisDefaultCacheExpirySecondsParameter"
+            # - Name: "JWT_SECRET"
+            #   Value: !Ref "JwtSecretParameter"
+            # - Name: "JWT_EXPIRATION"
+            #   Value: !Ref "JwtExpirationParameter"
+            # - Name: "MAIL_HOST"
+            #   Value: !Ref "MailHostParameter"
+            # - Name: "MAIL_PORT"
+            #   Value: !Ref "MailPortParameter"
+            # - Name: "MAIL_USERNAME"
+            #   Value: !Ref "MailUsernameParameter"
+            # - Name: "MAIL_PASSWORD"
+            #   Value: !Ref "MailPasswordParameter"
+            # - Name: "PASSWORD_RESET_SECRET"
+            #   Value: !Ref "PasswordResetSecretParameter"
+            # - Name: "PASSWORD_RESET_EXPIRATION"
+            #   Value: !Ref "PasswordResetExpirationParameter"
+            # - Name: "PASSWORD_RESET_FROM"
+            #   Value: !Ref "PasswordResetFromParameter"
+            # - Name: "REGISTRATION_CONFIRMATION_SECRET"
+            #   Value: !Ref "RegistrationConfirmationSecretParameter"
+            # - Name: "REGISTRATION_CONFIRMATION_EXPIRATION"
+            #   Value: !Ref "RegistrationConfirmationExpirationParameter"
+            # - Name: "REGISTRATION_CONFIRMATION_FROM"
+            #   Value: !Ref "RegistrationConfirmationFromParameter"
+            # - Name: "GOOGLE_CALENDAR_CLIENT_ID"
+            #   Value: !Ref "GoogleCalendarClientIdParameter"
+            # - Name: "GOOGLE_CALENDAR_CLIENT_SECRET"
+            #   Value: !Ref "GoogleCalendarClientSecretParameter"
+            # - Name: "GOOGLE_CALENDAR_API_KEY"
+            #   Value: !Ref "GoogleCalendarApiKeyParameter"
+            # - Name: "GOOGLE_CALENDAR_REDIRECT_URL"
+            #   Value: !Ref "GoogleCalendarRedirectUrlParameter"
+            # - Name: "GOOGLE_CALENDAR_SCOPES"
+            #   Value: !Ref "GoogleCalendarScopesParameter"
+            # - Name: "MICROSOFT_APPLICATION_ID"
+            #   Value: !Ref "MicrosoftApplicationIdParameter"
+            # - Name: "MICROSOFT_APPLICATION_PASSWORD"
+            #   Value: !Ref "MicrosoftApplicationPasswordParameter"
+            # - Name: "MICROSOFT_TOKEN_HOST"
+            #   Value: !Ref "MicrosoftTokenHostParameter"
+            # - Name: "MICROSOFT_AUTHORIZE_PATH"
+            #   Value: !Ref "MicrosoftAuthorizePathParameter"
+            # - Name: "MICROSOFT_TOKEN_PATH"
+            #   Value: !Ref "MicrosoftTokenPathParameter"
+            # - Name: "MICROSOFT_REDIRECT_URL"
+            #   Value: !Ref "MicrosoftRedirectUrlParameter"
+            # - Name: "MICROSOFT_SCOPES"
+            #   Value: !Ref "MicrosoftScopesParameter"
+            # - Name: "STRIPE_PUBLIC_KEY"
+            #   Value: !Ref "StripePublicKeyParameter"
+            # - Name: "STRIPE_SECRET_KEY"
+            #   Value: !Ref "StripeSecretKeyParameter"
+            # - Name: "SENTRY_DSN"
+            #   Value: !Ref "SentryDsnParameter"
+            # - Name: "ELASTICSEARCH_PROTOCOL"
+            #   Value: !Ref "ElasticsearchProtocolParameter"
+            # - Name: "ELASTICSEARCH_HOST"
+            #   Value: !Ref "ElasticsearchHostParameter"
+            # - Name: "ELASTICSEARCH_PORT"
+            #   Value: !Ref "ElasticsearchPortParameter"
+            # - Name: "VAULT_API_VERSION"
+            #   Value: !Ref "VaultApiVersionParameter"
+            # - Name: "VAULT_PROTOCOL"
+            #   Value: !Ref "VaultProtocolParameter"
+            # - Name: "VAULT_HOST"
+            #   Value: !Ref "VaultHostParameter"
+            # - Name: "VAULT_PORT"
+            #   Value: !Ref "VaultPortParameter"
+            # - Name: "VAULT_APPROLE_ROLE_ID"
+            #   Value: !Ref "VaultApproleRoleIdParameter"
+            # - Name: "VAULT_APPROLE_SECRET_WRAP_TOKEN"
+            #   Value: !Ref "VaultApproleSecretWrapTokenParameter"
+          Essential: true
+          # ExtraHosts:
+          #   - Hostname: String
+          #     IpAddress: String
+          # FirelensConfiguration:
+          #   Options:
+          #     Key: Value
+          #   Type: String
+          # HealthCheck:
+          #   Command:
+          #     - String
+          #   Interval: Integer
+          #   Retries: Integer
+          #   StartPeriod: Integer
+          #   Timeout: Integer
+          # Hostname: String
+          Image:
+            Fn::Sub:
+              - "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ApiImageRepositoryName}:latest"
+              - ApiImageRepositoryName: !ImportValue "ApiImageRepositoryName"
+          Interactive: true
+          # Links:
+          #   - String
+          # LinuxParameters:
+          #   Capabilities:
+          #     Add:
+          #       - String
+          #     Drop:
+          #       - String
+          #   Devices:
+          #     - ContainerPath: String
+          #       HostPath: String
+          #       Permissions:
+          #         - String
+          #   InitProcessEnabled: Boolean
+          #   MaxSwap: Integer
+          #   SharedMemorySize: Integer
+          #   Swappiness: Integer
+          #   Tmpfs:
+          #     - ContainerPath: String
+          #       MountOptions:
+          #         - String
+          #       Size: Integer
+          LogConfiguration:
+            LogDriver: "awslogs"
+            Options:
+              awslogs-region: !Ref "AWS::Region"
+              awslogs-group:
+                Fn::Join:
+                  - "-"
+                  - - !Ref "ApplicationNameParameter"
+                    - !Ref "EnvironmentNameParameter"
+                    - "api"
+              awslogs-stream-prefix:
+                Fn::Join:
+                  - "-"
+                  - - !Ref "ApplicationNameParameter"
+                    - !Ref "EnvironmentNameParameter"
+                    - "api"
+            # SecretOptions:
+            #   - Name: String
+            #     ValueFrom: String
+          # Memory: Integer
+          # MemoryReservation: Integer
+          # MountPoints:
+          #   - ContainerPath: String
+          #     ReadOnly: Boolean
+          #     SourceVolume: String
+          Name:
+            Fn::Join:
+              - "-"
+              - - !Ref "ApplicationNameParameter"
+                - !Ref "EnvironmentNameParameter"
+                - "api"
+          PortMappings:
+            - ContainerPort: 3000
+              # HostPort: 3000
+              Protocol: "tcp"
+          # Privileged: Boolean
+          PseudoTerminal: true
+          # ReadonlyRootFilesystem: Boolean
+          # RepositoryCredentials:
+          #   CredentialsParameter: String
+          # ResourceRequirements:
+          #   - Type: String
+          #     Value: String
+          # Secrets:
+          #   - Name: String
+          #     ValueFrom: String
+          # StartTimeout: Integer
+          # StopTimeout: Integer
+          # SystemControls:
+          #   - Namespace: String
+          #     Value: String
+          # Ulimits:
+          #   - HardLimit: Integer
+          #     Name: String
+          #     SoftLimit: Integer
+          # User: String
+          # VolumesFrom:
+          #   - ReadOnly: Boolean
+          #     SourceContainer: String
+          # WorkingDirectory: String
+      Cpu: 512
+      ExecutionRoleArn: !Ref "ApiExecutionRole"
+      Family:
+        Fn::Join:
+          - "-"
+          - - !Ref "ApplicationNameParameter"
+            - !Ref "EnvironmentNameParameter"
+            - "api"
+      # InferenceAccelerators:
+      #   - DeviceName: String
+      #     DeviceType: String
+      # IpcMode: "host" | "none" | "task"
+      Memory: 1024
+      NetworkMode: "awsvpc"
+      # PidMode: "host" | "task"
+      # PlacementConstraints:
+      #   - Expression: String
+      #     Type: "memberOf"
+      # ProxyConfiguration:
+      #   ContainerName: String
+      #   ProxyConfigurationProperties:
+      #     - Name: String
+      #     - Value: String
+      #   Type: String
+      RequiresCompatibilities:
+        - "FARGATE"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+      TaskRoleArn: !Ref "ApiTaskRole"
+      # Volumes:
+      #   - DockerVolumeConfiguration:
+      #       Autoprovision: Boolean
+      #       Driver: String
+      #       DriverOpts:
+      #         Key: Value
+      #       Labels:
+      #         Key: Value
+      #       Scope: String
+      #     Host:
+      #       SourcePath: String
+      #     Name: String
+  ApiService:
+    Type: "AWS::ECS::Service"
+    DependsOn:
+      - "ApiLoadBalancerListener"
+    Properties:
+      Cluster: !Ref "ApiCluster"
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DeploymentController:
+        Type: "ECS"
+      DesiredCount: 0
+      EnableECSManagedTags: true
+      HealthCheckGracePeriodSeconds: 120
+      LaunchType: "FARGATE"
+      LoadBalancers:
+        - ContainerName:
+            Fn::Join:
+              - "-"
+              - - !Ref "ApplicationNameParameter"
+                - !Ref "EnvironmentNameParameter"
+                - "api"
+          ContainerPort: 3000
+          # LoadBalancerName: String
+          TargetGroupArn: !Ref "ApiTargetGroup"
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: "ENABLED"
+          SecurityGroups:
+            - !Ref "ApiContainerSecurityGroup"
+          Subnets:
+            - !Ref "SubnetOneIdParameter"
+            - !Ref "SubnetTwoIdParameter"
+            - !Ref "SubnetThreeIdParameter"
+            - !Ref "SubnetFourIdParameter"
+      # PlacementConstraints:
+      #   - Expression: String
+      #     Type: "distinctInstance" | "memberOf"
+      # PlacementStrategies:
+      #   - Field: String
+      #     Type: "binpack" | "random" | "spread"
+      PlatformVersion: "LATEST"
+      # PropagateTags: "SERVICE" | "TASK_DEFINITION"
+      # Role: String
+      # SchedulingStrategy: "DAEMON" | "REPLICA"
+      # ServiceName: "docket-api"
+      # ServiceRegistries:
+      #   - ContainerName: String
+      #     ContainerPort: Integer
+      #     Port: Integer
+      #     RegistryArn: String
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+      TaskDefinition: !Ref "ApiTaskDefinition"
+  ApiContainerSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Container security group description"
+      # GroupName: "container-security-group"
+      # SecurityGroupEgress:
+      #   - CidrIp: String
+      #     CidrIpv6: String
+      #     Description: String
+      #     DestinationPrefixListId: String
+      #     DestinationSecurityGroupId: String
+      #     FromPort: Integer
+      #     IpProtocol: String
+      #     ToPort: Integer
+      SecurityGroupIngress:
+        - # CidrIp: "0.0.0.0/0"
+          # CidrIpv6: String
+          Description: "Container security group ingress TCP 3000"
+          FromPort: 3000
+          IpProtocol: "tcp"
+          # SourcePrefixListId: String
+          SourceSecurityGroupId: !Ref "ApiLoadBalancerSecurityGroup"
+          # SourceSecurityGroupName: String
+          # SourceSecurityGroupOwnerId: String
+          ToPort: 3000
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+      VpcId: !Ref "VpcIdParameter"
+  ApiExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "ecs-tasks.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Description: "Docket role"
+      ManagedPolicyArns:
+      #   - "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+      #   - "arn:aws:iam::aws:policy/AmazonEC2ContainerServiceFullAccess"
+      #   - "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
+        - "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+      # MaxSessionDuration: Integer
+      # Path: String
+      # PermissionsBoundary: String
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "ecr:GetAuthorizationToken"
+                  - "ecr:BatchCheckLayerAvailability"
+                  - "ecr:GetDownloadUrlForLayer"
+                  - "ecr:BatchGetImage"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+          PolicyName:
+            Fn::Join:
+              - "-"
+              - - !Ref "ApplicationNameParameter"
+                - !Ref "EnvironmentNameParameter"
+                - "api-execution"
+      # RoleName:
+      #   Fn::Join:
+      #     - "-"
+      #     - - !Ref "ApplicationNameParameter"
+      #       - !Ref "EnvironmentNameParameter"
+      #       - "api"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+  ApiTaskRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "ecs-tasks.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      # Description: "Docket role"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+      # MaxSessionDuration: Integer
+      # Path: String
+      # PermissionsBoundary: String
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "ecr:GetAuthorizationToken"
+                  - "ecr:BatchCheckLayerAvailability"
+                  - "ecr:GetDownloadUrlForLayer"
+                  - "ecr:BatchGetImage"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+          PolicyName:
+            Fn::Join:
+              - "-"
+              - - !Ref "ApplicationNameParameter"
+                - !Ref "EnvironmentNameParameter"
+                - "api-task"
+      RoleName:
+        Fn::Join:
+          - "-"
+          - - !Ref "ApplicationNameParameter"
+            - !Ref "EnvironmentNameParameter"
+            - "execution-role"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+  ApiLoadBalancerSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Load balancer description"
+      # GroupName: "load-balancer-security-group"
+      # SecurityGroupEgress:
+      #   - CidrIp: String
+      #     CidrIpv6: String
+      #     Description: String
+      #     DestinationPrefixListId: String
+      #     DestinationSecurityGroupId: String
+      #     FromPort: Integer
+      #     IpProtocol: String
+      #     ToPort: Integer
+      SecurityGroupIngress:
+        # - CidrIp: "0.0.0.0/0"
+        #   # CidrIpv6: String
+        #   Description: "Load balancer security group ingress TCP 80"
+        #   FromPort: 80
+        #   IpProtocol: "tcp"
+        #   # SourcePrefixListId: String
+        #   # SourceSecurityGroupId: String
+        #   # SourceSecurityGroupName: String
+        #   # SourceSecurityGroupOwnerId: String
+        #   ToPort: 80
+        - CidrIp: "0.0.0.0/0"
+          # CidrIpv6: String
+          Description: "Load balancer security group ingress TCP 443"
+          FromPort: 443
+          IpProtocol: "tcp"
+          # SourcePrefixListId: String
+          # SourceSecurityGroupId: String
+          # SourceSecurityGroupName: String
+          # SourceSecurityGroupOwnerId: String
+          ToPort: 443
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+      VpcId: !Ref "VpcIdParameter"
+  ApiLoadBalancerListener:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    Properties:
+      Certificates:
+        - CertificateArn: !Ref "ApiCertificate"
+      DefaultActions:
+        - # AuthenticateCognitoConfig:
+          #   AuthenticationRequestExtraParams:
+          #     Key : Value
+          #   OnUnauthenticatedRequest: String
+          #   Scope: String
+          #   SessionCookieName: String
+          #   SessionTimeout: Long
+          #   UserPoolArn: String
+          #   UserPoolClientId: String
+          #   UserPoolDomain: String
+          # AuthenticateOidcConfig:
+          #   AuthenticationRequestExtraParams:
+          #     Key : Value
+          #   AuthorizationEndpoint: String
+          #   ClientId: String
+          #   ClientSecret: String
+          #   Issuer: String
+          #   OnUnauthenticatedRequest: String
+          #   Scope: String
+          #   SessionCookieName: String
+          #   SessionTimeout: Long
+          #   TokenEndpoint: String
+          #   UserInfoEndpoint: String
+          # FixedResponseConfig:
+          #   ContentType: String
+          #   MessageBody: String
+          #   StatusCode: String
+          # Order: Integer
+          # RedirectConfig:
+          #   Host: String
+          #   Path: String
+          #   Port: String
+          #   Protocol: String
+          #   Query: String
+          #   StatusCode: String
+          TargetGroupArn: !Ref "ApiTargetGroup"
+          Type: "forward"
+      LoadBalancerArn: !Ref "ApiLoadBalancer"
+      Port: 443
+      Protocol: "HTTPS"
+      # SslPolicy: String
+  ApiLoadBalancer:
+    Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    Properties:
+      # IpAddressType: "dualstack" | "ipv4"
+      # LoadBalancerAttributes:
+      #   - Key: "access_logs.s3.enabled"
+      #     Value: ""
+      #   - Key: "access_logs.s3.bucket"
+      #     Value: ""
+      #   - Key: "access_logs.s3.prefix"
+      #     Value: ""
+      #   - Key: "deletion_protection.enabled"
+      #     Value: ""
+      #   - Key: "idle_timeout.timeout_seconds"
+      #     Value: ""
+      #   - Key: "routing.http.drop_invalid_header_fields.enabled"
+      #     Value: ""
+      #   - Key: "routing.http2.enabled"
+      #     Value: ""
+      #   - Key: "load_balancing.cross_zone.enabled"
+      #     Value: ""
+      Name:
+        Fn::Join:
+          - "-"
+          - - !Ref "ApplicationNameParameter"
+            - !Ref "EnvironmentNameParameter"
+            - "api"
+      Scheme: "internet-facing"
+      SecurityGroups:
+        - !Ref "ApiLoadBalancerSecurityGroup"
+      # SubnetMappings:
+      #   - AllocationId: String
+      #     SubnetId: String
+      Subnets:
+        - !Ref "SubnetOneIdParameter"
+        - !Ref "SubnetTwoIdParameter"
+        - !Ref "SubnetThreeIdParameter"
+        - !Ref "SubnetFourIdParameter"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+      Type: "application"
+  ApiTargetGroup:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Properties:
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 60
+      HealthCheckPath: "/v1/health-check"
+      HealthCheckPort: "3000"
+      HealthCheckProtocol: "HTTP"
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: "200"
+      # Name:
+      #   Fn::Join:
+      #     - "-"
+      #     - - !Ref "ApplicationNameParameter"
+      #       - !Ref "EnvironmentNameParameter"
+      #       - "target-group"
+      Port: 3000
+      Protocol: "HTTP"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+      # TargetGroupAttributes:
+      #   - Key: "load_balancing.algorithm.type"
+      #     Value: ""
+      #   - Key: "load_balancing.algorithm.type"
+      #     Value: ""
+      #   - Key: "slow_start.duration_seconds"
+      #     Value: ""
+      #   - Key: "stickiness.enabled"
+      #     Value: ""
+      #   - Key: "stickiness.type"
+      #     Value: ""
+      #   - Key: "stickiness.lb_cookie.duration_seconds"
+      #     Value: ""
+      #   - Key: "lambda.multi_value_headers.enabled"
+      #     Value: ""
+      #   - Key: "proxy_protocol_v2.enabled"
+      #     Value: ""
+      # Targets:
+      #   - AvailabilityZone: String
+      #     Id: String
+      #     Port: Integer
+      TargetType: "ip"
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref "VpcIdParameter"
+  ApiLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName:
+        Fn::Join:
+          - "-"
+          - - !Ref "ApplicationNameParameter"
+            - !Ref "EnvironmentNameParameter"
+            - "api"
+      RetentionInDays: 7
+  ApiSubdomainToLoadBalancerARecord:
+    Type: "AWS::Route53::RecordSet"
+    DependsOn:
+      - "ApiLoadBalancer"
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt "ApiLoadBalancer.DNSName"
+        # EvaluateTargetHealth: Boolean
+        HostedZoneId: !GetAtt "ApiLoadBalancer.CanonicalHostedZoneID"
+      # Comment: String
+      # Failover: String
+      # GeoLocation:
+      #   ContinentCode: String
+      #   CountryCode: String
+      #   SubdivisionCode: String
+      # HealthCheckId: String
+      # HostedZoneId: String
+      HostedZoneName: "docket.fyi."
+      # MultiValueAnswer: Boolean
+      Name: "api.staging.docket.fyi."
+      # Region: String
+      # ResourceRecords:
+      #   - String
+      # SetIdentifier: String
+      # TTL: String
+      Type: "A"
+      # Weight: Integer
+  ApiCertificate:
+    Type: "AWS::CertificateManager::Certificate"
+    Properties:
+      DomainName: "api.staging.docket.fyi"
+      # DomainValidationOptions:
+      #   - DomainName: String
+      #     ValidationDomain: String
+      # SubjectAlternativeNames:
+      #   - String
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+      ValidationMethod: "DNS"
+  WorkerLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName:
+        Fn::Join:
+          - "-"
+          - - !Ref "ApplicationNameParameter"
+            - !Ref "EnvironmentNameParameter"
+            - "worker"
+      RetentionInDays: 7
+  # Elasticsearch:
+  #   Type: "AWS::Elasticsearch::Domain"
+  #   Properties:
+  #     AccessPolicies: Json
+  #     AdvancedOptions:
+  #       rest.action.multi.allow_explicit_index: Boolean
+  #       indices.fielddata.cache.size: Integer
+  #       indices.query.bool.max_clause_count: Integer
+  #     CognitoOptions:
+  #       Enabled: Boolean
+  #       IdentityPoolId: String
+  #       RoleArn: String
+  #       UserPoolId: String
+  #     DomainName: String
+  #     EBSOptions:
+  #       EBSEnabled: Boolean
+  #       Iops: Integer
+  #       VolumeSize: Integer
+  #       VolumeType: String
+  #     ElasticsearchClusterConfig:
+  #       DedicatedMasterCount: Integer
+  #       DedicatedMasterEnabled: Boolean
+  #       DedicatedMasterType: String
+  #       InstanceCount: Integer
+  #       InstanceType: String
+  #       ZoneAwarenessConfig:
+  #         AvailabilityZoneCount: Integer
+  #       ZoneAwarenessEnabled: Boolean
+  #     ElasticsearchVersion: String
+  #     EncryptionAtRestOptions:
+  #       Enabled: Boolean
+  #       KmsKeyId: String
+  #     LogPublishingOptions:
+  #       CloudWatchLogsLogGroupArn: String
+  #       Enabled: Boolean
+  #     NodeToNodeEncryptionOptions:
+  #       Enabled: Boolean
+  #     SnapshotOptions:
+  #       AutomatedSnapshotStartHour: Integer
+  #     Tags:
+  #       - Key: "Application"
+  #         Value: !Ref "ApplicationNameParameter"
+  #       - Key: "Component"
+  #         Value: !Ref "ComponentNameParameter"
+  #       - Key: "StackName"
+  #         Value: !Ref "AWS::StackName"
+  #       - Key: "Environment"
+  #         Value: !Ref "EnvironmentNameParameter"
+  #     VPCOptions:
+  #       SecurityGroupIds:
+  #         - String
+  #       SubnetIds:
+  #         - String
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html
+Outputs:
+  ApiContainerSecurityGroupId:
+    Description: "API security group ID"
+    Value: !Ref "ApiContainerSecurityGroup"

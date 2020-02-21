@@ -1,0 +1,246 @@
+# This template is intended to...
+#
+# Setup stack (setup.yml)
+#  |
+#  | import
+#  +--------> Root stack (root.yml)
+#              |
+#              | parameters
+#              +------------> Config stack (config.yml)
+#              | parameters
+#              +------------> Network stack (network.yml; outputs VPC & subnets) <─ You are here
+#              | parameters
+#              +------------> Vault stack (vault.yml)
+#              | parameters
+#              +------------> App stack (app.yml; outputs container security group ID)
+#              | parameters
+#              +------------> Data stack (data.yml)
+#
+# Run the following command to create/update this stack:
+#
+# aws cloudformation deploy \
+#   --template-file ./aws/cloudformation/network.yml \
+#   --stack-name DocketEnvApiNetworkStack \
+#   --profile docket \
+#   --parameter-overrides \
+#     ApplicationNameParameter=value \
+#     EnvironmentNameParameter=ENV \
+#     ComponentNameParameter=value
+#
+########################################################################
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/format-version-structure.html
+AWSTemplateFormatVersion: "2010-09-09"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-description-structure.html
+Description: "Docket API networking infrastructure"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/metadata-section-structure.html
+# Metadata:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html
+# Conditions:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/transform-section-structure.html
+# Transform:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/mappings-section-structure.html
+# Mappings:
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+Parameters:
+  ApplicationNameParameter:
+    AllowedPattern: "^[a-z]+$"
+    Description: "The name of the application"
+    Type: "String"
+    Default: "docket"
+  EnvironmentNameParameter: # This will come from the parent stack
+    AllowedPattern: "^[a-z]+$"
+    AllowedValues:
+      - "staging"
+      - "production"
+    Default: "staging"
+    ConstraintDescription: "Must match pattern ^[a-z]+$"
+    Description: "The environment in which the application will run."
+    Type: "String"
+  ComponentNameParameter:
+    ConstraintDescription: "Must match pattern ^[a-z]+$"
+    Description: "The application component name"
+    AllowedPattern: "^[a-z]+$"
+    Default: "network"
+    Type: "String"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
+Resources:
+  Vpc:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: "10.0.0.0/16"
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: "default"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+  SubnetOne:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      # AssignIpv6AddressOnCreation: Boolean
+      AvailabilityZone: "us-west-2a"
+      CidrBlock: "10.0.0.0/20"
+      # Ipv6CidrBlock: String
+      # MapPublicIpOnLaunch: Boolean
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+      VpcId: !Ref "Vpc"
+  SubnetTwo:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      # AssignIpv6AddressOnCreation: Boolean
+      AvailabilityZone: "us-west-2b"
+      CidrBlock: "10.0.16.0/20"
+      # Ipv6CidrBlock: String
+      # MapPublicIpOnLaunch: Boolean
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+      VpcId: !Ref "Vpc"
+  SubnetThree:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      # AssignIpv6AddressOnCreation: Boolean
+      AvailabilityZone: "us-west-2c"
+      CidrBlock: "10.0.32.0/20"
+      # Ipv6CidrBlock: String
+      # MapPublicIpOnLaunch: Boolean
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+      VpcId: !Ref "Vpc"
+  SubnetFour:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      # AssignIpv6AddressOnCreation: Boolean
+      AvailabilityZone: "us-west-2d"
+      CidrBlock: "10.0.48.0/20"
+      # Ipv6CidrBlock: String
+      # MapPublicIpOnLaunch: Boolean
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+      VpcId: !Ref "Vpc"
+  InternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+  InternetGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      InternetGatewayId: !Ref "InternetGateway"
+      VpcId: !Ref "Vpc"
+      # VpnGatewayId: String
+  RouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      Tags:
+        - Key: "Application"
+          Value: !Ref "ApplicationNameParameter"
+        - Key: "Component"
+          Value: !Ref "ComponentNameParameter"
+        - Key: "StackName"
+          Value: !Ref "AWS::StackName"
+        - Key: "Environment"
+          Value: !Ref "EnvironmentNameParameter"
+      VpcId: !Ref "Vpc"
+  Route:
+    Type: "AWS::EC2::Route"
+    DependsOn:
+      - "InternetGateway"
+    Properties:
+      DestinationCidrBlock: "0.0.0.0/0"
+      # DestinationIpv6CidrBlock: String
+      # EgressOnlyInternetGatewayId: String
+      GatewayId: !Ref "InternetGateway"
+      # InstanceId: String
+      # NatGatewayId: String
+      # NetworkInterfaceId: String
+      RouteTableId: !Ref "RouteTable"
+      # TransitGatewayId: String
+      # VpcPeeringConnectionId: String
+  SubnetOneRouteTableAssociation:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref "RouteTable"
+      SubnetId: !Ref "SubnetOne"
+  SubnetTwoRouteTableAssociation:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref "RouteTable"
+      SubnetId: !Ref "SubnetTwo"
+  SubnetThreeRouteTableAssociation:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref "RouteTable"
+      SubnetId: !Ref "SubnetThree"
+  SubnetFourRouteTableAssociation:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref "RouteTable"
+      SubnetId: !Ref "SubnetFour"
+
+# See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html
+Outputs:
+  VpcId:
+    Description: "VPC ID"
+    Value: !Ref "Vpc"
+  SubnetOneId:
+    Description: "Subnet #1 ID"
+    Value: !Ref "SubnetOne"
+  SubnetTwoId:
+    Description: "Subnet #2 ID"
+    Value: !Ref "SubnetTwo"
+  SubnetThreeId:
+    Description: "Subnet #3 ID"
+    Value: !Ref "SubnetThree"
+  SubnetFourId:
+    Description: "Subnet #4 ID"
+    Value: !Ref "SubnetFour"
