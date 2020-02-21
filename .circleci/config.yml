@@ -6,6 +6,8 @@ orbs:
   aws-ecr: circleci/aws-ecr@6.7.0
   # See https://circleci.com/orbs/registry/orb/circleci/aws-ecs
   aws-ecs: circleci/aws-ecs@1.0.4
+  # See https://circleci.com/orbs/registry/orb/circleci/jq
+  jq: circleci/jq@1.9.1
 jobs:
   lint:
     working_directory: ~/docket/docket-api
@@ -74,6 +76,25 @@ jobs:
               --no-fail-on-empty-changeset \
               --capabilities CAPABILITY_NAMED_IAM \
               --s3-bucket docket-cloudformation
+  get_vault_secret:
+    working_directory: ~/docket/docket-api
+    docker:
+      - image: circleci/buildpack-deps:trusty
+    steps:
+      - checkout
+      - jq/install
+      - run:
+          name: Get Vault wrapped app role secret ID
+          command: |
+            VAULT_WRAP_TOKEN=$( \
+              curl \
+                --silent \
+                --header "X-Vault-Token: ${VAULT_TOKEN}" \
+                --header "X-Vault-Wrap-TTL: ${VAULT_WRAP_TTL}" \
+                --request POST \
+                  "${VAULT_PROTOCOL}://${VAULT_HOST}:${VAULT_PORT}/${VAULT_API_VERSION}/auth/approle/role/${VAULT_APPROLE_ROLE_NAME}/secret-id" \
+              | jq -r '.wrap_info.token' \
+            )
 workflows:
   version: 2
   lint_and_test:
@@ -82,10 +103,12 @@ workflows:
       - test
   build_push_and_deploy_image:
     jobs:
+      - get_vault_secret
       # See https://circleci.com/orbs/registry/orb/circleci/aws-ecr#commands-build-and-push-image
       - aws-ecr/build-and-push-image:
           repo: "${AWS_ECR_REPOSITORY_NAME}"
           tag: "${CIRCLE_SHA1}"
+          # extra-build-args: "--build-arg vault_approle_role_id=${VAULT_APPROLE_ROLE_ID}" #" --build-arg vault_approle_secret_id=${VAULT_APPROLE_SECRET_ID}"
       # See https://circleci.com/orbs/registry/orb/circleci/aws-ecs#jobs-update-task-definition
       - aws-ecs/update-task-definition:
           requires:
