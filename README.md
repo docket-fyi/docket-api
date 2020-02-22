@@ -66,9 +66,13 @@ VAULT_ADDR=http://127.0.0.1:8200 vault auth enable approle
 
 # Create a new role
 VAULT_ADDR=http://127.0.0.1:8200 vault write auth/approle/role/docket-api secret_id_ttl=10m token_num_uses=10 token_ttl=20m token_max_ttl=30m secret_id_num_uses=40
+VAULT_ADDR=http://127.0.0.1:8200 vault write auth/approle/role/docket-api bind_secret_id=false secret_id_bound_cidrs=127.0.0.1/24
 
 # Get the role ID
 VAULT_ADDR=http://127.0.0.1:8200 vault read auth/approle/role/docket-api/role-id
+
+# Create a token
+VAULT_ADDR=http://127.0.0.1:8200 vault token create -orphan=true -policy=default -role=test
 
 # Wrap role secret ID
 VAULT_ADDR=http://127.0.0.1:8200 vault write -f -wrap-ttl=60s auth/approle/role/docket-api/secret-id

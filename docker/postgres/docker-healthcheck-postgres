@@ -1,4 +1,5 @@
 #!/bin/bash
+
 set -eo pipefail
 
 # See https://github.com/docker-library/healthcheck/blob/master/postgres/docker-healthcheck

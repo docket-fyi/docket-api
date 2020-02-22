@@ -10,7 +10,23 @@ services:
       - 8200:8200
       - 8201:8201
     environment:
-      VAULT_LOCAL_CONFIG: '{"backend": {"file": {"path": "/vault/file"}}, "listener": {"tcp": {"address": "0.0.0.0:8200", "tls_disable": 1}}, "default_lease_ttl": "168h", "max_lease_ttl": "720h", "ui": true}'
+      VAULT_LOCAL_CONFIG: |
+        {
+          "backend": {
+            "file": {
+              "path": "/vault/file"
+            }
+          },
+          "listener": {
+            "tcp": {
+              "address": "0.0.0.0:8200",
+              "tls_disable": 1
+            }
+          },
+          "default_lease_ttl": "168h",
+          "max_lease_ttl": "720h",
+          "ui": true
+        }
       VAULT_API_ADDR: 'http://127.0.0.1:8200'
     cap_add:
       - IPC_LOCK
@@ -27,11 +43,15 @@ services:
   docket-postgres:
     container_name: docket-postgres
     build: ./docker/postgres
+    command: postgres -c logging_collector=on -c log_directory=/var/log/postgresql -c log_statement=all
     ports:
       - 5432:5432
     # environment:
     #   POSTGRES_USER: 'user'
     #   POSTGRES_PASSWORD: 'user'
+    # links:
+    #   - docket-elasticsearch
+    #   - docket-kibana
   docket-elasticsearch:
     container_name: docket-elasticsearch
     # image: elasticsearch:7.2.0
@@ -42,7 +62,10 @@ services:
     # networks:
     #   - docket
     environment:
+      # - cluster.initial_master_nodes=master-a
       - discovery.type=single-node
+      # - index.number_of_replicas=0
+      # - index.number_of_shards=0
     # healthcheck:
     #   test: docker-healthcheck-elasticsearch
     #   interval: 60s
@@ -50,7 +73,7 @@ services:
     #   retries: 3
   docket-kibana:
     container_name: docket-kibana
-    image: kibana:7.2.0
+    image: kibana:7.5.2
     ports:
       - 5601:5601
     environment:
@@ -77,8 +100,13 @@ services:
     container_name: docket-api
     build: .
     environment:
-      VAULT_APPROLE_ROLE_ID: ${VAULT_APPROLE_ROLE_ID}
-      VAULT_APPROLE_ROLE_SECRET_WRAP_TOKEN: ${VAULT_APPROLE_ROLE_SECRET_WRAP_TOKEN}
+      - NODE_ENV
+      - VAULT_APPROLE_ROLE_ID
+      - VAULT_WRAP_TOKEN
+      - VAULT_PROTOCOL
+      - VAULT_HOST
+      - VAULT_PORT
+      - VAULT_TOKEN
     # command: npm run start
     # working_dir: /docket/docket-api
     # volumes:

@@ -12,9 +12,10 @@ services:
   #   container_name: arena
   #   image: mixmaxhq/arena # This image is 2+ years old
   docket-api:
-    command: npm run start:dev
+    # command: npm run start:dev
     # command: npm run start:debug
     # command: npx nodemon --inspect=0.0.0.0 ./index.js
+    command: npx nodemon ./index.js
     volumes:
       - ./src:/docket/docket-api/src
     # ports:

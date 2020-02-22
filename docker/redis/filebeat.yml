@@ -1,0 +1,21 @@
+filebeat.config:
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: false
+
+# filebeat.autodiscover:
+#   providers:
+#     - type: docker
+#       hints.enabled: true
+
+filebeat.inputs:
+  - type: redis
+    hosts:
+      - '${REDIS_HOST:docket-redis}:${REDIS_PORT:6379}'
+
+output.elasticsearch:
+  hosts:
+    - '${ELASTICSEARCH_HOST:docket-elasticsearch}:${ELASTICSEARCH_PORT:9200}'
+
+setup.kibana:
+  host: "${KIBANA_HOST:docket-kibana}:${KIBANA_PORT:5601}"

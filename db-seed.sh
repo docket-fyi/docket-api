@@ -26,18 +26,6 @@ VAULT_APPROLE_SECRET_ID=$( \
   | jq -r '.data.secret_id' \
 )
 
-# TODO: Move this to CI system.
-# Create a wrapped secret ID for the app role.
-# VAULT_APPROLE_SECRET_ID=$( \
-#   curl \
-#     --silent \
-#     --header "X-Vault-Token: ${VAULT_TOKEN}" \
-#     --header "X-Vault-Wrap-TTL: ${VAULT_WRAP_TTL}" \
-#     --request POST \
-#       "${VAULT_PROTOCOL}://${VAULT_HOST}:${VAULT_PORT}/${VAULT_API_VERSION}/auth/approle/role/${VAULT_APPROLE_ROLE_NAME}/secret-id" \
-#   | jq -r '.wrap_info.token' \
-# )
-
 # Login via AppRole to be issued a token.
 VAULT_TOKEN=$( \
   curl \
@@ -68,29 +56,10 @@ DB_HOST=$(echo $DATABASE_VALUES | jq -r '.DB_HOST // empty')
 DB_PORT=$(echo $DATABASE_VALUES | jq -r '.DB_PORT // empty')
 DB_NAME=$(echo $DATABASE_VALUES | jq -r '.DB_NAME // empty')
 
-# Uncomment the following if the database should always be created.
-# NB: the Postgres image will automatically attempt to create the
-# database if the POSTGRES_DB environment variable is present.
-# See https://github.com/docker-library/docs/tree/master/postgres#postgres_db
-# echo "Creating database..."
-# npx sequelize db:create \
-#   --url "${DB_PROTOCOL}://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
-# echo "Done creating database."
-
-# --models-path "$(pwd)/src/${API_VERSION}/models"
-echo "Migrating database..."
-npx sequelize db:migrate \
-  --migrations-path "$(pwd)/src/${API_VERSION}/migrations" \
+echo "Seeding database..."
+VAULT_TOKEN=$VAULT_TOKEN npx sequelize db:seed:all \
+  --seeders-path "$(pwd)/src/${API_VERSION}/seeders" \
   --url "${DB_PROTOCOL}://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
-echo "Done migrating database."
+echo "Done seeding database."
 
-# Uncomment the following if the database should always be seeded.
-# Never seed production environments!
-# echo "Seeding database..."
-# npx sequelize db:seed:all \
-#   --seeders-path "$(pwd)/src/${API_VERSION}/seeders" \
-#   --url "${DB_PROTOCOL}://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
-# echo "Done seeding database."
-
-# Pass command execution to remainder of arguments, in this case, the Docker CMD directive
-exec env VAULT_TOKEN=$VAULT_TOKEN "$@"
+exit 0
