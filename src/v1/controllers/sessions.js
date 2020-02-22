@@ -3,8 +3,9 @@ const bcrypt = require('bcryptjs')
 const jsonWebToken = require('jsonwebtoken')
 const Sentry = require('@sentry/node')
 
-const environment = require('../environment')
-const { User } = require('../models')
+// const environment = require('../environment')
+const Secret = require('../config/secret')
+const { getUserModel } = require('../models')
 const serializers = require('../serializers')
 const errors = require('../errors')
 
@@ -67,6 +68,7 @@ async function create(req, res, next) {
       res.status(status.BAD_REQUEST)
       throw new errors.authentication.InvalidLoginError()
     }
+    const User = await getUserModel()
     const user = await User.findOne({
       where: {
         email
@@ -85,10 +87,11 @@ async function create(req, res, next) {
       res.status(status.BAD_REQUEST)
       throw new errors.authentication.InvalidLoginError()
     }
+    const jwtSecrets = await Secret.get('jwt')
     const options = {
-      expiresIn: environment.jwt.expiration
+      expiresIn: jwtSecrets.JWT_EXPIRATION
     }
-    const jwt = jsonWebToken.sign({ id: user.id }, environment.jwt.secret, options)
+    const jwt = jsonWebToken.sign({ id: user.id }, jwtSecrets.JWT_SECRET, options)
     res.status(status.OK)
     res.body = serializers.sessions.create.serialize({ jwt })
     return next()

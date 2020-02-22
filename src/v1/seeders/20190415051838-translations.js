@@ -1,12 +1,14 @@
 /* eslint-disable arrow-body-style, max-lines */
 
-const { Locale, Translation } = require('../models')
+const { getLocaleModel, getTranslationModel } = require('../models')
 
 const TABLE_NAME = 'translations'
 
 module.exports = {
 
   up: async (/*queryInterface, Sequelize*/) => {
+    const Locale = await getLocaleModel()
+    const Translation = await getTranslationModel()
     const locales = await Locale.findAll()
     // return queryInterface.bulkInsert(TABLE_NAME, [
     return Translation.bulkCreate([

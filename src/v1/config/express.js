@@ -1,6 +1,5 @@
 const express = require('express')
 
-require('./sequelize')
 const routes = require('../routes')
 const {
   jsonBodyParser,
@@ -19,6 +18,8 @@ const {
 } = require('../middleware')
 
 const app = express()
+
+app.disable('x-powered-by')
 
 app.use(sentryRequestHandler)
 app.use(cors)

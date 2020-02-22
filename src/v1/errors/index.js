@@ -8,6 +8,8 @@ const microsoft = require('./microsoft')
 const search = require('./search')
 const sessions = require('./sessions')
 const users = require('./users')
+const vault = require('./vault')
+const jsonApi = require('./json-api')
 
 module.exports = {
   BaseError,
@@ -19,5 +21,7 @@ module.exports = {
   microsoft,
   search,
   sessions,
-  users
+  users,
+  vault,
+  jsonApi
 }

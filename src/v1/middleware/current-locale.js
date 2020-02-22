@@ -1,12 +1,14 @@
 const acceptLanguage = require('accept-language')
 
-const debug = require('../config/debug').api
-const { Locale } = require('../models')
-const environment = require('../environment')
-const redis = require('../config/redis').primary
+// const debug = require('../config/debug').api
+const Secret = require('../config/secret')
+const logger = require('../config/logger')
+const { getLocaleModel } = require('../models')
+// const environment = require('../environment')
+const { getPrimaryInstance } = require('../config/redis')
 const cacheKeys = require('../config/cache-keys')
 
-const FALLBACK_LOCALE = environment.api.fallbackLocale
+let FALLBACK_LOCALE = null
 
 /**
  * Inspects the 'Accept-Language' request header to determine a closest
@@ -22,6 +24,13 @@ async function currentLocale(req, res, next) {
   try {
     const acceptLanguageHeader = req.get('Accept-Language')
 
+    const Locale = await getLocaleModel()
+    const redis = await getPrimaryInstance()
+    if (!FALLBACK_LOCALE) {
+      FALLBACK_LOCALE = await Secret.get('api', 'FALLBACK_LOCALE') // eslint-disable-line require-atomic-updates
+    }
+    const defaultTtl = await Secret.get('redis', 'REDIS_DEFAULT_CACHE_TTL_SECONDS')
+
     let fallbackLocale = null
     const fallbackLocaleCache = await redis.get(cacheKeys.locales.show(FALLBACK_LOCALE))
     if (!fallbackLocaleCache) {
@@ -30,9 +39,13 @@ async function currentLocale(req, res, next) {
           code: 'en-US'
         }
       })
-      const fallbackLocaleAsJson = fallbackLocale.toJSON()
-      const fallbackLocaleAsString = JSON.stringify(fallbackLocaleAsJson)
-      await redis.setex(cacheKeys.locales.show(FALLBACK_LOCALE), environment.redis.defaultTtl, fallbackLocaleAsString)
+      if (fallbackLocale) {
+        const fallbackLocaleAsJson = fallbackLocale.toJSON()
+        const fallbackLocaleAsString = JSON.stringify(fallbackLocaleAsJson)
+        await redis.setex(cacheKeys.locales.show(FALLBACK_LOCALE), defaultTtl, fallbackLocaleAsString)
+      } else {
+        fallbackLocale = 'en-US'
+      }
     } else {
       fallbackLocale = Locale.build(JSON.parse(fallbackLocaleCache), {newRecord: false})
     }
@@ -41,9 +54,17 @@ async function currentLocale(req, res, next) {
     const supportedLocalesCache = await redis.get(cacheKeys.locales.list)
     if (!supportedLocalesCache) {
       supportedLocales = await Locale.findAll()
-      const supportedLocalesAsJson = supportedLocales.map(locale => locale.toJSON())
-      const supportedLocalesAsString = JSON.stringify(supportedLocalesAsJson)
-      await redis.setex(cacheKeys.locales.list, environment.redis.defaultTtl, supportedLocalesAsString)
+      if (supportedLocales.length) {
+        const supportedLocalesAsJson = supportedLocales.map(locale => locale.toJSON())
+        const supportedLocalesAsString = JSON.stringify(supportedLocalesAsJson)
+        await redis.setex(cacheKeys.locales.list, defaultTtl, supportedLocalesAsString)
+      } else {
+        supportedLocales = [
+          {
+            code: 'en-US'
+          }
+        ]
+      }
     } else {
       supportedLocales = JSON.parse(supportedLocalesCache).map(locale => Locale.build(locale, {newRecord: false}))
     }
@@ -60,9 +81,13 @@ async function currentLocale(req, res, next) {
           code
         }
       })
-     const localeAsJson = locale.toJSON()
-     const localeAsString = JSON.stringify(localeAsJson)
-     await redis.setex(cacheKeys.locales.show(code), environment.redis.defaultTtl, localeAsString)
+      if (locale) {
+        const localeAsJson = locale.toJSON()
+        const localeAsString = JSON.stringify(localeAsJson)
+        await redis.setex(cacheKeys.locales.show(code), defaultTtl, localeAsString)
+      } /*else {
+        locale = {}
+      }*/
     } else {
       locale = Locale.build(JSON.parse(localeCache), {newRecord: false})
     }
@@ -70,7 +95,7 @@ async function currentLocale(req, res, next) {
     req.currentLocale = locale || fallbackLocale // eslint-disable-line require-atomic-updates
     return next()
   } catch (err) {
-    debug(`${err.name}: ${err.message}`)
+    logger.error(err)
     /**
      * Don't pass `err` to next() because users should be able to carry
      * on even if a locale can't be found.

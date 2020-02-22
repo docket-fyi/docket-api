@@ -1,8 +1,21 @@
 const Sentry = require('@sentry/node')
 
-const environment = require('../environment')
+const logger = require('./logger')
+const Secret = require('./secret')
 
-Sentry.init({
-  dsn: environment.sentry.dsn,
-  environment: environment.api.name
-})
+// const environment = require('../environment')
+
+async function init() {
+  const dsn = await Secret.get('sentry', 'SENTRY_DSN')
+  const environment = process.env.NODE_ENV || 'development'
+  logger.info('Initializing Sentry...')
+  Sentry.init({
+    dsn,
+    environment
+  })
+  logger.info('Initialized Sentry.')
+}
+
+module.exports = {
+  init
+}

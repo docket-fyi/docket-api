@@ -2,13 +2,22 @@
 
 const { Client } = require('@elastic/elasticsearch')
 
-const environment = require('../environment')
+const Secret = require('../config/secret')
 
-const { protocol, host, port } = environment.elasticsearch
-const client = new Client({
-  node: `${protocol}${host}:${port}`
-})
+let client = null
+
+async function getClient() {
+  const elasticsearchSecrets = await Secret.get('elasticsearch')
+  if (!client) {
+    client = new Client({
+      node: `${elasticsearchSecrets.ELASTICSEARCH_PROTOCOL}://${elasticsearchSecrets.ELASTICSEARCH_HOST}:${elasticsearchSecrets.ELASTICSEARCH_PORT}`
+    })
+  }
+  return client
+}
 
 // const indicies = ['docket']
 
-module.exports = client
+module.exports = {
+  getClient
+}

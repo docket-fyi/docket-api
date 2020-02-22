@@ -1,67 +1,107 @@
-// /**
-//  * This file was originally generated as output from `npx sequelize init`
-//  */
+const logger = require('../config/logger')
+const userModelDefinition = require('./user')
+const eventModelDefinition = require('./event')
+const localeModelDefinition = require('./locale')
+const translationModelDefinition = require('./translation')
+const googleCredentialModelDefinition = require('./google-credential')
+const microsoftCredentialModelDefinition = require('./microsoft-credential')
 
-// const fs = require('fs')
-// const path = require('path')
-// const Sequelize = require('sequelize')
-// const sequelize = require('../config/sequelize')
+let User = null
+let Event = null
+let Locale = null
+let Translation = null
+let GoogleCredential = null
+let MicrosoftCredential = null
 
-// const basename = path.basename(__filename)
-// const env = process.env.NODE_ENV || 'development'
-// const config = require(`${__dirname}/../config/sequelize-cli.js`)[env]
-// const db = {}
+async function init() {
+  logger.info('Initializing models...')
+  const [
+    userModel,
+    eventModel,
+    localeModel,
+    translationModel,
+    googleCredentialModel,
+    microsoftCredentialModel
+  ] = await Promise.all([
+    userModelDefinition.init(),
+    eventModelDefinition.init(),
+    localeModelDefinition.init(),
+    translationModelDefinition.init(),
+    googleCredentialModelDefinition.init(),
+    microsoftCredentialModelDefinition.init()
+  ])
+  eventModel.belongsTo(userModel)
+  userModel.hasMany(eventModel)
+  userModel.hasOne(googleCredentialModel)
+  userModel.hasOne(microsoftCredentialModel)
+  googleCredentialModel.belongsTo(userModel)
+  microsoftCredentialModel.belongsTo(userModel)
+  localeModel.hasMany(translationModel)
+  translationModel.belongsTo(localeModel)
 
-// // let sequelize // eslint-disable-line init-declarations
-// // if (config.use_env_variable) {
-// //   sequelize = new Sequelize(process.env[config.use_env_variable], config)
-// // } else {
-// //   sequelize = new Sequelize(config.database, config.username, config.password, config)
-// // }
-// fs // eslint-disable-line no-sync
-//   .readdirSync(__dirname) // eslint-disable-line dot-location
-//   .filter(file => { // eslint-disable-line dot-location, arrow-body-style
-//     return (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js')
-//   })
-//   .forEach(file => { // eslint-disable-line dot-location
-//     // const model = sequelize['import'](path.join(__dirname, file)) // eslint-disable-line dot-notation
-//     const model = require(path.join(__dirname, file))
-//     db[model.name] = model
-//   })
+  User = userModel
+  Event = eventModel
+  Locale = localeModel
+  Translation = translationModel
+  GoogleCredential = googleCredentialModel
+  MicrosoftCredential = microsoftCredentialModel
+  logger.info('Initialized models.')
+}
 
-// // Object.keys(db).forEach(modelName => {
-// //   if (db[modelName].associate) {
-// //     db[modelName].associate(db)
-// //   }
-// // })
+async function getUserModel() {
+  if (!User) {
+    // User = await userModelDefinition.init() // eslint-disable-line require-atomic-updates
+    await init() // eslint-disable-line require-atomic-updates
+  }
+  return User
+}
 
+async function getEventModel() {
+  if (!Event) {
+    // Event = await eventModelDefinition.init() // eslint-disable-line require-atomic-updates
+    await init() // eslint-disable-line require-atomic-updates
+  }
+  return Event
+}
 
-// db.sequelize = sequelize
-// db.Sequelize = Sequelize
+async function getLocaleModel() {
+  if (!Locale) {
+    // Locale = await localeModelDefinition.init() // eslint-disable-line require-atomic-updates
+    await init() // eslint-disable-line require-atomic-updates
+  }
+  return Locale
+}
 
-// module.exports = db
+async function getTranslationModel() {
+  if (!Translation) {
+    // Translation = await translationModelDefinition.init() // eslint-disable-line require-atomic-updates
+    await init() // eslint-disable-line require-atomic-updates
+  }
+  return Translation
+}
 
-const User = require('./user')
-const Event = require('./event')
-const Locale = require('./locale')
-const Translation = require('./translation')
-const GoogleCredential = require('./google-credential')
-const MicrosoftCredential = require('./microsoft-credential')
+async function getGoogleCredentialModel() {
+  if (!GoogleCredential) {
+    // GoogleCredential = await googleCredentialModelDefinition.init() // eslint-disable-line require-atomic-updates
+    await init() // eslint-disable-line require-atomic-updates
+  }
+  return GoogleCredential
+}
 
-Event.belongsTo(User)
-User.hasMany(Event)
-User.hasOne(GoogleCredential)
-User.hasOne(MicrosoftCredential)
-GoogleCredential.belongsTo(User)
-MicrosoftCredential.belongsTo(User)
-Locale.hasMany(Translation)
-Translation.belongsTo(Locale)
+async function getMicrosoftCredentialModel() {
+  if (!MicrosoftCredential) {
+    // MicrosoftCredential = await microsoftCredentialModelDefinition.init() // eslint-disable-line require-atomic-updates
+    await init() // eslint-disable-line require-atomic-updates
+  }
+  return MicrosoftCredential
+}
 
 module.exports = {
-  User,
-  Event,
-  Locale,
-  Translation,
-  GoogleCredential,
-  MicrosoftCredential
+  init,
+  getUserModel,
+  getEventModel,
+  getLocaleModel,
+  getTranslationModel,
+  getGoogleCredentialModel,
+  getMicrosoftCredentialModel
 }

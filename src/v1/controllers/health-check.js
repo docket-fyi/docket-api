@@ -3,9 +3,9 @@ const Sentry = require('@sentry/node')
 const fetch = require('node-fetch')
 
 const serializers = require('../serializers')
-// const vault = require('../config/vault')
-// const elasticsearch = require('../config/elasticsearch')
-const redis = require('../config/redis').primary
+const vault = require('../config/vault')
+const { getClient } = require('../config/elasticsearch')
+const redis = require('../config/redis')
 const sequelize = require('../config/sequelize')
 
 /**
@@ -34,39 +34,48 @@ async function list(req, res, next) {
     scope.setTag('action', 'list')
   })
 
-  let isApiHealthy = true
-  let isVaultHealthy = true
-  let isElasticsearchHealthy = true
+  const sequelizeInstance = await sequelize.getInstance()
+  const redisPrimaryInstance = await redis.getPrimaryInstance()
+  const elasticsearch = await getClient()
+
+  let isApiHealthy = true // If the request got here, it must be healthy
+  let isVaultHealthy = false
+  let isElasticsearchHealthy = false
   let isPostgresHealthy = false
-  let isRedisHealthy = redis.status === 'ready'
+  let isRedisHealthy = redisPrimaryInstance.status === 'ready'
   let isStripeHealthy = false
   let errors = []
 
-  /*
   try {
     const response = await vault.health()
     isVaultHealthy = response.initialized
   } catch (err) {
-    errors.push({message: err.message || err.toString(), name: err.name || err.toString()})
+    errors.push({
+      message: err.message || err.toString(),
+      name: err.name || err.toString()
+    })
     isVaultHealthy = false
   }
-  */
 
-  /*
   try {
     const response = await elasticsearch.cat.health({h: 'status'}) // eslint-disable-line id-length
     isElasticsearchHealthy = response.statusCode === 200 && response.body.trim() === 'green'
   } catch (err) {
-    errors.push({message: err.message || err.toString(), name: err.name || err.toString()})
+    errors.push({
+      message: err.message || err.toString(),
+      name: err.name || err.toString()
+    })
     isElasticsearchHealthy = false
   }
-  */
 
   try {
-    await sequelize.authenticate() // Resolves with `undefined` if successful, otherwise rejects
+    await sequelizeInstance.authenticate() // Resolves with `undefined` if successful, otherwise rejects
     isPostgresHealthy = true
   } catch (err) {
-    errors.push({message: err.message || err.toString(), name: err.name || err.toString()})
+    errors.push({
+      message: err.message || err.toString(),
+      name: err.name || err.toString()
+    })
     isPostgresHealthy = false
   }
 
@@ -75,7 +84,10 @@ async function list(req, res, next) {
     const responseJson = await response.json()
     isStripeHealthy = responseJson.largestatus === 'up'
   } catch (err) {
-    errors.push({message: err.message || err.toString(), name: err.name || err.toString()})
+    errors.push({
+      message: err.message || err.toString(),
+      name: err.name || err.toString()
+    })
     isStripeHealthy = false
   }
 

@@ -1,10 +1,10 @@
 const status = require('http-status')
 
-const { User } = require('../models')
+const Secret = require('../config/secret')
+const { getUserModel } = require('../models')
 const errors = require('../errors')
-const redis = require('../config/redis').primary
+const { getPrimaryInstance } = require('../config/redis')
 const cacheKeys = require('../config/cache-keys')
-const environment = require('../environment')
 
 /**
  * Handler for unknown routes.
@@ -28,6 +28,8 @@ async function currentUser(req, res, next) {
       throw new errors.authentication.MalformedJwtError()
     }
     let currentUser = null
+    const redis = await getPrimaryInstance()
+    const User = await getUserModel()
     const cache = await redis.get(cacheKeys.users.show(id))
     if (!cache) {
       currentUser = await User.findOne({
@@ -39,7 +41,8 @@ async function currentUser(req, res, next) {
         res.status(status.FORBIDDEN)
         throw new errors.users.NotFoundError()
       }
-      await redis.setex(cacheKeys.users.show(currentUser.id), environment.redis.defaultTtl, JSON.stringify(currentUser.toJSON()))
+      const defaultTtl = await Secret.get('redis', 'REDIS_DEFAULT_CACHE_TTL_SECONDS')
+      await redis.setex(cacheKeys.users.show(currentUser.id), defaultTtl, JSON.stringify(currentUser.toJSON()))
     } else {
       currentUser = User.build(JSON.parse(cache), {isNewRecord: false})
     }
