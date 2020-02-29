@@ -68,7 +68,7 @@
   "devDependencies": {
     "@semantic-release/changelog": "5.0.0",
     "autocannon": "4.6.0",
-    "aws-sdk": "2.624.0",
+    "aws-sdk": "2.629.0",
     "clinic": "5.0.0",
     "commitizen": "4.0.3",
     "coveralls": "3.0.9",
