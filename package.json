@@ -34,7 +34,7 @@
     "@elastic/elasticsearch": "7.6.0",
     "@hapi/joi": "17.0.2",
     "@microsoft/microsoft-graph-client": "2.0.0",
-    "@sentry/node": "5.12.4",
+    "@sentry/node": "5.14.0",
     "accept-language": "3.0.18",
     "bcryptjs": "2.4.3",
     "body-parser": "1.19.0",
