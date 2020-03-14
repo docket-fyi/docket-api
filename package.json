@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "7.6.0",
-    "@hapi/joi": "17.0.2",
+    "@hapi/joi": "17.1.1",
     "@microsoft/microsoft-graph-client": "2.0.0",
     "@sentry/node": "5.12.4",
     "accept-language": "3.0.18",
