@@ -31,7 +31,7 @@
     "url": "https://github.com/docket-fyi/docket-api.git"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "7.6.0",
+    "@elastic/elasticsearch": "7.7.0",
     "@hapi/joi": "17.0.2",
     "@microsoft/microsoft-graph-client": "2.0.0",
     "@sentry/node": "5.12.4",
