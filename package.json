@@ -84,7 +84,7 @@
     "pino-pretty": "3.5.0",
     "semantic-release": "17.0.4",
     "sequelize-cli": "5.5.1",
-    "snyk": "1.295.0",
+    "snyk": "1.330.0",
     "yaml-cfn": "0.2.3"
   },
   "husky": {
