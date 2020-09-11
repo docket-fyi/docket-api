@@ -51,7 +51,7 @@
     "jsonapi-serializer": "3.6.6",
     "jsonwebtoken": "8.5.1",
     "moment": "2.24.0",
-    "node-fetch": "2.6.0",
+    "node-fetch": "2.6.1",
     "node-vault": "0.9.12",
     "nodemailer": "6.4.2",
     "pg": "7.18.2",
